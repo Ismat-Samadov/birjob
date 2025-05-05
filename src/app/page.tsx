@@ -75,7 +75,7 @@ export default function Home() {
     <main className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold text-center">Jobry</h1>
+          <h1 className="text-4xl font-bold text-center">BirJob</h1>
           <div className="w-full max-w-xl mx-auto">
             <Input
               type="search"

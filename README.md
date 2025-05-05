@@ -1,6 +1,6 @@
-# 🚀 Jobry - Your Ultimate Job Aggregator
+# 🚀 BirJob - Your Ultimate Job Aggregator
 
-Jobry is a modern, high-performance job board that aggregates positions from over 50 different sources, making job hunting simpler and more efficient. Built with Next.js and powered by real-time data scraping, it brings you the latest opportunities in one sleek interface.
+BirJob is a modern, high-performance job board that aggregates positions from over 50 different sources, making job hunting simpler and more efficient. Built with Next.js and powered by real-time data scraping, it brings you the latest opportunities in one sleek interface.
 
 ## ✨ Features
 
@@ -41,8 +41,8 @@ PostgreSQL >= 13
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/ismat-samadov/jobry.git
-cd jobry
+git clone https://github.com/ismat-samadov/birjob.git
+cd birjob
 ```
 
 2. **Install dependencies**
@@ -53,7 +53,7 @@ npm install
 3. **Set up environment variables**
 ```bash
 # Create a .env file and add:
-DATABASE_URL="postgresql://user:password@localhost:5432/jobry"
+DATABASE_URL="postgresql://user:password@localhost:5432/birjob"
 ```
 
 4. **Initialize the database**
@@ -72,7 +72,7 @@ Visit [http://localhost:3000](http://localhost:3000) to see your application run
 ## 📚 Project Structure
 
 ```
-jobry/
+birjob/
 ├── src/
 │   ├── app/              # Next.js 14 app directory
 │   │   ├── api/         # API routes

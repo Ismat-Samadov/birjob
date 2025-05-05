@@ -59,7 +59,7 @@ jobs:
             console.log(`Attempting to send email to ${to} with ${matches.length} matches`);
             
             const firstName = await extractFirstName(to);
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://jobry.com';
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://birjob.com';
             
             // Generate the job items HTML
             const jobItemsHtml = matches.map(match => `
@@ -78,7 +78,7 @@ jobs:
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Your Daily Job Matches from Jobry</title>
+            <title>Your Daily Job Matches from BirJob</title>
             <style>
               /* Base styles with more subtle design */
               body {
@@ -209,7 +209,7 @@ jobs:
           <body>
             <div class="wrapper">
               <div class="header">
-                <a href="${appUrl}" class="logo">Jobry</a>
+                <a href="${appUrl}" class="logo">BirJob</a>
               </div>
               
               <div class="container">
@@ -228,14 +228,14 @@ jobs:
                   <p>Manage your <a href="${appUrl}/notifications" class="settings-link">notification preferences</a> to update your keywords and get more relevant matches.</p>
                   
                   <p>Best regards,<br>
-                  The Jobry Team</p>
+                  The BirJob Team</p>
                 </div>
               </div>
               
               <div class="footer">
                 <p>This email was sent to ${to} because you signed up for job alerts.</p>
                 <p>To stop receiving these notifications, <a href="${appUrl}/notifications">remove all keywords</a> from your account.</p>
-                <p>Jobry - Your Ultimate Job Aggregator</p>
+                <p>BirJob - Your Ultimate Job Aggregator</p>
               </div>
             </div>
           </body>
@@ -244,13 +244,13 @@ jobs:
             try {
               // Add specific email headers to help avoid promotion filters
               const { data, error } = await resend.emails.send({
-                from: `Jobry Jobs <${process.env.RESEND_FROM_EMAIL}>`,
+                from: `BirJob Jobs <${process.env.RESEND_FROM_EMAIL}>`,
                 to: [to],
                 subject: subject,
                 html: htmlContent,
                 headers: {
                   // Important headers for getting into the Primary tab
-                  "X-Entity-Ref-ID": `jobry-notification-${Date.now()}`, // Unique ID for this specific email
+                  "X-Entity-Ref-ID": `birjob-notification-${Date.now()}`, // Unique ID for this specific email
                   "Precedence": "bulk", // Signal this is an expected bulk email, not spam
                   "List-Unsubscribe": `<${appUrl}/notifications>`, // Easy unsubscribe option
                   "X-Priority": "1", // Mark as high priority

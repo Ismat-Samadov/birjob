@@ -137,7 +137,7 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
   return (
     <Card className="w-full shadow-lg">
       <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
-        <CardTitle className="text-2xl font-bold text-center">Jobry Notification Manager</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">BirJob Notification Manager</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         {!isLoggedIn ? (
