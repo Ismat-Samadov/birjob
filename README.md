@@ -140,4 +140,3 @@ We love contributions! Follow these steps:
 - [Tailwind CSS](https://tailwindcss.com) for styling
 - [Prisma](https://prisma.io) for database management
 - [Vercel](https://vercel.com) for hosting
-
