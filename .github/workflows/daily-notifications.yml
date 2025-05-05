@@ -1,0 +1,407 @@
+name: Daily Job Notifications
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # 1:00 PM UTC daily
+  workflow_dispatch:  # Allow manual triggers for testing
+
+jobs:
+  send-notifications:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          npm install @prisma/client@6.7.0 resend dotenv
+          
+      - name: Generate Prisma Client
+        run: |
+          npm install -D prisma@6.7.0
+          npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Run notification script
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+        run: |
+          node << 'EOF'
+          const { PrismaClient } = require('@prisma/client');
+          const { Resend } = require('resend');
+
+          const prisma = new PrismaClient();
+          const resend = new Resend(process.env.RESEND_API_KEY);
+
+          async function extractFirstName(email) {
+            // Try to extract a name from the email address
+            const namePart = email.split('@')[0];
+            // Clean up the name (remove numbers, dots, underscores, etc.)
+            const cleanName = namePart.replace(/[0-9_\.]/g, ' ').trim();
+            // Capitalize first letter
+            if (cleanName && cleanName.length > 0) {
+              return cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+            }
+            return "there"; // Fallback to "there" if we can't extract a name
+          }
+
+          async function sendJobMatchesEmail(to, matches, subject) {
+            console.log(`Attempting to send email to ${to} with ${matches.length} matches`);
+            
+            const firstName = await extractFirstName(to);
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://jobry.com';
+            
+            // Generate the job items HTML
+            const jobItemsHtml = matches.map(match => `
+              <div class="job-item">
+                <h2 class="job-title">${match.job.title}</h2>
+                <p class="job-company">${match.job.company}</p>
+                <div class="job-meta">
+                  <span class="keyword-tag">Matched: ${match.keyword}</span>
+                </div>
+                <a href="${match.job.apply_link}" class="button">View Job & Apply</a>
+              </div>
+            `).join('');
+
+            const htmlContent = `<!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Your Daily Job Matches from Jobry</title>
+            <style>
+              /* Base styles with more subtle design */
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+                line-height: 1.6;
+                color: #333;
+                background-color: #f9f9f9;
+                margin: 0;
+                padding: 0;
+              }
+              .wrapper {
+                width: 100%;
+                max-width: 620px;
+                margin: 0 auto;
+                background-color: #ffffff;
+              }
+              .container {
+                padding: 30px;
+              }
+              .header {
+                padding: 25px 30px;
+                border-bottom: 1px solid #eaeaea;
+              }
+              .logo {
+                color: #4338ca;
+                font-size: 24px;
+                font-weight: 700;
+                text-decoration: none;
+              }
+              h1 {
+                font-size: 20px;
+                font-weight: 600;
+                color: #111827;
+                margin-top: 0;
+                margin-bottom: 16px;
+              }
+              p {
+                margin: 0 0 16px;
+                font-size: 16px;
+              }
+              .content {
+                padding: 20px 0;
+              }
+              .job-item {
+                padding: 20px;
+                margin-bottom: 16px;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                background-color: #ffffff;
+              }
+              .job-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #111827;
+                margin: 0 0 4px;
+              }
+              .job-company {
+                font-size: 16px;
+                color: #4b5563;
+                margin: 0 0 12px;
+              }
+              .job-meta {
+                display: flex;
+                align-items: center;
+                margin-bottom: 16px;
+              }
+              .keyword-tag {
+                display: inline-block;
+                padding: 4px 10px;
+                background-color: #f3f4f6;
+                color: #4b5563;
+                border-radius: 100px;
+                font-size: 14px;
+                margin-right: 8px;
+              }
+              .button {
+                display: inline-block;
+                padding: 10px 16px;
+                background-color: #10b981; /* Changed from #4338ca to a green color */
+                color: white;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: 500;
+                font-size: 15px;
+              }
+              .footer {
+                padding: 20px 30px;
+                font-size: 14px;
+                color: #6b7280;
+                text-align: left;
+                border-top: 1px solid #eaeaea;
+                background-color: #f9fafb;
+              }
+              .footer p {
+                margin: 4px 0;
+                font-size: 14px;
+              }
+              .footer a {
+                color: #4338ca;
+                text-decoration: underline;
+              }
+              .settings-link {
+                color: #4338ca;
+                text-decoration: underline;
+              }
+              .summary {
+                padding: 16px;
+                margin-bottom: 24px;
+                border-left: 3px solid #4338ca;
+                background-color: #f5f5ff;
+              }
+              .personal-note {
+                font-style: italic;
+                margin-bottom: 24px;
+              }
+              
+              /* Mobile responsiveness */
+              @media only screen and (max-width: 620px) {
+                .wrapper {
+                  width: 100% !important;
+                }
+                .container {
+                  padding: 20px !important;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="wrapper">
+              <div class="header">
+                <a href="${appUrl}" class="logo">Jobry</a>
+              </div>
+              
+              <div class="container">
+                <div class="content">
+                  <p>Hi ${firstName},</p>
+                  
+                  <div class="summary">
+                    <strong>Today's summary:</strong> We found ${matches.length} new job ${matches.length === 1 ? 'match' : 'matches'} based on your keywords.
+                  </div>
+                  
+                  <p class="personal-note">Here are today's opportunities that match what you're looking for:</p>
+                  
+                  <!-- Job matches -->
+                  ${jobItemsHtml}
+                  
+                  <p>Manage your <a href="${appUrl}/notifications" class="settings-link">notification preferences</a> to update your keywords and get more relevant matches.</p>
+                  
+                  <p>Best regards,<br>
+                  The Jobry Team</p>
+                </div>
+              </div>
+              
+              <div class="footer">
+                <p>This email was sent to ${to} because you signed up for job alerts.</p>
+                <p>To stop receiving these notifications, <a href="${appUrl}/notifications">remove all keywords</a> from your account.</p>
+                <p>Jobry - Your Ultimate Job Aggregator</p>
+              </div>
+            </div>
+          </body>
+          </html>`;
+
+            try {
+              // Add specific email headers to help avoid promotion filters
+              const { data, error } = await resend.emails.send({
+                from: `Jobry Jobs <${process.env.RESEND_FROM_EMAIL}>`,
+                to: [to],
+                subject: subject,
+                html: htmlContent,
+                headers: {
+                  // Important headers for getting into the Primary tab
+                  "X-Entity-Ref-ID": `jobry-notification-${Date.now()}`, // Unique ID for this specific email
+                  "Precedence": "bulk", // Signal this is an expected bulk email, not spam
+                  "List-Unsubscribe": `<${appUrl}/notifications>`, // Easy unsubscribe option
+                  "X-Priority": "1", // Mark as high priority
+                }
+              });
+
+              if (error) {
+                console.error('Resend API error:', error);
+                return false;
+              }
+
+              console.log('Email sent successfully:', data);
+              return true;
+            } catch (error) {
+              console.error('Exception while sending email:', error);
+              return false;
+            }
+          }
+
+          async function processNotifications() {
+            console.log('Starting daily notification process...');
+            
+            try {
+              // Get all users with keywords
+              const users = await prisma.users.findMany({
+                include: { keywords: true },
+              });
+
+              console.log(`Found ${users.length} users to process`);
+
+              // Calculate 24 hours ago
+              const now = new Date();
+              const twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+
+              let totalEmailsSent = 0;
+              let totalErrors = 0;
+
+              // Process each user
+              for (const user of users) {
+                if (user.keywords.length === 0) {
+                  console.log(`Skipping user ${user.email} - no keywords`);
+                  continue;
+                }
+
+                console.log(`Processing user ${user.email} with ${user.keywords.length} keywords`);
+
+                // Find matching jobs from the last 24 hours
+                const matches = [];
+                
+                const recentJobs = await prisma.jobs_jobpost.findMany({
+                  where: {
+                    created_at: {
+                      gte: twentyFourHoursAgo
+                    }
+                  },
+                  orderBy: {
+                    created_at: 'desc'
+                  }
+                });
+
+                console.log(`Found ${recentJobs.length} recent jobs to check`);
+
+                // Check each job against user's keywords
+                for (const job of recentJobs) {
+                  const jobContent = `${job.title.toLowerCase()} ${job.company.toLowerCase()}`;
+                  
+                  for (const keywordObj of user.keywords) {
+                    if (jobContent.includes(keywordObj.keyword.toLowerCase())) {
+                      // Check if notification already sent
+                      const existingNotification = await prisma.notifications.findFirst({
+                        where: {
+                          userId: user.id,
+                          jobId: job.id
+                        }
+                      });
+
+                      if (!existingNotification) {
+                        matches.push({
+                          job,
+                          keyword: keywordObj.keyword
+                        });
+                        break; // Only match one keyword per job
+                      }
+                    }
+                  }
+                }
+
+                if (matches.length > 0) {
+                  console.log(`Found ${matches.length} matches for ${user.email}`);
+                  
+                  // Craft a more personalized subject line
+                  let subject = '';
+                  if (matches.length === 1) {
+                    subject = `${matches[0].job.title} at ${matches[0].job.company} | Matching Your Search`;
+                  } else if (matches.length <= 3) {
+                    subject = `${matches.length} New Job Matches Including ${matches[0].job.company}`;
+                  } else {
+                    subject = `${matches.length} New Job Opportunities Matching Your Keywords`;
+                  }
+                  
+                  // Send email notification
+                  const emailSent = await sendJobMatchesEmail(
+                    user.email,
+                    matches,
+                    subject
+                  );
+
+                  if (emailSent) {
+                    totalEmailsSent++;
+                    
+                    // Record notifications in database
+                    for (const match of matches) {
+                      await prisma.notifications.create({
+                        data: {
+                          userId: user.id,
+                          jobId: match.job.id,
+                          matchedKeyword: match.keyword,
+                        },
+                      });
+                    }
+
+                    // Update user's lastNotifiedAt timestamp
+                    await prisma.users.update({
+                      where: { id: user.id },
+                      data: { lastNotifiedAt: new Date() },
+                    });
+                    
+                    console.log(`Successfully sent email to ${user.email}`);
+                  } else {
+                    totalErrors++;
+                    console.error(`Failed to send email to ${user.email}`);
+                  }
+                } else {
+                  console.log(`No matches found for ${user.email}`);
+                }
+              }
+
+              console.log(`
+                Daily notification process completed
+                Total users processed: ${users.length}
+                Emails sent: ${totalEmailsSent}
+                Errors: ${totalErrors}
+              `);
+
+            } catch (error) {
+              console.error('Error in notification process:', error);
+              process.exit(1);
+            } finally {
+              await prisma.$disconnect();
+            }
+          }
+
+          processNotifications();
+          EOF

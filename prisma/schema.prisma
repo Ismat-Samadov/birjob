@@ -1,0 +1,62 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Existing models
+model jobs_jobpost {
+  id         Int      @id @default(autoincrement())
+  title      String
+  company    String
+  apply_link String
+  created_at DateTime @default(now())
+  notifications notifications[] // Add relation to notifications
+}
+
+model search_logs {
+  id        Int      @id @default(autoincrement())
+  query     String
+  timestamp DateTime @default(now())
+}
+
+// Models for user notification system
+model users {
+  id                   Int             @id @default(autoincrement())
+  email                String          @unique
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  lastNotifiedAt       DateTime?       // Track when the last notification was sent
+  keywords             keywords[]
+  notifications        notifications[]
+}
+
+model keywords {
+  id        Int      @id @default(autoincrement())
+  keyword   String
+  userId    Int
+  createdAt DateTime @default(now())
+  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, keyword])
+}
+
+// Notifications history
+model notifications {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  jobId         Int
+  sentAt        DateTime @default(now())
+  matchedKeyword String
+  isRead        Boolean  @default(false)
+  user          users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job           jobs_jobpost @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([jobId])
+}
