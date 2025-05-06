@@ -1,3 +1,4 @@
+// src/app/about/page.tsx
 import ClientWrapper from "@/components/ClientWrapper";
 import AboutContent from "@/components/AboutContent";
 
