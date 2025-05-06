@@ -50,9 +50,12 @@ export async function GET(request: Request) {
       }
     });
     
+    // Make sure we have a valid date (not null)
+    const latestDate = latestScrapeDate._max.created_at || new Date();
+    
     // Build where conditions properly for Prisma
     const baseWhereCondition: Prisma.jobs_jobpostWhereInput = {
-      created_at: latestScrapeDate._max.created_at,
+      created_at: latestDate, // Use the non-null date
     };
     
     // Add search condition if present
@@ -63,15 +66,67 @@ export async function GET(request: Request) {
       ];
     }
     
-    // Add source filter if present
+    // Add source filter if present - make sure to check if source column exists in schema
     if (source) {
-      baseWhereCondition.source = { 
-        equals: source, 
-        mode: Prisma.QueryMode.insensitive 
-      };
-    }
+      // We need to use Prisma.sql for raw SQL filtering if the source column
+      // isn't defined in the Prisma schema
+      const jobsWithSource = await prisma.$queryRaw`
+        SELECT * FROM jobs_jobpost 
+        WHERE source = ${source}
+        AND created_at = ${latestDate}
+        ${search ? Prisma.sql`AND (
+          LOWER(title) LIKE ${`%${search.toLowerCase()}%`} OR 
+          LOWER(company) LIKE ${`%${search.toLowerCase()}%`}
+        )` : Prisma.sql``}
+        ORDER BY created_at DESC
+        LIMIT ${pageSize}
+        OFFSET ${(page - 1) * pageSize}
+      `;
+      
+      // Count total matching jobs
+      const totalCount = await prisma.$queryRaw<[{count: number}]>`
+        SELECT COUNT(*) as count FROM jobs_jobpost 
+        WHERE source = ${source}
+        AND created_at = ${latestDate}
+        ${search ? Prisma.sql`AND (
+          LOWER(title) LIKE ${`%${search.toLowerCase()}%`} OR 
+          LOWER(company) LIKE ${`%${search.toLowerCase()}%`}
+        )` : Prisma.sql``}
+      `;
+      
+      // Get all available job sources for filtering
+      const sources = await prisma.$queryRaw<{source: string}[]>`
+        SELECT DISTINCT source FROM jobs_jobpost
+        WHERE source IS NOT NULL
+        ORDER BY source ASC
+      `;
+      
+      // Log search query if provided
+      if (search) {
+        await prisma.search_logs.create({
+          data: {
+            query: search,
+            timestamp: new Date(),
+          },
+        });
+      }
 
-    // Get jobs with filters
+      // Process jobs to format bigints
+      const processedJobs = processDbResult(jobsWithSource as any[]);
+
+      return NextResponse.json({
+        jobs: processedJobs,
+        sources: sources.map(s => s.source), // Add sources for filtering
+        metadata: {
+          latestScrapeDate: latestDate,
+          totalJobs: Number(totalCount[0]?.count || 0),
+          currentPage: page,
+          totalPages: Math.ceil(Number(totalCount[0]?.count || 0) / pageSize)
+        }
+      });
+    }
+    
+    // If no source filter, use standard Prisma query
     const jobsQuery = await prisma.jobs_jobpost.findMany({
       where: baseWhereCondition,
       orderBy: { 
@@ -96,10 +151,12 @@ export async function GET(request: Request) {
       });
     }
 
-    // Get all available job sources for filtering
-    const sources = await prisma.job_sources.findMany({
-      orderBy: { source: 'asc' }
-    });
+    // Get all available job sources via raw query since the column might not be in schema
+    const sources = await prisma.$queryRaw<{source: string}[]>`
+      SELECT DISTINCT source FROM jobs_jobpost
+      WHERE source IS NOT NULL
+      ORDER BY source ASC
+    `;
 
     // Process jobs to format bigints
     const processedJobs = processDbResult(jobsQuery);
@@ -108,7 +165,7 @@ export async function GET(request: Request) {
       jobs: processedJobs,
       sources: sources.map(s => s.source), // Add sources for filtering
       metadata: {
-        latestScrapeDate: latestScrapeDate._max.created_at,
+        latestScrapeDate: latestDate,
         totalJobs: totalUniqueJobs,
         currentPage: page,
         totalPages: Math.ceil(totalUniqueJobs / pageSize)
