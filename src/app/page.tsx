@@ -11,7 +11,6 @@ import { FilterIcon, X, Search as SearchIcon, Bell } from 'lucide-react'
 import JobCard from '@/components/JobCard'
 import LazyLoad from '@/components/LazyLoad'
 import { useAnalytics } from '@/lib/hooks/useAnalytics'
-import { useToast } from '@/context/ToastContext'
 import FeatureSpotlight from '@/components/FeatureSpotlight'
 
 interface Job {

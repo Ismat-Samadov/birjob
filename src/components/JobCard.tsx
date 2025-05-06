@@ -16,7 +16,7 @@ interface JobCardProps {
   created_at: string;
 }
 
-export default function JobCard({ id, title, company, source, apply_link, created_at }: JobCardProps) {
+export default function JobCard({ title, company, source, apply_link, created_at }: JobCardProps) {
   const [isSaved, setIsSaved] = useState(false);
   const { trackEvent } = useAnalytics();
   

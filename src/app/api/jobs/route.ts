@@ -22,7 +22,7 @@ function formatBigInt(value: unknown): unknown {
   return value
 }
 
-function processDbResult(result: any[]): DbResult[] {
+function processDbResult(result: DbResult[]): DbResult[] {
   return result.map(item => {
     const processed: DbResult = { 
       ...item,
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
     `;
     
     // Execute query
-    const jobsQuery = await prisma.$queryRaw(sqlQuery);
+    const jobsQuery: DbResult[] = await prisma.$queryRaw(sqlQuery);
     
     // Build count query
     let countQuery = Prisma.sql`
@@ -143,7 +143,7 @@ export async function GET(request: Request) {
     }
 
     // Process jobs to format bigints
-    const processedJobs = processDbResult(jobsQuery as any[]);
+    const processedJobs = processDbResult(jobsQuery);
     
     // Convert count to number
     const totalJobs = typeof totalCount[0]?.count === 'string' 
