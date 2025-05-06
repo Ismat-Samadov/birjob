@@ -279,10 +279,11 @@ jobs:
             console.log('Starting daily notification process...');
             
             try {
-              // Get all users with keywords - DO NOT include userSources since it doesn't exist yet
+              // Get all users with keywords AND source preferences
               const users = await prisma.users.findMany({
                 include: { 
-                  keywords: true
+                  keywords: true,
+                  sourcePreferences: true
                 },
               });
 
@@ -304,14 +305,29 @@ jobs:
 
                 console.log(`Processing user ${user.email} with ${user.keywords.length} keywords`);
 
-                // Find matching jobs from the last 24 hours - no source filtering for now
+                // Create a source filter if user has source preferences
+                let sourceFilter = {};
+                if (user.sourcePreferences && user.sourcePreferences.length > 0) {
+                  // If user has selected sources, only include jobs from those sources
+                  const selectedSources = user.sourcePreferences.map(pref => pref.source);
+                  console.log(`User ${user.email} has ${selectedSources.length} selected sources`);
+                  
+                  sourceFilter = {
+                    source: {
+                      in: selectedSources
+                    }
+                  };
+                }
+
+                // Find matching jobs from the last 24 hours - WITH source filtering if applicable
                 const matches = [];
                 
                 const recentJobs = await prisma.jobs_jobpost.findMany({
                   where: {
                     created_at: {
                       gte: twentyFourHoursAgo
-                    }
+                    },
+                    ...sourceFilter  // Apply source filter if any
                   },
                   orderBy: {
                     created_at: 'desc'

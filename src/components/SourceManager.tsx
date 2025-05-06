@@ -22,9 +22,6 @@ export default function SourceManager({ email }: SourceManagerProps) {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   
-  // Local storage key for source preferences
-  const storageKey = `birjob-sources-${email}`;
-
   // Fetch sources from API
   const fetchSources = useCallback(async () => {
     if (!email) return;
@@ -40,14 +37,9 @@ export default function SourceManager({ email }: SourceManagerProps) {
       if (response.ok) {
         setSources(data.allSources || []);
         
-        // Try to get selected sources from localStorage
-        try {
-          const savedPreferences = localStorage.getItem(storageKey);
-          if (savedPreferences) {
-            setSelectedSourceIds(JSON.parse(savedPreferences));
-          }
-        } catch (localStorageError) {
-          console.error('Error reading from localStorage:', localStorageError);
+        // Set selected sources from API response
+        if (data.userSelectedSourceIds) {
+          setSelectedSourceIds(data.userSelectedSourceIds);
         }
         
         if (data.message) {
@@ -65,19 +57,16 @@ export default function SourceManager({ email }: SourceManagerProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [email, storageKey]);
+  }, [email]);
 
-  // Save source preferences (client-side only)
+  // Save source preferences to database
   const saveSourcePreferences = async () => {
     setIsLoading(true);
     setError('');
     setMessage('');
     
     try {
-      // Save to localStorage
-      localStorage.setItem(storageKey, JSON.stringify(selectedSourceIds));
-      
-      // Simulate API call (for future compatibility)
+      // API call to save preferences
       const response = await fetch('/api/users/sources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -89,7 +78,11 @@ export default function SourceManager({ email }: SourceManagerProps) {
       
       const data = await response.json();
       
-      setMessage('Source preferences saved successfully!');
+      if (response.ok) {
+        setMessage(data.message || 'Source preferences saved successfully!');
+      } else {
+        throw new Error(data.error || 'Failed to save source preferences');
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

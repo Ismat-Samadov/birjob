@@ -9,15 +9,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Existing models with source column added
+// Existing models 
 model jobs_jobpost {
   id         Int      @id @default(autoincrement())
   title      String
   company    String
   apply_link String
-  source     String?  // Add source column
+  source     String?
   created_at DateTime @default(now())
-  notifications notifications[] // Relation to notifications
+  notifications notifications[]
+
+  @@unique([title, company, apply_link], name: "unique_job_listing")
 }
 
 model search_logs {
@@ -26,15 +28,16 @@ model search_logs {
   timestamp DateTime @default(now())
 }
 
-// Models for user notification system
+// User notification system models
 model users {
   id                   Int             @id @default(autoincrement())
   email                String          @unique
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
-  lastNotifiedAt       DateTime?       // Track when the last notification was sent
+  lastNotifiedAt       DateTime?
   keywords             keywords[]
   notifications        notifications[]
+  sourcePreferences    sourcePreferences[]
 }
 
 model keywords {
@@ -45,6 +48,25 @@ model keywords {
   user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, keyword])
+}
+
+// Keep the scraper_errors table to prevent it from being dropped
+model scraper_errors {
+  id        Int      @id @default(autoincrement())
+  source    String
+  error     String
+  timestamp DateTime @default(now())
+}
+
+// New model for source preferences
+model sourcePreferences {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  source    String
+  createdAt DateTime @default(now())
+  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, source])
 }
 
 // Notifications history
