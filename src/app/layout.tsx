@@ -1,7 +1,7 @@
-// src/app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import ClientWrapper from '@/components/ClientWrapper';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Providers } from '@/components/Providers';
@@ -38,10 +38,14 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <div className="flex flex-col min-h-screen">
-            <Navbar />
+            <ClientWrapper>
+              <Navbar />
+            </ClientWrapper>
             <main className="flex-grow">{children}</main>
             <Footer />
-            <ScrollToTop />
+            <ClientWrapper>
+              <ScrollToTop />
+            </ClientWrapper>
           </div>
         </Providers>
       </body>
