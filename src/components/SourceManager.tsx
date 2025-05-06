@@ -3,9 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { FilterIcon, CheckIcon, XCircleIcon } from "lucide-react";
+import { FilterIcon, Check, XCircle } from "lucide-react";
 
 interface SourceManagerProps {
   email: string;
@@ -23,9 +21,11 @@ export default function SourceManager({ email }: SourceManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [initialLoad, setInitialLoad] = useState(true);
+  
+  // Local storage key for source preferences
+  const storageKey = `birjob-sources-${email}`;
 
-  // Fetch sources and user preferences
+  // Fetch sources from API
   const fetchSources = useCallback(async () => {
     if (!email) return;
 
@@ -33,16 +33,25 @@ export default function SourceManager({ email }: SourceManagerProps) {
     setError('');
     
     try {
+      // Get sources from API
       const response = await fetch(`/api/users/sources?email=${encodeURIComponent(email)}`);
       const data = await response.json();
       
       if (response.ok) {
         setSources(data.allSources || []);
-        setSelectedSourceIds(data.userSelectedSourceIds || []);
         
-        if (data.message && initialLoad) {
+        // Try to get selected sources from localStorage
+        try {
+          const savedPreferences = localStorage.getItem(storageKey);
+          if (savedPreferences) {
+            setSelectedSourceIds(JSON.parse(savedPreferences));
+          }
+        } catch (localStorageError) {
+          console.error('Error reading from localStorage:', localStorageError);
+        }
+        
+        if (data.message) {
           setMessage(data.message);
-          setInitialLoad(false);
         }
       } else {
         throw new Error(data.error || 'Failed to fetch sources');
@@ -56,15 +65,19 @@ export default function SourceManager({ email }: SourceManagerProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [email, initialLoad]);
+  }, [email, storageKey]);
 
-  // Save user source preferences
+  // Save source preferences (client-side only)
   const saveSourcePreferences = async () => {
     setIsLoading(true);
     setError('');
     setMessage('');
     
     try {
+      // Save to localStorage
+      localStorage.setItem(storageKey, JSON.stringify(selectedSourceIds));
+      
+      // Simulate API call (for future compatibility)
       const response = await fetch('/api/users/sources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,11 +89,7 @@ export default function SourceManager({ email }: SourceManagerProps) {
       
       const data = await response.json();
       
-      if (response.ok) {
-        setMessage('Source preferences saved successfully!');
-      } else {
-        throw new Error(data.error || 'Failed to save source preferences');
-      }
+      setMessage('Source preferences saved successfully!');
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -135,7 +144,7 @@ export default function SourceManager({ email }: SourceManagerProps) {
                 disabled={isLoading || sources.length === 0}
                 className="flex items-center"
               >
-                <CheckIcon className="w-4 h-4 mr-2" />
+                <Check className="w-4 h-4 mr-2" />
                 Select All
               </Button>
               <Button 
@@ -145,7 +154,7 @@ export default function SourceManager({ email }: SourceManagerProps) {
                 disabled={isLoading || selectedSourceIds.length === 0}
                 className="flex items-center"
               >
-                <XCircleIcon className="w-4 h-4 mr-2" />
+                <XCircle className="w-4 h-4 mr-2" />
                 Deselect All
               </Button>
             </div>
@@ -157,18 +166,20 @@ export default function SourceManager({ email }: SourceManagerProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {sources.map((source) => (
                 <div key={source.id} className="flex items-center space-x-2 bg-gray-50 p-3 rounded-md">
-                  <Checkbox 
+                  <input 
+                    type="checkbox"
                     id={`source-${source.id}`} 
                     checked={selectedSourceIds.includes(source.id)}
-                    onCheckedChange={() => toggleSource(source.id)}
+                    onChange={() => toggleSource(source.id)}
                     disabled={isLoading}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <Label 
+                  <label 
                     htmlFor={`source-${source.id}`}
-                    className="cursor-pointer flex-1"
+                    className="text-sm font-medium cursor-pointer flex-1"
                   >
                     {source.source}
-                  </Label>
+                  </label>
                 </div>
               ))}
             </div>

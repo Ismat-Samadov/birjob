@@ -9,14 +9,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Existing models
+// Existing models with source column added
 model jobs_jobpost {
   id         Int      @id @default(autoincrement())
   title      String
   company    String
   apply_link String
+  source     String?  // Add source column
   created_at DateTime @default(now())
-  notifications notifications[] // Add relation to notifications
+  notifications notifications[] // Relation to notifications
 }
 
 model search_logs {
@@ -34,7 +35,6 @@ model users {
   lastNotifiedAt       DateTime?       // Track when the last notification was sent
   keywords             keywords[]
   notifications        notifications[]
-  userSources          user_sources[]
 }
 
 model keywords {
@@ -60,23 +60,4 @@ model notifications {
 
   @@index([userId])
   @@index([jobId])
-}
-
-model job_sources {
-  id        Int      @id @default(autoincrement())
-  source    String   @unique
-  createdAt DateTime @default(now())
-  userSources user_sources[]
-}
-
-model user_sources {
-  id       Int         @id @default(autoincrement())
-  userId   Int
-  sourceId Int
-  user     users       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  source   job_sources @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, sourceId])
-  @@index([userId])
-  @@index([sourceId])
 }

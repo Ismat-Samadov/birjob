@@ -53,94 +53,70 @@ export async function GET(request: Request) {
     // Make sure we have a valid date (not null)
     const latestDate = latestScrapeDate._max.created_at || new Date();
     
-    // Build where conditions properly for Prisma
-    const baseWhereCondition: Prisma.jobs_jobpostWhereInput = {
-      created_at: latestDate, // Use the non-null date
-    };
+    // Check if source column exists in the schema
+    let hasSourceColumn = true;
+    try {
+      // Try a simple query to see if the source column exists
+      await prisma.$queryRaw`SELECT source FROM jobs_jobpost LIMIT 1`;
+    } catch (error) {
+      hasSourceColumn = false;
+      console.log('Source column does not exist in jobs_jobpost table');
+    }
     
-    // Add search condition if present
+    // Build SQL query based on filters
+    let sqlQuery = Prisma.sql`
+      SELECT * FROM jobs_jobpost 
+      WHERE created_at = ${latestDate}
+    `;
+    
+    // Add search filter if provided
     if (search) {
-      baseWhereCondition.OR = [
-        { title: { contains: search, mode: Prisma.QueryMode.insensitive } },
-        { company: { contains: search, mode: Prisma.QueryMode.insensitive } }
-      ];
-    }
-    
-    // Add source filter if present - make sure to check if source column exists in schema
-    if (source) {
-      // We need to use Prisma.sql for raw SQL filtering if the source column
-      // isn't defined in the Prisma schema
-      const jobsWithSource = await prisma.$queryRaw`
-        SELECT * FROM jobs_jobpost 
-        WHERE source = ${source}
-        AND created_at = ${latestDate}
-        ${search ? Prisma.sql`AND (
+      sqlQuery = Prisma.sql`
+        ${sqlQuery} AND (
           LOWER(title) LIKE ${`%${search.toLowerCase()}%`} OR 
           LOWER(company) LIKE ${`%${search.toLowerCase()}%`}
-        )` : Prisma.sql``}
-        ORDER BY created_at DESC
-        LIMIT ${pageSize}
-        OFFSET ${(page - 1) * pageSize}
+        )
       `;
-      
-      // Count total matching jobs
-      const totalCount = await prisma.$queryRaw<[{count: number}]>`
-        SELECT COUNT(*) as count FROM jobs_jobpost 
-        WHERE source = ${source}
-        AND created_at = ${latestDate}
-        ${search ? Prisma.sql`AND (
-          LOWER(title) LIKE ${`%${search.toLowerCase()}%`} OR 
-          LOWER(company) LIKE ${`%${search.toLowerCase()}%`}
-        )` : Prisma.sql``}
-      `;
-      
-      // Get all available job sources for filtering
-      const sources = await prisma.$queryRaw<{source: string}[]>`
-        SELECT DISTINCT source FROM jobs_jobpost
-        WHERE source IS NOT NULL
-        ORDER BY source ASC
-      `;
-      
-      // Log search query if provided
-      if (search) {
-        await prisma.search_logs.create({
-          data: {
-            query: search,
-            timestamp: new Date(),
-          },
-        });
-      }
-
-      // Process jobs to format bigints
-      const processedJobs = processDbResult(jobsWithSource as any[]);
-
-      return NextResponse.json({
-        jobs: processedJobs,
-        sources: sources.map(s => s.source), // Add sources for filtering
-        metadata: {
-          latestScrapeDate: latestDate,
-          totalJobs: Number(totalCount[0]?.count || 0),
-          currentPage: page,
-          totalPages: Math.ceil(Number(totalCount[0]?.count || 0) / pageSize)
-        }
-      });
     }
     
-    // If no source filter, use standard Prisma query
-    const jobsQuery = await prisma.jobs_jobpost.findMany({
-      where: baseWhereCondition,
-      orderBy: { 
-        created_at: 'desc' 
-      },
-      skip: (page - 1) * pageSize,
-      take: pageSize
-    });
-
-    // Count total jobs with the same filters
-    const totalUniqueJobs = await prisma.jobs_jobpost.count({
-      where: baseWhereCondition
-    });
-
+    // Add source filter if provided and column exists
+    if (source && hasSourceColumn) {
+      sqlQuery = Prisma.sql`${sqlQuery} AND source = ${source}`;
+    }
+    
+    // Add ordering and pagination
+    sqlQuery = Prisma.sql`
+      ${sqlQuery} 
+      ORDER BY created_at DESC
+      LIMIT ${pageSize}
+      OFFSET ${(page - 1) * pageSize}
+    `;
+    
+    // Execute query
+    const jobsQuery = await prisma.$queryRaw(sqlQuery);
+    
+    // Build count query
+    let countQuery = Prisma.sql`
+      SELECT COUNT(*) as count FROM jobs_jobpost 
+      WHERE created_at = ${latestDate}
+    `;
+    
+    if (search) {
+      countQuery = Prisma.sql`
+        ${countQuery} AND (
+          LOWER(title) LIKE ${`%${search.toLowerCase()}%`} OR 
+          LOWER(company) LIKE ${`%${search.toLowerCase()}%`}
+        )
+      `;
+    }
+    
+    if (source && hasSourceColumn) {
+      countQuery = Prisma.sql`${countQuery} AND source = ${source}`;
+    }
+    
+    // Get total count
+    const totalCount = await prisma.$queryRaw<[{count: string | number}]>(countQuery);
+    
     // Log search query if provided
     if (search) {
       await prisma.search_logs.create({
@@ -150,25 +126,38 @@ export async function GET(request: Request) {
         },
       });
     }
-
-    // Get all available job sources via raw query since the column might not be in schema
-    const sources = await prisma.$queryRaw<{source: string}[]>`
-      SELECT DISTINCT source FROM jobs_jobpost
-      WHERE source IS NOT NULL
-      ORDER BY source ASC
-    `;
+    
+    // Get sources using raw SQL if column exists
+    let sources: string[] = [];
+    if (hasSourceColumn) {
+      try {
+        const sourcesResult = await prisma.$queryRaw<{source: string}[]>`
+          SELECT DISTINCT source FROM jobs_jobpost
+          WHERE source IS NOT NULL
+          ORDER BY source ASC
+        `;
+        sources = sourcesResult.map(row => row.source);
+      } catch (error) {
+        console.error('Error fetching sources:', error);
+      }
+    }
 
     // Process jobs to format bigints
-    const processedJobs = processDbResult(jobsQuery);
+    const processedJobs = processDbResult(jobsQuery as any[]);
+    
+    // Convert count to number
+    const totalJobs = typeof totalCount[0]?.count === 'string' 
+      ? parseInt(totalCount[0].count) 
+      : Number(totalCount[0]?.count || 0);
 
     return NextResponse.json({
       jobs: processedJobs,
-      sources: sources.map(s => s.source), // Add sources for filtering
+      sources: sources, // Add sources for filtering
       metadata: {
         latestScrapeDate: latestDate,
-        totalJobs: totalUniqueJobs,
+        totalJobs: totalJobs,
         currentPage: page,
-        totalPages: Math.ceil(totalUniqueJobs / pageSize)
+        totalPages: Math.ceil(totalJobs / pageSize)
       }
     });
   } catch (error) {

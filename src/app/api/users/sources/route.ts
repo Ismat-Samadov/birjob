@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
-// GET handler - retrieve available sources and user selected sources
+// GET handler - retrieve available sources from jobs_jobpost
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const email = searchParams.get('email');
@@ -18,46 +18,45 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get all available sources
-    const allSources = await prisma.job_sources.findMany({
-      orderBy: { source: 'asc' }
-    });
-
     // Check if user exists
     const user = await prisma.users.findUnique({
-      where: { email },
-      include: {
-        userSources: {
-          include: {
-            source: true
-          }
-        }
-      }
+      where: { email }
     });
-
-    if (user) {
-      // Return sources with user preferences
-      const userSelectedSourceIds = user.userSources.map(us => us.sourceId);
-      
+    
+    if (!user) {
       return NextResponse.json({ 
-        allSources,
-        userSelectedSourceIds
-      });
-    } else {
-      // New user, no selected sources yet
-      return NextResponse.json({ 
-        allSources,
-        userSelectedSourceIds: [],
-        message: 'User not found. Create user first by adding keywords.'
-      });
+        error: 'User not found. Create user first by adding keywords.' 
+      }, { status: 404 });
     }
+
+    // Get distinct sources directly from jobs_jobpost table
+    const sourcesResult = await prisma.$queryRaw<{source: string}[]>`
+      SELECT DISTINCT source FROM jobs_jobpost
+      WHERE source IS NOT NULL
+      ORDER BY source ASC
+    `;
+    
+    // Format the sources to match the expected interface
+    const allSources = sourcesResult.map((row, index) => ({
+      id: index + 1,
+      source: row.source,
+      createdAt: new Date()
+    }));
+    
+    // Get user source preferences from localStorage instead of database
+    // This approach simulates source preferences without needing new tables
+    return NextResponse.json({ 
+      allSources,
+      userSelectedSourceIds: [], // Empty array - preferences will be managed client-side
+      message: 'Retrieved available sources from jobs table'
+    });
   } catch (error) {
     console.error('Error fetching sources:', error);
     return NextResponse.json({ error: 'Failed to fetch sources' }, { status: 500 });
   }
 }
 
-// POST handler - add or update user source preferences
+// POST handler - simulate adding source preferences (client-side only)
 export async function POST(request: NextRequest) {
   try {
     const { email, sourceIds } = await request.json();
@@ -79,31 +78,13 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // First remove all existing source preferences for this user
-    await prisma.user_sources.deleteMany({
-      where: { userId: user.id }
-    });
-
-    // If sourceIds is empty, the user wants no sources (which means all sources)
-    if (sourceIds.length > 0) {
-      // Then add the new source preferences
-      const sourceCreations = sourceIds.map(sourceId => {
-        return prisma.user_sources.create({
-          data: {
-            userId: user.id,
-            sourceId: typeof sourceId === 'string' ? parseInt(sourceId) : sourceId
-          }
-        });
-      });
-      
-      await prisma.$transaction(sourceCreations);
-    }
-
+    // Simply acknowledge the request - actual preferences will be stored client-side
     return NextResponse.json({ 
-      message: 'Source preferences updated successfully' 
+      message: 'Source preferences received. Using client-side storage for preferences.',
+      sourceIds: sourceIds
     });
   } catch (error) {
-    console.error('Error updating source preferences:', error);
-    return NextResponse.json({ error: 'Failed to update source preferences' }, { status: 500 });
+    console.error('Error handling source preferences:', error);
+    return NextResponse.json({ error: 'Failed to process source preferences' }, { status: 500 });
   }
 }
