@@ -1,59 +1,59 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent } from "@/components/ui/card"
-import { useDebounce } from '@/lib/hooks/useDebounce'
-import { FilterIcon, X, Search as SearchIcon, Bell } from 'lucide-react'
-import JobCard from '@/components/JobCard'
-import LazyLoad from '@/components/LazyLoad'
-import { useAnalytics } from '@/lib/hooks/useAnalytics'
-import FeatureSpotlight from '@/components/FeatureSpotlight'
+import { useState, useEffect, useCallback } from 'react';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { useDebounce } from '@/lib/hooks/useDebounce';
+import { FilterIcon, X, Search as SearchIcon, Bell } from 'lucide-react';
+import JobCard from '@/components/JobCard';
+import LazyLoad from '@/components/LazyLoad';
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
+import FeatureSpotlight from '@/components/FeatureSpotlight';
 
 interface Job {
-  id: number
-  title: string
-  company: string
-  source: string | null
-  apply_link: string
-  created_at: string
+  id: number;
+  title: string;
+  company: string;
+  source: string | null;
+  apply_link: string;
+  created_at: string;
 }
 
 interface JobsMetadata {
-  latestScrapeDate: string
-  totalJobs: number
-  currentPage: number
-  totalPages: number
+  latestScrapeDate: string;
+  totalJobs: number;
+  currentPage: number;
+  totalPages: number;
 }
 
 interface JobsResponse {
-  jobs: Job[]
-  sources: string[]
-  metadata: JobsMetadata
+  jobs: Job[];
+  sources: string[];
+  metadata: JobsMetadata;
 }
 
 export default function HomeContent() {
-  const [jobsData, setJobsData] = useState<JobsResponse | null>(null)
-  const [search, setSearch] = useState<string>('')
-  const [selectedSource, setSelectedSource] = useState<string>('')
-  const [showSourceFilter, setShowSourceFilter] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(false)
-  const [page, setPage] = useState<number>(1)
-  const [isSearching, setIsSearching] = useState<boolean>(false)
-  const debouncedSearch = useDebounce<string>(search, 500)
+  const [jobsData, setJobsData] = useState<JobsResponse | null>(null);
+  const [search, setSearch] = useState<string>('');
+  const [selectedSource, setSelectedSource] = useState<string>('');
+  const [showSourceFilter, setShowSourceFilter] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const debouncedSearch = useDebounce<string>(search, 500);
   const { trackEvent } = useAnalytics();
 
   const fetchJobs = useCallback(async () => {
-    setLoading(true)
-    setIsSearching(true)
+    setLoading(true);
+    setIsSearching(true);
     
     try {
-      const queryParams = new URLSearchParams()
+      const queryParams = new URLSearchParams();
       
       if (debouncedSearch) {
-        queryParams.append('search', debouncedSearch)
+        queryParams.append('search', debouncedSearch);
         
         // Track search event
         trackEvent({
@@ -64,7 +64,7 @@ export default function HomeContent() {
       }
       
       if (selectedSource) {
-        queryParams.append('source', selectedSource)
+        queryParams.append('source', selectedSource);
         
         // Track source filter use
         trackEvent({
@@ -74,13 +74,13 @@ export default function HomeContent() {
         });
       }
       
-      queryParams.append('page', page.toString())
+      queryParams.append('page', page.toString());
       
       const response = await fetch(
         `/api/jobs?${queryParams.toString()}`
-      )
-      const data: JobsResponse = await response.json()
-      setJobsData(data)
+      );
+      const data: JobsResponse = await response.json();
+      setJobsData(data);
       
       // Track search results
       trackEvent({
@@ -90,7 +90,7 @@ export default function HomeContent() {
         value: data.metadata.totalJobs
       });
     } catch (error) {
-      console.error('Error fetching jobs:', error)
+      console.error('Error fetching jobs:', error);
       
       // Track error
       trackEvent({
@@ -99,28 +99,28 @@ export default function HomeContent() {
         label: 'Job fetch failed'
       });
     } finally {
-      setLoading(false)
+      setLoading(false);
       // Set a small delay before removing the searching state for better UX
-      setTimeout(() => setIsSearching(false), 300)
+      setTimeout(() => setIsSearching(false), 300);
     }
-  }, [debouncedSearch, selectedSource, page, trackEvent])
+  }, [debouncedSearch, selectedSource, page, trackEvent]);
 
   useEffect(() => {
-    fetchJobs()
-  }, [fetchJobs])
+    fetchJobs();
+  }, [fetchJobs]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(event.target.value)
-    setPage(1)
-  }
+    setSearch(event.target.value);
+    setPage(1);
+  };
 
   const handleSourceChange = (source: string) => {
-    setSelectedSource(source)
-    setPage(1)
-  }
+    setSelectedSource(source);
+    setPage(1);
+  };
 
   const handlePreviousPage = () => {
-    setPage((p) => Math.max(1, p - 1))
+    setPage((p) => Math.max(1, p - 1));
     
     // Track pagination event
     trackEvent({
@@ -135,10 +135,10 @@ export default function HomeContent() {
       top: 0,
       behavior: 'smooth'
     });
-  }
+  };
 
   const handleNextPage = () => {
-    setPage((p) => p + 1)
+    setPage((p) => p + 1);
     
     // Track pagination event
     trackEvent({
@@ -153,22 +153,22 @@ export default function HomeContent() {
       top: 0,
       behavior: 'smooth'
     });
-  }
+  };
 
   const clearFilters = () => {
-    setSearch('')
-    setSelectedSource('')
-    setPage(1)
+    setSearch('');
+    setSelectedSource('');
+    setPage(1);
     
     // Track clear filters event
     trackEvent({
       category: 'Filter',
       action: 'Clear Filters'
     });
-  }
+  };
 
   const toggleSourceFilter = () => {
-    setShowSourceFilter(!showSourceFilter)
+    setShowSourceFilter(!showSourceFilter);
     
     // Track filter toggle
     trackEvent({
@@ -176,7 +176,7 @@ export default function HomeContent() {
       action: 'Toggle Source Filter',
       label: showSourceFilter ? 'Hide' : 'Show'
     });
-  }
+  };
 
   return (
     <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900">
@@ -353,7 +353,7 @@ export default function HomeContent() {
             description="BirJob aggregates positions from over 50 different job boards, making your job search more efficient."
             buttonText="Learn More"
             buttonLink="/about"
-            icon={<search className="h-8 w-8" />}
+            icon={<Search className="h-8 w-8" />}
             variant="secondary"
           />
         </div>
