@@ -56,10 +56,10 @@ export default function AboutPage() {
           </CardHeader>
           <CardContent className="p-6">
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              At BirJob, we believe job hunting should be simpler and more efficient. We've built a platform that aggregates job listings from dozens of sources, eliminates duplicates, and lets you set up personalized alerts so you never miss an opportunity.
+              At BirJob, we believe job hunting should be simpler and more efficient. We&apos;ve built a platform that aggregates job listings from dozens of sources, eliminates duplicates, and lets you set up personalized alerts so you never miss an opportunity.
             </p>
             <p className="text-gray-700 dark:text-gray-300">
-              Our continuous scraping system ensures you're always seeing the freshest content, while our intelligent deduplication algorithms make sure you don't waste time reviewing the same position multiple times.
+              Our continuous scraping system ensures you&apos;re always seeing the freshest content, while our intelligent deduplication algorithms make sure you don&apos;t waste time reviewing the same position multiple times.
             </p>
           </CardContent>
         </Card>
@@ -213,7 +213,7 @@ export default function AboutPage() {
           </CardHeader>
           <CardContent className="p-6">
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              Have questions or feedback about BirJob? We'd love to hear from you!
+              Have questions or feedback about BirJob? We&apos;d love to hear from you!
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center">
