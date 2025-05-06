@@ -1,6 +1,6 @@
 This favicon was generated using the following font:
 
-- Font Title: Lexend
+- Font Title: DM Serif Text
 - Font Author: undefined
-- Font Source: https://fonts.gstatic.com/s/lexend/v24/wlptgwvFAVdoq2_F94zlCfv0bz1WCzsW_LBte6KuGEo.ttf
+- Font Source: https://fonts.gstatic.com/s/dmseriftext/v12/rnCu-xZa_krGokauCeNq1wWyafOPXHIJErY.ttf
 - Font License: undefined)
