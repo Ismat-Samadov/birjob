@@ -84,7 +84,7 @@ export async function GET(request: Request) {
     });
 
     // Count total jobs that match the search criteria
-    let countQuery = `
+    const countQuery = `
       SELECT COUNT(DISTINCT (LOWER(title), LOWER(company)))::integer as count
       FROM jobs_jobpost
       WHERE ${prisma.$raw(whereClause)}
