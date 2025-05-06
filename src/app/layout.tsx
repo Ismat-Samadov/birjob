@@ -3,6 +3,10 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { ThemeProvider } from '@/context/ThemeContext';
+import { Providers } from '@/components/Providers';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -31,23 +35,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Navbar />
-        <main>{children}</main>
-        <footer className="bg-gray-50 border-t border-gray-200 py-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-600">Birjob</h3>
-                <p className="text-sm text-gray-500">Your Ultimate Job Aggregator</p>
-              </div>
-              <div className="text-sm text-gray-500">
-                © 2025 Birjob | All rights reserved
-              </div>
-            </div>
+        <Providers>
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+            <ScrollToTop />
           </div>
-        </footer>
+        </Providers>
       </body>
     </html>
   );

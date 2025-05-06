@@ -5,14 +5,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { useDebounce } from '@/lib/hooks/useDebounce'
-import { FilterIcon, X } from 'lucide-react'
+import { FilterIcon, X, Search as SearchIcon, Bell } from 'lucide-react'
+import JobCard from '@/components/JobCard'
+import LazyLoad from '@/components/LazyLoad'
+import { useAnalytics } from '@/lib/hooks/useAnalytics'
+import { useToast } from '@/context/ToastContext'
+import FeatureSpotlight from '@/components/FeatureSpotlight'
 
 interface Job {
   id: number
@@ -43,19 +43,37 @@ export default function Home() {
   const [showSourceFilter, setShowSourceFilter] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
   const [page, setPage] = useState<number>(1)
+  const [isSearching, setIsSearching] = useState<boolean>(false)
   const debouncedSearch = useDebounce<string>(search, 500)
+  const { trackEvent } = useAnalytics();
 
   const fetchJobs = useCallback(async () => {
     setLoading(true)
+    setIsSearching(true)
+    
     try {
       const queryParams = new URLSearchParams()
       
       if (debouncedSearch) {
         queryParams.append('search', debouncedSearch)
+        
+        // Track search event
+        trackEvent({
+          category: 'Search',
+          action: 'Job Search',
+          label: debouncedSearch
+        });
       }
       
       if (selectedSource) {
         queryParams.append('source', selectedSource)
+        
+        // Track source filter use
+        trackEvent({
+          category: 'Filter',
+          action: 'Source Filter',
+          label: selectedSource
+        });
       }
       
       queryParams.append('page', page.toString())
@@ -65,12 +83,29 @@ export default function Home() {
       )
       const data: JobsResponse = await response.json()
       setJobsData(data)
+      
+      // Track search results
+      trackEvent({
+        category: 'Search',
+        action: 'Search Results',
+        label: debouncedSearch || 'All Jobs',
+        value: data.metadata.totalJobs
+      });
     } catch (error) {
       console.error('Error fetching jobs:', error)
+      
+      // Track error
+      trackEvent({
+        category: 'Error',
+        action: 'API Error',
+        label: 'Job fetch failed'
+      });
     } finally {
       setLoading(false)
+      // Set a small delay before removing the searching state for better UX
+      setTimeout(() => setIsSearching(false), 300)
     }
-  }, [debouncedSearch, selectedSource, page])
+  }, [debouncedSearch, selectedSource, page, trackEvent])
 
   useEffect(() => {
     fetchJobs()
@@ -88,40 +123,91 @@ export default function Home() {
 
   const handlePreviousPage = () => {
     setPage((p) => Math.max(1, p - 1))
+    
+    // Track pagination event
+    trackEvent({
+      category: 'Navigation',
+      action: 'Pagination',
+      label: 'Previous Page',
+      value: page - 1
+    });
+    
+    // Scroll to top when changing pages
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 
   const handleNextPage = () => {
     setPage((p) => p + 1)
+    
+    // Track pagination event
+    trackEvent({
+      category: 'Navigation',
+      action: 'Pagination',
+      label: 'Next Page',
+      value: page + 1
+    });
+    
+    // Scroll to top when changing pages
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 
   const clearFilters = () => {
     setSearch('')
     setSelectedSource('')
     setPage(1)
+    
+    // Track clear filters event
+    trackEvent({
+      category: 'Filter',
+      action: 'Clear Filters'
+    });
   }
 
   const toggleSourceFilter = () => {
     setShowSourceFilter(!showSourceFilter)
+    
+    // Track filter toggle
+    trackEvent({
+      category: 'UI',
+      action: 'Toggle Source Filter',
+      label: showSourceFilter ? 'Hide' : 'Show'
+    });
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
+    <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold text-center">BirJob</h1>
+          <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-white">
+            BirJob
+          </h1>
           <div className="w-full max-w-xl mx-auto">
-            <div className="flex gap-2">
-              <Input
-                type="search"
-                placeholder="Search jobs or companies..."
-                value={search}
-                onChange={handleSearch}
-                className="w-full"
-              />
+            <div className="relative flex gap-2">
+              <div className="relative flex-grow">
+                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  type="search"
+                  placeholder="Search jobs or companies..."
+                  value={search}
+                  onChange={handleSearch}
+                  className="w-full pl-10 pr-4 transition-all focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
+                />
+                {isSearching && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                  </div>
+                )}
+              </div>
               <Button
                 variant="outline"
                 onClick={toggleSourceFilter}
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                 aria-expanded={showSourceFilter}
               >
                 <FilterIcon className="h-4 w-4" />
@@ -131,7 +217,7 @@ export default function Home() {
                 <Button
                   variant="ghost"
                   onClick={clearFilters}
-                  className="flex items-center"
+                  className="flex items-center dark:text-gray-300"
                 >
                   <X className="h-4 w-4" />
                   <span className="hidden sm:inline ml-1">Clear</span>
@@ -140,13 +226,13 @@ export default function Home() {
             </div>
             
             {showSourceFilter && jobsData?.sources && (
-              <div className="mt-2 p-4 bg-white border rounded-md shadow-sm">
-                <Label className="block mb-2 font-medium">Filter by Source:</Label>
-                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+              <div className="mt-2 p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md shadow-sm animate-in slide-in-from-top duration-300 ease-in-out">
+                <Label className="block mb-2 font-medium text-gray-700 dark:text-gray-300">Filter by Source:</Label>
+                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto custom-scrollbar">
                   <Button
                     variant={!selectedSource ? "default" : "outline"}
                     onClick={() => handleSourceChange('')}
-                    className="text-xs py-1 h-8"
+                    className="text-xs py-1 h-8 dark:border-gray-700"
                   >
                     All
                   </Button>
@@ -155,7 +241,7 @@ export default function Home() {
                       key={source}
                       variant={selectedSource === source ? "default" : "outline"}
                       onClick={() => handleSourceChange(source)}
-                      className="text-xs py-1 h-8"
+                      className="text-xs py-1 h-8 dark:border-gray-700"
                     >
                       {source}
                     </Button>
@@ -163,74 +249,117 @@ export default function Home() {
                 </div>
               </div>
             )}
+            
+            {jobsData?.metadata && (
+              <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4 p-2 bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
+                <p>Last Updated: {new Date(jobsData.metadata.latestScrapeDate).toLocaleString()}</p>
+                <p className="font-medium">
+                  Found {jobsData.metadata.totalJobs} {selectedSource ? `${selectedSource} ` : ''}jobs
+                  {search ? ` matching "${search}"` : ''}
+                </p>
+              </div>
+            )}
           </div>
-          {jobsData?.metadata && (
-            <div className="text-center text-sm text-gray-600">
-              <p>Last Updated: {new Date(jobsData.metadata.latestScrapeDate).toLocaleString()}</p>
-              <p>Found {jobsData.metadata.totalJobs} {selectedSource ? `${selectedSource} ` : ''}jobs{search ? ` matching "${search}"` : ''}</p>
-            </div>
-          )}
         </div>
 
         <div className="space-y-4">
-          {loading ? (
-            <p className="text-center">Loading...</p>
+          {loading && !isSearching ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, index) => (
+                <Card key={index} className="animate-pulse dark:bg-gray-800">
+                  <CardContent className="p-6">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+                    <div className="mt-4 flex space-x-2">
+                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           ) : !jobsData?.jobs.length ? (
-            <p className="text-center">No jobs found</p>
+            <Card className="dark:bg-gray-800 p-8">
+              <CardContent className="flex flex-col items-center justify-center text-center p-6">
+                <SearchIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No jobs found</h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {search || selectedSource ? 
+                    `Try adjusting your search or filters to see more results.` : 
+                    `There are currently no job listings available.`}
+                </p>
+              </CardContent>
+            </Card>
           ) : (
             jobsData.jobs.map((job: Job) => (
-              <Card key={job.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{job.title}</CardTitle>
-                      <div className="flex flex-wrap items-center gap-2 mt-1">
-                        <p className="text-sm text-gray-500">{job.company}</p>
-                        {job.source && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {job.source}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => window.open(job.apply_link, '_blank')}
-                      className="ml-4"
-                    >
-                      Apply
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
-                    Posted: {new Date(job.created_at).toLocaleDateString()}
-                  </p>
-                </CardContent>
-              </Card>
+              <LazyLoad key={job.id} threshold={0.1}>
+                <JobCard
+                  id={job.id}
+                  title={job.title}
+                  company={job.company}
+                  source={job.source}
+                  apply_link={job.apply_link}
+                  created_at={job.created_at}
+                />
+              </LazyLoad>
             ))
           )}
         </div>
 
         {jobsData?.metadata && jobsData.jobs.length > 0 && (
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <Button
               onClick={handlePreviousPage}
               disabled={page === 1 || loading}
+              className="font-medium px-6 py-2 transition-all"
+              variant={page === 1 ? "outline" : "default"}
             >
               Previous
             </Button>
-            <span className="flex items-center">
-              Page {page} of {jobsData.metadata.totalPages}
-            </span>
+            
+            <div className="flex items-center text-sm font-medium">
+              <span className="hidden sm:block mr-2">Page</span>
+              <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-md">
+                {page}
+              </span>
+              <span className="mx-2">of</span>
+              <span className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-md">
+                {jobsData.metadata.totalPages}
+              </span>
+            </div>
+            
             <Button
               onClick={handleNextPage}
               disabled={page >= jobsData.metadata.totalPages || loading}
+              className="font-medium px-6 py-2 transition-all"
+              variant={page >= jobsData.metadata.totalPages ? "outline" : "default"}
             >
               Next
             </Button>
           </div>
         )}
+        
+        {/* Feature spotlights */}
+        <div className="space-y-4">
+          <FeatureSpotlight 
+            title="Never Miss an Opportunity"
+            description="Get daily email notifications for jobs matching your keywords. Set up your preferences and stay ahead in your job search."
+            buttonText="Set Up Notifications"
+            buttonLink="/notifications"
+            icon={<Bell className="h-8 w-8" />}
+            variant="primary"
+          />
+          
+          <FeatureSpotlight 
+            title="Find Jobs from 50+ Sources"
+            description="BirJob aggregates positions from over 50 different job boards, making your job search more efficient."
+            buttonText="Learn More"
+            buttonLink="/about"
+            icon={<Search className="h-8 w-8" />}
+            variant="secondary"
+          />
+        </div>
       </div>
-    </main>
-  )
+    </div>
+  );
 }
