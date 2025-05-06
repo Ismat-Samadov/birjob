@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { FilterIcon, X, Search as SearchIcon, Bell } from 'lucide-react';
+import { FilterIcon, X, Search as SearchIcon, Bell, Search } from 'lucide-react';
 import JobCard from '@/components/JobCard';
 import LazyLoad from '@/components/LazyLoad';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
