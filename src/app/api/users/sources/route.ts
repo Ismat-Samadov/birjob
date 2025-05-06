@@ -87,16 +87,16 @@ export async function POST(request: NextRequest) {
     // If sourceIds is empty, the user wants no sources (which means all sources)
     if (sourceIds.length > 0) {
       // Then add the new source preferences
-      await prisma.$transaction(
-        sourceIds.map(sourceId => 
-          prisma.user_sources.create({
-            data: {
-              userId: user.id,
-              sourceId: parseInt(sourceId)
-            }
-          })
-        )
-      );
+      const sourceCreations = sourceIds.map(sourceId => {
+        return prisma.user_sources.create({
+          data: {
+            userId: user.id,
+            sourceId: typeof sourceId === 'string' ? parseInt(sourceId) : sourceId
+          }
+        });
+      });
+      
+      await prisma.$transaction(sourceCreations);
     }
 
     return NextResponse.json({ 
