@@ -69,7 +69,7 @@ export default function Footer() {
             © {currentYear} BirJob. All rights reserved.
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 md:mt-0">
-            Made with ❤️ by <a href="https://github.com/ismat-samadov" className="text-blue-600 dark:text-blue-400 hover:underline">Ismat Samadov</a>
+            Made with ❤️ by <a href="https://ismat.pro/" className="text-blue-600 dark:text-blue-400 hover:underline">Ismat Samadov</a>
           </p>
         </div>
       </div>
