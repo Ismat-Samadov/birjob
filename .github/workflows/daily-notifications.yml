@@ -68,7 +68,7 @@ jobs:
                 <p class="job-company">${match.job.company}</p>
                 <div class="job-meta">
                   <span class="keyword-tag">Matched: ${match.keyword}</span>
-                  <span class="source-tag">Source: ${match.job.source || 'Unknown'}</span>
+                  ${match.job.source ? `<span class="source-tag">Source: ${match.job.source}</span>` : ''}
                 </div>
                 <a href="${match.job.apply_link}" class="button">View Job & Apply</a>
               </div>
@@ -222,7 +222,7 @@ jobs:
                   <p>Hi ${firstName},</p>
                   
                   <div class="summary">
-                    <strong>Today's summary:</strong> We found ${matches.length} new job ${matches.length === 1 ? 'match' : 'matches'} based on your keywords and source preferences.
+                    <strong>Today's summary:</strong> We found ${matches.length} new job ${matches.length === 1 ? 'match' : 'matches'} based on your keywords and preferences.
                   </div>
                   
                   <p class="personal-note">Here are today's opportunities that match what you're looking for:</p>
@@ -230,7 +230,7 @@ jobs:
                   <!-- Job matches -->
                   ${jobItemsHtml}
                   
-                  <p>Manage your <a href="${appUrl}/notifications" class="settings-link">notification preferences</a> to update your keywords and sources to get more relevant matches.</p>
+                  <p>Manage your <a href="${appUrl}/notifications" class="settings-link">notification preferences</a> to update your keywords to get more relevant matches.</p>
                   
                   <p>Best regards,<br>
                   The BirJob Team</p>
@@ -279,15 +279,10 @@ jobs:
             console.log('Starting daily notification process...');
             
             try {
-              // Get all users with keywords
+              // Get all users with keywords - DO NOT include userSources since it doesn't exist yet
               const users = await prisma.users.findMany({
                 include: { 
-                  keywords: true,
-                  userSources: {
-                    include: {
-                      source: true
-                    }
-                  }
+                  keywords: true
                 },
               });
 
@@ -307,34 +302,16 @@ jobs:
                   continue;
                 }
 
-                console.log(`Processing user ${user.email} with ${user.keywords.length} keywords and ${user.userSources.length} selected sources`);
+                console.log(`Processing user ${user.email} with ${user.keywords.length} keywords`);
 
-                // Find matching jobs from the last 24 hours
+                // Find matching jobs from the last 24 hours - no source filtering for now
                 const matches = [];
                 
-                // Prepare source filter
-                let sourceFilter = {};
-                if (user.userSources.length > 0) {
-                  // User has selected specific sources
-                  const selectedSources = user.userSources.map(us => us.source.source);
-                  console.log(`User has selected sources: ${selectedSources.join(', ')}`);
-                  
-                  sourceFilter = {
-                    source: {
-                      in: selectedSources
-                    }
-                  };
-                } else {
-                  console.log(`User has not selected specific sources, will search all sources`);
-                }
-                
-                // Get recent jobs with source filter if applicable
                 const recentJobs = await prisma.jobs_jobpost.findMany({
                   where: {
                     created_at: {
                       gte: twentyFourHoursAgo
-                    },
-                    ...sourceFilter
+                    }
                   },
                   orderBy: {
                     created_at: 'desc'
