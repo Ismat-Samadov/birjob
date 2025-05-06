@@ -355,7 +355,7 @@ export default function Home() {
             description="BirJob aggregates positions from over 50 different job boards, making your job search more efficient."
             buttonText="Learn More"
             buttonLink="/about"
-            icon={<Search className="h-8 w-8" />}
+            icon={<search className="h-8 w-8" />}
             variant="secondary"
           />
         </div>
