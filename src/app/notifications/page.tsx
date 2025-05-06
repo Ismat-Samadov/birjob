@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 
 // Use dynamic import to load client components
 const KeywordManager = dynamic(() => import('@/components/KeywordManager'), { ssr: false });
+const SourceManager = dynamic(() => import('@/components/SourceManager'), { ssr: false });
 const NotificationPreferences = dynamic(() => import('@/components/NotificationPreferences'), { ssr: false });
 
 export default function NotificationsPage() {
   const [email, setEmail] = useState<string>('');
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'keywords' | 'schedule'>('keywords');
+  const [activeTab, setActiveTab] = useState<'keywords' | 'sources' | 'schedule'>('keywords');
 
   const handleEmailSubmit = async () => {
     setError('');
@@ -40,7 +41,7 @@ export default function NotificationsPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-center">Daily Job Notifications</h1>
           <p className="text-center text-gray-600 mt-2">
-            Get daily email alerts for jobs matching your keywords
+            Get daily email alerts for jobs matching your keywords and preferred sources
           </p>
         </div>
       
@@ -85,6 +86,16 @@ export default function NotificationsPage() {
                     Keywords
                   </button>
                   <button
+                    onClick={() => setActiveTab('sources')}
+                    className={`${
+                      activeTab === 'sources'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                  >
+                    Sources
+                  </button>
+                  <button
                     onClick={() => setActiveTab('schedule')}
                     className={`${
                       activeTab === 'schedule'
@@ -100,6 +111,8 @@ export default function NotificationsPage() {
             
             {activeTab === 'keywords' ? (
               <KeywordManager email={email} />
+            ) : activeTab === 'sources' ? (
+              <SourceManager email={email} />
             ) : (
               <NotificationPreferences email={email} />
             )}
@@ -111,17 +124,17 @@ export default function NotificationsPage() {
           <ol className="list-decimal pl-5 space-y-2">
             <li>Enter your email address to access your notification settings</li>
             <li>Add keywords related to job positions you&apos;re interested in</li>
+            <li>Select job sources you want to monitor (or leave all selected to check all sources)</li>
             <li>Receive one comprehensive email daily with all matching jobs</li>
             <li>Click on any job to apply directly on the company website</li>
-            <li>Manage your keywords anytime to adjust your job alerts</li>
           </ol>
           <div className="mt-6 pt-4 border-t border-gray-100">
-            <h3 className="text-lg font-medium mb-2">Tips for Effective Keywords</h3>
+            <h3 className="text-lg font-medium mb-2">Tips for Effective Notifications</h3>
             <ul className="list-disc pl-5 space-y-1 text-gray-700">
               <li>Use broad terms for your field (e.g., &ldquo;developer&rdquo;, &ldquo;marketing&rdquo;)</li>
               <li>Include specific skills (e.g., &ldquo;python&rdquo;, &ldquo;react&rdquo;, &ldquo;analytics&rdquo;)</li>
-              <li>Add job titles you&apos;re interested in (e.g., &ldquo;project manager&rdquo;)</li>
-              <li>Consider including seniority levels (e.g., &ldquo;senior&rdquo;, &ldquo;lead&rdquo;)</li>
+              <li>Select specific job sources if you have preferences for certain platforms</li>
+              <li>If you don&apos;t select any sources, you&apos;ll receive matches from all available sources</li>
             </ul>
           </div>
         </div>

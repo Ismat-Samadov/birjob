@@ -68,6 +68,7 @@ jobs:
                 <p class="job-company">${match.job.company}</p>
                 <div class="job-meta">
                   <span class="keyword-tag">Matched: ${match.keyword}</span>
+                  <span class="source-tag">Source: ${match.job.source || 'Unknown'}</span>
                 </div>
                 <a href="${match.job.apply_link}" class="button">View Job & Apply</a>
               </div>
@@ -145,7 +146,7 @@ jobs:
                 align-items: center;
                 margin-bottom: 16px;
               }
-              .keyword-tag {
+              .keyword-tag, .source-tag {
                 display: inline-block;
                 padding: 4px 10px;
                 background-color: #f3f4f6;
@@ -153,6 +154,10 @@ jobs:
                 border-radius: 100px;
                 font-size: 14px;
                 margin-right: 8px;
+              }
+              .source-tag {
+                background-color: #e0f2fe;
+                color: #0369a1;
               }
               .button {
                 display: inline-block;
@@ -217,7 +222,7 @@ jobs:
                   <p>Hi ${firstName},</p>
                   
                   <div class="summary">
-                    <strong>Today's summary:</strong> We found ${matches.length} new job ${matches.length === 1 ? 'match' : 'matches'} based on your keywords.
+                    <strong>Today's summary:</strong> We found ${matches.length} new job ${matches.length === 1 ? 'match' : 'matches'} based on your keywords and source preferences.
                   </div>
                   
                   <p class="personal-note">Here are today's opportunities that match what you're looking for:</p>
@@ -225,7 +230,7 @@ jobs:
                   <!-- Job matches -->
                   ${jobItemsHtml}
                   
-                  <p>Manage your <a href="${appUrl}/notifications" class="settings-link">notification preferences</a> to update your keywords and get more relevant matches.</p>
+                  <p>Manage your <a href="${appUrl}/notifications" class="settings-link">notification preferences</a> to update your keywords and sources to get more relevant matches.</p>
                   
                   <p>Best regards,<br>
                   The BirJob Team</p>
@@ -276,7 +281,14 @@ jobs:
             try {
               // Get all users with keywords
               const users = await prisma.users.findMany({
-                include: { keywords: true },
+                include: { 
+                  keywords: true,
+                  userSources: {
+                    include: {
+                      source: true
+                    }
+                  }
+                },
               });
 
               console.log(`Found ${users.length} users to process`);
@@ -295,23 +307,41 @@ jobs:
                   continue;
                 }
 
-                console.log(`Processing user ${user.email} with ${user.keywords.length} keywords`);
+                console.log(`Processing user ${user.email} with ${user.keywords.length} keywords and ${user.userSources.length} selected sources`);
 
                 // Find matching jobs from the last 24 hours
                 const matches = [];
                 
+                // Prepare source filter
+                let sourceFilter = {};
+                if (user.userSources.length > 0) {
+                  // User has selected specific sources
+                  const selectedSources = user.userSources.map(us => us.source.source);
+                  console.log(`User has selected sources: ${selectedSources.join(', ')}`);
+                  
+                  sourceFilter = {
+                    source: {
+                      in: selectedSources
+                    }
+                  };
+                } else {
+                  console.log(`User has not selected specific sources, will search all sources`);
+                }
+                
+                // Get recent jobs with source filter if applicable
                 const recentJobs = await prisma.jobs_jobpost.findMany({
                   where: {
                     created_at: {
                       gte: twentyFourHoursAgo
-                    }
+                    },
+                    ...sourceFilter
                   },
                   orderBy: {
                     created_at: 'desc'
                   }
                 });
 
-                console.log(`Found ${recentJobs.length} recent jobs to check`);
+                console.log(`Found ${recentJobs.length} recent jobs to check for user ${user.email}`);
 
                 // Check each job against user's keywords
                 for (const job of recentJobs) {
