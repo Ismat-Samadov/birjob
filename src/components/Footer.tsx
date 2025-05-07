@@ -68,9 +68,6 @@ export default function Footer() {
           <p className="text-sm text-gray-500 dark:text-gray-400">
             © {currentYear} BirJob. All rights reserved.
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 md:mt-0">
-            Made with ❤️ by BirJob Team
-          </p>
         </div>
       </div>
     </footer>
