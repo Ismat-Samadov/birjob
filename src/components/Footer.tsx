@@ -56,9 +56,9 @@ export default function Footer() {
             <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">Contact</h3>
             <ul className="mt-4 space-y-3">
               <li className="text-sm text-gray-500 dark:text-gray-400">
-                <a href="mailto:support@birjob.com" className="hover:text-blue-600 dark:hover:text-blue-400">
-                  ismetsemedov@gmail.com
-                </a>
+                <Link href="/contact" className="hover:text-blue-600 dark:hover:text-blue-400">
+                  Contact Us
+                </Link>
               </li>
             </ul>
           </div>
@@ -69,7 +69,7 @@ export default function Footer() {
             © {currentYear} BirJob. All rights reserved.
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 md:mt-0">
-            Made with ❤️ by <a href="https://ismat.pro/" className="text-blue-600 dark:text-blue-400 hover:underline">Ismat Samadov</a>
+            Made with ❤️ by BirJob Team
           </p>
         </div>
       </div>
