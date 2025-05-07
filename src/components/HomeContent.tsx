@@ -188,7 +188,7 @@ export default function HomeContent() {
           <div className="w-full max-w-xl mx-auto">
             <div className="relative flex gap-2">
               <div className="relative flex-grow">
-                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                 <Input
                   type="search"
                   placeholder="Search jobs or companies..."
@@ -205,7 +205,7 @@ export default function HomeContent() {
               <Button
                 variant="outline"
                 onClick={toggleSourceFilter}
-                className="flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                className="flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
                 aria-expanded={showSourceFilter}
               >
                 <FilterIcon className="h-4 w-4" />
@@ -215,7 +215,7 @@ export default function HomeContent() {
                 <Button
                   variant="ghost"
                   onClick={clearFilters}
-                  className="flex items-center dark:text-gray-300"
+                  className="flex items-center dark:text-gray-300 dark:hover:bg-gray-800"
                 >
                   <X className="h-4 w-4" />
                   <span className="hidden sm:inline ml-1">Clear</span>
@@ -316,11 +316,11 @@ export default function HomeContent() {
             </Button>
             
             <div className="flex items-center text-sm font-medium">
-              <span className="hidden sm:block mr-2">Page</span>
+              <span className="hidden sm:block mr-2 dark:text-gray-300">Page</span>
               <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-md">
                 {page}
               </span>
-              <span className="mx-2">of</span>
+              <span className="mx-2 dark:text-gray-300">of</span>
               <span className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-md">
                 {jobsData.metadata.totalPages}
               </span>

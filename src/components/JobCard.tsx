@@ -71,7 +71,7 @@ export default function JobCard({ title, company, source, apply_link, created_at
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-semibold job-title">{title}</h3>
+            <h3 className="text-xl font-semibold job-title dark:text-white">{title}</h3>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               <p className="text-sm text-gray-500 dark:text-gray-400 job-company">{company}</p>
               {source && (
@@ -100,13 +100,20 @@ export default function JobCard({ title, company, source, apply_link, created_at
             variant="outline" 
             size="sm" 
             onClick={handleSave}
-            className={isSaved ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800" : ""}
+            className={isSaved ? 
+              "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800" : 
+              "dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"}
           >
             <Bookmark className={`h-4 w-4 mr-1 ${isSaved ? "fill-blue-700 dark:fill-blue-400" : ""}`} />
             {isSaved ? "Saved" : "Save"}
           </Button>
           
-          <Button variant="outline" size="sm" onClick={handleShare}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleShare}
+            className="dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
+          >
             <Share2 className="h-4 w-4 mr-1" />
             Share
           </Button>

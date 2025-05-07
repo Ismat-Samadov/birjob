@@ -121,21 +121,21 @@ export default function SourceManager({ email }: SourceManagerProps) {
   }, [fetchSources]);
 
   return (
-    <Card className="w-full shadow-lg">
+    <Card className="w-full shadow-lg dark:bg-gray-800">
       <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
         <CardTitle className="text-xl font-bold">Job Source Preferences</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Select job sources to monitor</h3>
+            <h3 className="text-lg font-medium dark:text-gray-200">Select job sources to monitor</h3>
             <div className="flex gap-2">
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={selectAll}
                 disabled={isLoading || sources.length === 0}
-                className="flex items-center"
+                className="flex items-center dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 <Check className="w-4 h-4 mr-2" />
                 Select All
@@ -145,7 +145,7 @@ export default function SourceManager({ email }: SourceManagerProps) {
                 size="sm"
                 onClick={deselectAll}
                 disabled={isLoading || selectedSourceIds.length === 0}
-                className="flex items-center"
+                className="flex items-center dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 <XCircle className="w-4 h-4 mr-2" />
                 Deselect All
@@ -154,22 +154,22 @@ export default function SourceManager({ email }: SourceManagerProps) {
           </div>
           
           {sources.length === 0 ? (
-            <p className="text-gray-500 italic">No job sources available</p>
+            <p className="text-gray-500 dark:text-gray-400 italic">No job sources available</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {sources.map((source) => (
-                <div key={source.id} className="flex items-center space-x-2 bg-gray-50 p-3 rounded-md">
+                <div key={source.id} className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
                   <input 
                     type="checkbox"
                     id={`source-${source.id}`} 
                     checked={selectedSourceIds.includes(source.id)}
                     onChange={() => toggleSource(source.id)}
                     disabled={isLoading}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:checked:bg-blue-600"
                   />
                   <label 
                     htmlFor={`source-${source.id}`}
-                    className="text-sm font-medium cursor-pointer flex-1"
+                    className="text-sm font-medium cursor-pointer flex-1 dark:text-gray-200"
                   >
                     {source.source}
                   </label>
@@ -189,7 +189,7 @@ export default function SourceManager({ email }: SourceManagerProps) {
             </Button>
           </div>
           
-          <div className="text-sm text-gray-500 italic">
+          <div className="text-sm text-gray-500 dark:text-gray-400 italic">
             {selectedSourceIds.length === 0 ? (
               <p>No sources selected: You will receive notifications from ALL job sources</p>
             ) : (
@@ -198,13 +198,13 @@ export default function SourceManager({ email }: SourceManagerProps) {
           </div>
 
           {error && (
-            <div className="p-2 bg-red-50 text-red-800 rounded-md">
+            <div className="p-2 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-md">
               {error}
             </div>
           )}
           
           {message && (
-            <div className="p-2 bg-green-50 text-green-800 rounded-md">
+            <div className="p-2 bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-md">
               {message}
             </div>
           )}

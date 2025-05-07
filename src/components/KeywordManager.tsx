@@ -135,14 +135,14 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
   }, [propEmail, handleEmailSubmit]); // Add handleEmailSubmit as a dependency
 
   return (
-    <Card className="w-full shadow-lg">
+    <Card className="w-full shadow-lg dark:bg-gray-800">
       <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
         <CardTitle className="text-2xl font-bold text-center">BirJob Notification Manager</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         {!isLoggedIn ? (
           <div className="space-y-6">
-            <p className="text-gray-600 text-center">
+            <p className="text-gray-600 dark:text-gray-300 text-center">
               Enter your email to manage job notification keywords
             </p>
             <div className="space-y-4">
@@ -154,7 +154,7 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyPress={handleKeyPress}
                   disabled={isLoading}
-                  className="flex-1"
+                  className="flex-1 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
                 />
                 <Button 
                   onClick={handleEmailSubmit} 
@@ -168,10 +168,10 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="font-medium">Manage Keywords for: {email}</h3>
+              <h3 className="font-medium dark:text-gray-200">Manage Keywords for: {email}</h3>
               {!propEmail && (
                 <Button 
-                  className="text-sm bg-transparent text-gray-700 border border-gray-300 hover:bg-gray-100"
+                  className="text-sm bg-transparent text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setIsLoggedIn(false)}
                 >
                   Change Email
@@ -187,7 +187,7 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
                 onChange={(e) => setNewKeyword(e.target.value)}
                 onKeyPress={handleKeyPress}
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
               />
               <Button 
                 onClick={addKeyword} 
@@ -199,20 +199,20 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
             </div>
             
             <div className="space-y-2">
-              <h4 className="font-medium">Your Keywords:</h4>
+              <h4 className="font-medium dark:text-gray-200">Your Keywords:</h4>
               {keywords.length === 0 ? (
-                <p className="text-gray-500 italic">No keywords yet. Add keywords to receive daily job notifications at 1:00 PM UTC.</p>
+                <p className="text-gray-500 dark:text-gray-400 italic">No keywords yet. Add keywords to receive daily job notifications at 1:00 PM UTC.</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {keywords.map((keyword, index) => (
                     <div 
                       key={index} 
-                      className="flex items-center bg-gray-100 rounded-full px-3 py-1"
+                      className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1 text-gray-800 dark:text-gray-200"
                     >
                       <span className="mr-2">{keyword}</span>
                       <button 
                         onClick={() => removeKeyword(keyword)}
-                        className="text-gray-500 hover:text-red-500 transition-colors"
+                        className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                         disabled={isLoading}
                       >
                         <X className="w-4 h-4" />
@@ -226,18 +226,18 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
         )}
         
         {error && (
-          <div className="mt-4 p-2 bg-red-50 text-red-800 rounded-md">
+          <div className="mt-4 p-2 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-md">
             {error}
           </div>
         )}
         
         {message && (
-          <div className="mt-4 p-2 bg-green-50 text-green-800 rounded-md">
+          <div className="mt-4 p-2 bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-md">
             {message}
           </div>
         )}
         
-        <div className="mt-6 pt-4 border-t border-gray-200 text-sm text-gray-500">
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
           <p>You&apos;ll receive one email notification daily at 1:00 PM UTC for jobs matching your keywords.</p>
         </div>
       </CardContent>

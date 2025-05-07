@@ -86,7 +86,7 @@ export default function NotificationsContent() {
                 Continue
               </Button>
               {error && (
-                <div className="p-2 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md">
+                <div className="p-2 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-md">
                   {error}
                 </div>
               )}
