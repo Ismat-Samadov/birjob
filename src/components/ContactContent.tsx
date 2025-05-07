@@ -147,7 +147,7 @@ export default function ContactContent() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Contact Us</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Have questions or feedback? We'd love to hear from you.
+            Have questions or feedback? We&apos;d love to hear from you.
           </p>
         </div>
         
