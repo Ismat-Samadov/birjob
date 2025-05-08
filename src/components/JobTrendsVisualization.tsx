@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart2, PieChart, Loader2, Clock, BarChart, List } from 'lucide-react';
+import { PieChart, Loader2, List, Database, Filter } from 'lucide-react';
 import { useToast } from "@/context/ToastContext";
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
@@ -13,23 +13,23 @@ interface SourceData {
   value: number;
 }
 
-// Define interface for trend data
-interface TrendData {
-  date: string;
-  count: number;
-}
-
 // Define interface for job title data
 interface JobTitleData {
   title: string;
   count: number;
 }
 
+// Define interface for skill data
+interface SkillData {
+  skill: string;
+  count: number;
+}
+
 // Interface for API response
 interface TrendsResponse {
   sourceData: SourceData[];
-  trendData: TrendData[];
   jobTitleData: JobTitleData[];
+  skillData: SkillData[];
   filters: string[];
   totalJobs: number;
   totalSources: number;
@@ -39,23 +39,23 @@ interface TrendsResponse {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#4CAF50', '#e91e63', '#9c27b0', 
                 '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39'];
 
-const JobTrendsVisualization = () => {
-  const [activeTab, setActiveTab] = useState('sources');
-  const [trendData, setTrendData] = useState<TrendData[]>([]);
+const JobTrendsVisualization: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'sources' | 'titles' | 'skills'>('sources');
   const [sourceData, setSourceData] = useState<SourceData[]>([]);
   const [jobTitleData, setJobTitleData] = useState<JobTitleData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [skillData, setSkillData] = useState<SkillData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [activeFilter, setActiveFilter] = useState<string>('all');
   const [filters, setFilters] = useState<string[]>(['all']);
-  const [totalJobs, setTotalJobs] = useState(0);
-  const [totalSources, setTotalSources] = useState(0);
-  const [lastUpdated, setLastUpdated] = useState('');
+  const [totalJobs, setTotalJobs] = useState<number>(0);
+  const [totalSources, setTotalSources] = useState<number>(0);
+  const [lastUpdated, setLastUpdated] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const { addToast } = useToast();
   const { trackEvent } = useAnalytics();
 
   // Function to fetch data from API
-  const fetchData = async (filter = 'all') => {
+  const fetchData = async (filter = 'all'): Promise<void> => {
     setIsLoading(true);
     setError(null);
     
@@ -68,11 +68,11 @@ const JobTrendsVisualization = () => {
       
       const data: TrendsResponse = await response.json();
       
-      setSourceData(data.sourceData);
-      setTrendData(data.trendData);
+      setSourceData(data.sourceData || []);
       setJobTitleData(data.jobTitleData || []);
-      setFilters(['all', ...data.filters]);
-      setTotalJobs(data.totalJobs);
+      setSkillData(data.skillData || []);
+      setFilters(['all', ...(data.filters || [])]);
+      setTotalJobs(data.totalJobs || 0);
       setTotalSources(data.totalSources || 0);
       setLastUpdated(data.lastUpdated || new Date().toISOString());
       
@@ -107,7 +107,7 @@ const JobTrendsVisualization = () => {
     });
   }, []);
 
-  const handleFilterChange = (filter: string) => {
+  const handleFilterChange = (filter: string): void => {
     setActiveFilter(filter);
     fetchData(filter);
     
@@ -119,7 +119,7 @@ const JobTrendsVisualization = () => {
     });
   };
 
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = (tab: 'sources' | 'titles' | 'skills'): void => {
     setActiveTab(tab);
     
     // Track tab change
@@ -130,26 +130,27 @@ const JobTrendsVisualization = () => {
     });
   };
 
-  // Format date for display
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
   // Format datetime with hours and minutes
   const formatDateTime = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric',
-      hour: '2-digit', 
-      minute: '2-digit'
-    });
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      return date.toLocaleString('en-US', { 
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return 'Invalid date';
+    }
   };
 
   // Calculate total value for source data
-  const totalSourceValue = sourceData.reduce((acc, curr) => acc + curr.value, 0);
+  const totalSourceValue: number = sourceData.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
     <div className="space-y-6">
@@ -172,15 +173,6 @@ const JobTrendsVisualization = () => {
                   Job Sources
                 </Button>
                 <Button 
-                  variant={activeTab === 'trends' ? "default" : "outline"} 
-                  onClick={() => handleTabChange('trends')}
-                  className="flex items-center"
-                  size="sm"
-                >
-                  <BarChart2 className="h-4 w-4 mr-2" />
-                  Job Trends
-                </Button>
-                <Button 
                   variant={activeTab === 'titles' ? "default" : "outline"} 
                   onClick={() => handleTabChange('titles')}
                   className="flex items-center"
@@ -188,6 +180,15 @@ const JobTrendsVisualization = () => {
                 >
                   <List className="h-4 w-4 mr-2" />
                   Top Job Titles
+                </Button>
+                <Button 
+                  variant={activeTab === 'skills' ? "default" : "outline"} 
+                  onClick={() => handleTabChange('skills')}
+                  className="flex items-center"
+                  size="sm"
+                >
+                  <Database className="h-4 w-4 mr-2" />
+                  In-demand Skills
                 </Button>
               </div>
               
@@ -229,14 +230,14 @@ const JobTrendsVisualization = () => {
             )}
             
             {isLoading ? (
-              <div className="h-80 w-full flex items-center justify-center">
+              <div className="h-96 w-full flex items-center justify-center">
                 <div className="flex flex-col items-center">
                   <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
                   <p className="mt-4 text-gray-500 dark:text-gray-400">Loading job market data...</p>
                 </div>
               </div>
             ) : error ? (
-              <div className="h-80 w-full flex items-center justify-center">
+              <div className="h-96 w-full flex items-center justify-center">
                 <div className="text-center p-6 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 rounded-lg">
                   <p className="text-red-600 dark:text-red-400">{error}</p>
                   <Button 
@@ -249,22 +250,27 @@ const JobTrendsVisualization = () => {
                 </div>
               </div>
             ) : activeTab === 'sources' ? (
-              <div className="h-96 w-full">
+              <div className="h-96 w-full overflow-y-auto">
                 {sourceData.length === 0 ? (
                   <div className="h-full flex items-center justify-center">
                     <p className="text-gray-500 dark:text-gray-400">No source data available for the selected filter.</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <div className="grid grid-cols-1 w-full">
                       {sourceData.map((item, index) => (
-                        <div key={index} className="flex items-center space-x-2">
+                        <div key={index} className="flex items-center space-x-2 mb-4">
                           <div 
-                            className="w-4 h-4 rounded-full" 
+                            className="w-4 h-4 rounded-full flex-shrink-0" 
                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                           ></div>
                           <div className="flex-1">
-                            <div className="text-sm font-medium dark:text-gray-200">{item.name}</div>
+                            <div className="text-sm font-medium dark:text-gray-200 flex justify-between">
+                              <span>{item.name}</span>
+                              <span className="font-semibold">
+                                {totalSourceValue > 0 ? (item.value / totalSourceValue * 100).toFixed(1) : '0'}%
+                              </span>
+                            </div>
                             <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                               <div 
                                 className="absolute top-0 left-0 h-full rounded-full" 
@@ -274,11 +280,8 @@ const JobTrendsVisualization = () => {
                                 }}
                               ></div>
                             </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex justify-between">
-                              <span>{item.value.toLocaleString()} jobs</span>
-                              <span className="font-semibold">
-                                {totalSourceValue > 0 ? (item.value / totalSourceValue * 100).toFixed(1) : 0}%
-                              </span>
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                              {item.value.toLocaleString()} jobs
                             </div>
                           </div>
                         </div>
@@ -286,62 +289,15 @@ const JobTrendsVisualization = () => {
                     </div>
                     <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
                       <div className="flex items-center justify-center">
-                        <Clock className="h-4 w-4 mr-2" />
+                        <Filter className="h-4 w-4 mr-2" />
                         <span>Data aggregated from {totalSources} sources as of {formatDateTime(lastUpdated)}</span>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
-            ) : activeTab === 'trends' ? (
-              <div className="h-96 w-full">
-                {trendData.length === 0 ? (
-                  <div className="h-full flex items-center justify-center">
-                    <p className="text-gray-500 dark:text-gray-400">No trend data available for the selected filter.</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <div className="w-full">
-                      <div className="flex justify-between items-center mb-4">
-                        <div className="text-sm font-medium dark:text-gray-200">Job Listings Over Time</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {trendData.length > 0 ? 
-                            `${formatDate(trendData[0].date)} - ${formatDate(trendData[trendData.length - 1].date)}` : 
-                            'No data available'}
-                        </div>
-                      </div>
-                      <div className="w-full h-64 flex items-end space-x-1">
-                        {trendData.map((item, index) => (
-                          <div key={index} className="flex-1 flex flex-col items-center group relative">
-                            <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none transition-opacity z-10">
-                              {item.count.toLocaleString()} jobs on {formatDate(item.date)}
-                            </div>
-                            <div 
-                              className="w-full bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-500 rounded-t-lg transition-all duration-300 ease-in-out cursor-pointer"
-                              style={{ 
-                                height: `${(item.count / Math.max(...trendData.map(d => d.count))) * 100}%`,
-                                maxHeight: '100%',
-                                minHeight: '4px'
-                              }}
-                            ></div>
-                            <div className="mt-2 text-xs dark:text-gray-300 truncate w-full text-center">
-                              {formatDate(item.date)}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                      <div className="flex items-center justify-center">
-                        <BarChart className="h-4 w-4 mr-2" />
-                        <span>Displaying job posting trends for the last 30 days ({trendData.length} data points)</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="h-96 w-full">
+            ) : activeTab === 'titles' ? (
+              <div className="h-96 w-full overflow-y-auto">
                 {jobTitleData.length === 0 ? (
                   <div className="h-full flex items-center justify-center">
                     <p className="text-gray-500 dark:text-gray-400">No job title data available for the selected filter.</p>
@@ -377,6 +333,43 @@ const JobTrendsVisualization = () => {
                   </div>
                 )}
               </div>
+            ) : (
+              <div className="h-96 w-full overflow-y-auto">
+                {skillData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center">
+                    <p className="text-gray-500 dark:text-gray-400">No skill data available for the selected filter.</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col h-full">
+                    <div className="text-sm font-medium dark:text-gray-200 mb-4">Top In-demand Skills</div>
+                    <div className="overflow-y-auto flex-grow">
+                      {skillData.map((item, index) => (
+                        <div key={index} className="mb-4">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-sm dark:text-gray-200 truncate pr-4 font-medium">{index + 1}. {item.skill}</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">{item.count.toLocaleString()} mentions</div>
+                          </div>
+                          <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div 
+                              className="absolute top-0 left-0 h-full rounded-full" 
+                              style={{ 
+                                width: `${(item.count / Math.max(...skillData.map(d => d.count))) * 100}%`,
+                                backgroundColor: COLORS[index % COLORS.length] 
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center justify-center">
+                        <Database className="h-4 w-4 mr-2" />
+                        <span>Skills extracted from {totalJobs.toLocaleString()} job listings</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
             
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -404,16 +397,16 @@ const JobTrendsVisualization = () => {
               </div>
               
               <div className="space-y-3">
-                <h4 className="text-md font-medium text-purple-600 dark:text-purple-400">Temporal Trends</h4>
+                <h4 className="text-md font-medium text-purple-600 dark:text-purple-400">Popular Job Titles</h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  The trends chart reveals hiring patterns over time. These patterns can help you time your job application for maximum effectiveness - apply when companies are actively posting new positions.
+                  By analyzing the most frequently posted job titles, you can identify which specific roles are in high demand. This helps you target your applications and skills development to match market needs.
                 </p>
               </div>
               
               <div className="space-y-3">
-                <h4 className="text-md font-medium text-green-600 dark:text-green-400">Popular Job Titles</h4>
+                <h4 className="text-md font-medium text-green-600 dark:text-green-400">In-demand Skills</h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  By analyzing the most frequently posted job titles, you can identify which specific roles are in high demand. This helps you target your applications and skills development to match market needs.
+                  The skills analysis highlights which technical and soft skills employers are actively seeking. Focus your learning and resume customization on these high-demand skills to maximize your employability.
                 </p>
               </div>
               
