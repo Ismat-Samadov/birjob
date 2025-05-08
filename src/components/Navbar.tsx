@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, Bot, Search } from 'lucide-react';
+import { Bell, Bot, Search, BarChart2 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
 export default function Navbar() {
@@ -29,6 +29,12 @@ export default function Navbar() {
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/')}`}>
                 <Search className="h-4 w-4 mr-1" />
                 Job Search
+              </Link>
+              <Link 
+                href="/trends" 
+                className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/trends')}`}>
+                <BarChart2 className="h-4 w-4 mr-1" />
+                Trends
               </Link>
               <Link 
                 href="/ai-assistant" 

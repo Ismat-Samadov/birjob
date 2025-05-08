@@ -32,7 +32,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error with Groq API:", error);
+    
+    // Type-safe error handling
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
     return NextResponse.json(
       { error: "Failed to process AI request: " + errorMessage },
       { status: 500 }
