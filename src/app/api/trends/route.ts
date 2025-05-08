@@ -31,8 +31,7 @@ export async function GET(request: NextRequest) {
           FROM jobs_jobpost 
           WHERE source IS NOT NULL 
           GROUP BY source 
-          ORDER BY count DESC 
-          LIMIT 10
+          ORDER BY count DESC
         `;
         
         sourceData = sourcesResult.map(item => ({
@@ -47,8 +46,7 @@ export async function GET(request: NextRequest) {
           WHERE source IS NOT NULL 
           AND (LOWER(title) LIKE ${`%${filter.toLowerCase()}%`} OR LOWER(company) LIKE ${`%${filter.toLowerCase()}%`})
           GROUP BY source 
-          ORDER BY count DESC 
-          LIMIT 10
+          ORDER BY count DESC
         `;
         
         sourceData = sourcesResult.map(item => ({
@@ -89,6 +87,37 @@ export async function GET(request: NextRequest) {
       }));
     }
     
+    // Fetch top 15 job titles
+    let jobTitleData = [];
+    if (filter === 'all') {
+      const jobTitlesResult = await prisma.$queryRaw<{title: string, count: bigint}[]>`
+        SELECT title, COUNT(*) as count 
+        FROM jobs_jobpost 
+        GROUP BY title 
+        ORDER BY count DESC 
+        LIMIT 15
+      `;
+      
+      jobTitleData = jobTitlesResult.map(item => ({
+        title: item.title,
+        count: Number(item.count)
+      }));
+    } else {
+      const jobTitlesResult = await prisma.$queryRaw<{title: string, count: bigint}[]>`
+        SELECT title, COUNT(*) as count 
+        FROM jobs_jobpost 
+        WHERE (LOWER(title) LIKE ${`%${filter.toLowerCase()}%`} OR LOWER(company) LIKE ${`%${filter.toLowerCase()}%`})
+        GROUP BY title 
+        ORDER BY count DESC 
+        LIMIT 15
+      `;
+      
+      jobTitleData = jobTitlesResult.map(item => ({
+        title: item.title,
+        count: Number(item.count)
+      }));
+    }
+    
     // Get common job categories for filters
     const commonCategories = await prisma.$queryRaw<{keyword: string, count: bigint}[]>`
       SELECT SPLIT_PART(LOWER(title), ' ', 1) as keyword, COUNT(*) as count
@@ -104,11 +133,33 @@ export async function GET(request: NextRequest) {
     // Get total job count
     const totalJobs = await prisma.jobs_jobpost.count();
     
+    // Get total distinct sources count
+    let totalSources = 0;
+    if (hasSourceColumn) {
+      const sourcesCountResult = await prisma.$queryRaw<[{count: bigint}]>`
+        SELECT COUNT(DISTINCT source) as count 
+        FROM jobs_jobpost 
+        WHERE source IS NOT NULL
+      `;
+      
+      totalSources = Number(sourcesCountResult[0].count);
+    }
+    
+    // Get last updated timestamp
+    const lastUpdatedResult = await prisma.$queryRaw<[{max_date: Date}]>`
+      SELECT MAX(created_at) as max_date FROM jobs_jobpost
+    `;
+    
+    const lastUpdated = lastUpdatedResult[0].max_date ? lastUpdatedResult[0].max_date.toISOString() : new Date().toISOString();
+    
     return NextResponse.json({
       sourceData,
       trendData,
+      jobTitleData,
       filters,
-      totalJobs
+      totalJobs,
+      totalSources,
+      lastUpdated
     });
   } catch (error) {
     console.error('Error:', error);
