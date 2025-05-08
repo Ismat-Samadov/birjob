@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const { messages } = await request.json();
 
     const response = await groqClient.chat.completions.create({
-      model: "llama3-8b-8192", 
+      model: "llama3-8b-8192", // Or you could use "llama-3.3-70b-versatile" as shown in the docs
       messages,
       temperature: 0.7,
       max_tokens: 1024,

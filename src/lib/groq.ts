@@ -1,8 +1,7 @@
 // src/lib/groq.ts
-import OpenAI from "openai";
+import { Groq } from 'groq-sdk';
 
-// Initialize the client with Groq's API endpoint
-export const groqClient = new OpenAI({
-  apiKey: process.env.BIRJOB_AI_GROQ_API_KEY || "",
-  baseURL: "https://api.groq.com/openai/v1",
+// Initialize the Groq client with your API key
+export const groqClient = new Groq({ 
+  apiKey: process.env.BIRJOB_AI_GROQ_API_KEY || "" 
 });
