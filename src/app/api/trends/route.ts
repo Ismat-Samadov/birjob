@@ -119,27 +119,30 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       // Empty array will be returned if there's an error
     }
     
-    // Get common job categories for filters
+    // Get common job categories for filters - FIXED THIS SECTION
     let filters: string[] = ['all'];
     try {
-      const commonCategories = await prisma.$queryRaw<Array<{keyword: string, count: bigint}>>`
+      // Fix the query to use the first word of the title, not a non-existent "keyword" column
+      const commonCategories = await prisma.$queryRaw<Array<{word: string, count: bigint}>>`
         SELECT 
-          LOWER(SPLIT_PART(title, ' ', 1)) as keyword, 
+          SUBSTRING(LOWER(title) FROM 1 FOR POSITION(' ' IN LOWER(title) + ' ') - 1) as word, 
           COUNT(*) as count
         FROM jobs_jobpost
-        GROUP BY keyword
-        HAVING COUNT(*) > 5 AND LENGTH(keyword) > 1
+        GROUP BY word
+        HAVING COUNT(*) > 5 AND LENGTH(word) > 1
         ORDER BY count DESC
         LIMIT 5
       `;
       
       const validKeywords = commonCategories
-        .map(item => item.keyword)
-        .filter(keyword => keyword && keyword.trim() !== '');
+        .map(item => item.word)
+        .filter(word => word && word.trim() !== '');
       
       filters = ['all', ...validKeywords];
     } catch (error) {
       console.error('Error getting filter categories:', error);
+      // If we can't get filter categories, just use 'all'
+      filters = ['all'];
     }
     
     // Get total job count
