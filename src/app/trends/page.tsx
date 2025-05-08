@@ -16,8 +16,7 @@ export default function TrendsPage() {
           </h1>
           <p className="text-center text-gray-600 dark:text-gray-400 mb-4 max-w-3xl mx-auto">
             Explore what&apos;s happening right now in the job market. This dashboard shows the latest data 
-            from our most recent scraping cycle, highlighting active job sources, top positions, 
-            and trending job categories.
+            from our most recent scraping cycle, highlighting active job sources and top positions.
           </p>
           
           <div className="mb-8 max-w-3xl mx-auto">
@@ -43,13 +42,16 @@ export default function TrendsPage() {
                 Each time our scraper runs, it refreshes the entire dataset with the latest available positions.
               </p>
               <p>
-                The <span className="font-medium">Job Categories</span> tab extracts the first word from each job title 
-                (converted to lowercase) to help identify common position types like &quot;senior,&quot; &quot;junior,&quot; or &quot;lead.&quot; 
-                This provides insight into the current demand for different position levels and types.
+                The <span className="font-medium">Job Sources</span> tab shows which platforms are currently providing the most 
+                job listings, helping you focus your search efforts on the most active job boards.
+              </p>
+              <p>
+                The <span className="font-medium">Top Job Titles</span> tab displays the most common job titles in our database, 
+                giving you insight into which positions are most frequently posted.
               </p>
               <p>
                 Use these insights to optimize your job search by focusing on the most active sources and 
-                tailoring your resume to match the most in-demand job categories and titles.
+                tailoring your resume to match the most in-demand job titles.
               </p>
             </div>
           </div>

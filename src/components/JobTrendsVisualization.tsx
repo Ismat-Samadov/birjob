@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PieChart, List, Database, Filter, Info, BarChart3, Clock, AlertCircle } from 'lucide-react';
+import { PieChart, List, Filter, Info, BarChart3, Clock, AlertCircle } from 'lucide-react';
 import { useToast } from "@/context/ToastContext";
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import HorizontalBarChart from './HorizontalBarChart';
@@ -24,17 +24,10 @@ interface JobTitleData {
   count: number;
 }
 
-// Define interface for job category data
-interface JobCategoryData {
-  category: string;
-  count: number;
-}
-
 // Interface for API response
 interface TrendsResponse {
   sourceData: SourceData[];
   jobTitleData: JobTitleData[];
-  jobCategoryData: JobCategoryData[];
   filters: string[];
   totalJobs: number;
   totalSources: number;
@@ -45,10 +38,9 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#4CAF50'
                 '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39'];
 
 const JobTrendsVisualization: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'sources' | 'titles' | 'categories'>('sources');
+  const [activeTab, setActiveTab] = useState<'sources' | 'titles'>('sources');
   const [sourceData, setSourceData] = useState<SourceData[]>([]);
   const [jobTitleData, setJobTitleData] = useState<JobTitleData[]>([]);
-  const [jobCategoryData, setJobCategoryData] = useState<JobCategoryData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [filters, setFilters] = useState<string[]>(['all']);
@@ -75,7 +67,6 @@ const JobTrendsVisualization: React.FC = () => {
       
       setSourceData(data.sourceData || []);
       setJobTitleData(data.jobTitleData || []);
-      setJobCategoryData(data.jobCategoryData || []);
       setFilters(['all', ...(data.filters || [])]);
       setTotalJobs(data.totalJobs || 0);
       setTotalSources(data.totalSources || 0);
@@ -125,7 +116,7 @@ const JobTrendsVisualization: React.FC = () => {
     });
   };
 
-  const handleTabChange = (tab: 'sources' | 'titles' | 'categories'): void => {
+  const handleTabChange = (tab: 'sources' | 'titles'): void => {
     setActiveTab(tab);
     
     // Track tab change
@@ -170,13 +161,6 @@ const JobTrendsVisualization: React.FC = () => {
     }));
   };
 
-  const formatJobCategoryData = () => {
-    return jobCategoryData.map(item => ({
-      label: item.category,
-      value: item.count
-    }));
-  };
-
   // Calculate total values
   const totalSourceValue = sourceData.reduce((acc, curr) => acc + curr.value, 0);
 
@@ -208,15 +192,6 @@ const JobTrendsVisualization: React.FC = () => {
                 >
                   <List className="h-4 w-4 mr-2" />
                   Top Job Titles
-                </Button>
-                <Button 
-                  variant={activeTab === 'categories' ? "default" : "outline"} 
-                  onClick={() => handleTabChange('categories')}
-                  className="flex items-center"
-                  size="sm"
-                >
-                  <Database className="h-4 w-4 mr-2" />
-                  Job Categories
                 </Button>
               </div>
               
@@ -305,7 +280,7 @@ const JobTrendsVisualization: React.FC = () => {
                   </>
                 )}
               </div>
-            ) : activeTab === 'titles' ? (
+            ) : (
               <div>
                 <div className="text-sm font-medium dark:text-gray-200 mb-4">Top 15 Job Titles</div>
                 {jobTitleData.length === 0 ? (
@@ -326,30 +301,6 @@ const JobTrendsVisualization: React.FC = () => {
                   <div className="flex items-center justify-center">
                     <List className="h-4 w-4 mr-2" />
                     <span>Based on {totalJobs.toLocaleString()} job listings</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="text-sm font-medium dark:text-gray-200 mb-4">Top Job Categories (First Word of Title)</div>
-                {jobCategoryData.length === 0 ? (
-                  <EmptyState
-                    icon={<Database className="h-12 w-12" />}
-                    title="No Job Category Data Available"
-                    message="There are no job categories available for the selected filter."
-                  />
-                ) : (
-                  <HorizontalBarChart 
-                    data={formatJobCategoryData()} 
-                    colors={COLORS}
-                    showPercentages={false}
-                    emptyMessage="No job category data available for the selected filter."
-                  />
-                )}
-                <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center justify-center">
-                    <Database className="h-4 w-4 mr-2" />
-                    <span>Categories extracted from {totalJobs.toLocaleString()} job listings</span>
                   </div>
                 </div>
               </div>
@@ -392,20 +343,19 @@ const JobTrendsVisualization: React.FC = () => {
               </div>
               
               <div className="space-y-3">
-                <h4 className="text-md font-medium text-green-600 dark:text-green-400">Align with Job Categories</h4>
+                <h4 className="text-md font-medium text-amber-600 dark:text-amber-400">Set Up BirJob Notifications</h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  The &quot;Job Categories&quot; visualization shows the most common first words in job titles. 
-                  Use these insights to understand which position levels (senior, junior, etc.) and types 
-                  are most prevalent, and tailor your application materials accordingly.
+                  Based on these insights, configure your BirJob notification preferences using the most common job titles 
+                  as keywords. This ensures you&apos;ll receive alerts for relevant positions as soon as they&apos;re 
+                  aggregated in our system.
                 </p>
               </div>
               
               <div className="space-y-3">
-                <h4 className="text-md font-medium text-amber-600 dark:text-amber-400">Set Up BirJob Notifications</h4>
+                <h4 className="text-md font-medium text-green-600 dark:text-green-400">Track Trending Positions</h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Based on these insights, configure your BirJob notification preferences using the most common job titles 
-                  and categories as keywords. This ensures you&apos;ll receive alerts for relevant positions as soon as they&apos;re 
-                  aggregated in our system.
+                  Keep an eye on the job sources and titles that appear most frequently. These trends can help you identify 
+                  which skills and qualifications are most in-demand, allowing you to tailor your application materials accordingly.
                 </p>
               </div>
             </div>

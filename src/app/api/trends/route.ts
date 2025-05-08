@@ -17,15 +17,9 @@ interface JobTitleData {
   count: number;
 }
 
-interface JobCategoryData {
-  category: string;
-  count: number;
-}
-
 interface TrendsResponse {
   sourceData: SourceData[];
   jobTitleData: JobTitleData[];
-  jobCategoryData: JobCategoryData[];
   filters: string[];
   totalJobs: number;
   totalSources: number;
@@ -50,7 +44,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       console.log('Source column does not exist in jobs_jobpost table');
     }
     
-// Fetch data for source distribution
+    // Fetch data for source distribution
     let sourceData: SourceData[] = [];
     if (hasSourceColumn) {
       try {
@@ -125,48 +119,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       // Empty array will be returned if there's an error
     }
     
-    // Extract job categories (first word of title)
-    let jobCategoryData: JobCategoryData[] = [];
-    try {
-      if (filter === 'all') {
-        const categoriesResult = await prisma.$queryRaw<Array<{category: string, count: bigint}>>`
-          SELECT 
-            LOWER(SPLIT_PART(title, ' ', 1)) as category, 
-            COUNT(*) as count
-          FROM jobs_jobpost
-          GROUP BY category
-          HAVING COUNT(*) > 2 AND LENGTH(category) > 1
-          ORDER BY count DESC
-          LIMIT 15
-        `;
-        
-        jobCategoryData = categoriesResult.map(item => ({
-          category: item.category,
-          count: Number(item.count)
-        })).filter(item => item.category && item.category.trim() !== '');
-      } else {
-        const categoriesResult = await prisma.$queryRaw<Array<{category: string, count: bigint}>>`
-          SELECT 
-            LOWER(SPLIT_PART(title, ' ', 1)) as category, 
-            COUNT(*) as count
-          FROM jobs_jobpost
-          WHERE (LOWER(title) LIKE ${`%${filter.toLowerCase()}%`} OR LOWER(company) LIKE ${`%${filter.toLowerCase()}%`})
-          GROUP BY category
-          HAVING COUNT(*) > 1 AND LENGTH(category) > 1
-          ORDER BY count DESC
-          LIMIT 15
-        `;
-        
-        jobCategoryData = categoriesResult.map(item => ({
-          category: item.category,
-          count: Number(item.count)
-        })).filter(item => item.category && item.category.trim() !== '');
-      }
-    } catch (error) {
-      console.error('Error extracting job categories:', error);
-      // Empty array will be returned if there's an error
-    }
-    
     // Get common job categories for filters
     let filters: string[] = ['all'];
     try {
@@ -233,7 +185,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const response: TrendsResponse = {
       sourceData,
       jobTitleData,
-      jobCategoryData,
       filters,
       totalJobs,
       totalSources,
@@ -249,7 +200,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         details: error instanceof Error ? error.message : 'Unknown error',
         sourceData: [],
         jobTitleData: [],
-        jobCategoryData: [],
         filters: ['all'],
         totalJobs: 0,
         totalSources: 0,
