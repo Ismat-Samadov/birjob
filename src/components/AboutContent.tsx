@@ -1,9 +1,6 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/context/ToastContext";
-import { useAnalytics } from "@/lib/hooks/useAnalytics";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { 
@@ -16,32 +13,27 @@ import {
   Shield, 
   Clock 
 } from "lucide-react";
+import { useEffect } from "react";
 
 export default function AboutContent() {
-  const { addToast } = useToast();
-  const { trackPageView } = useAnalytics();
+  // Removed useToast and useAnalytics to prevent potential issues
+  // If you want to re-enable analytics, make sure it's properly initialized
 
   useEffect(() => {
-    // Track page view
-    trackPageView({
-      url: '/about',
-      title: 'About - BirJob'
-    });
-
-    // Show welcome toast
-    addToast({
-      title: "Welcome to BirJob",
-      description: "Learn about our mission to simplify your job search",
-      type: "info",
-      duration: 5000
-    });
-  }, [addToast, trackPageView]);
+    // Simple page view tracking if needed
+    try {
+      // Track page view (simplified)
+      console.log('About page viewed');
+    } catch (error) {
+      console.error('Error tracking page view:', error);
+    }
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-5xl">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 sm:mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
             About BirJob
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
@@ -49,7 +41,7 @@ export default function AboutContent() {
           </p>
         </div>
 
-        <Card className="mb-12 shadow-lg dark:bg-gray-800">
+        <Card className="mb-8 sm:mb-12 shadow-lg dark:bg-gray-800">
           <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
             <CardTitle className="text-2xl font-bold">Our Mission</CardTitle>
           </CardHeader>
@@ -63,7 +55,7 @@ export default function AboutContent() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
           <FeatureCard
             icon={<Globe className="h-8 w-8 text-blue-500" />}
             title="Multi-source Aggregation"
@@ -86,7 +78,7 @@ export default function AboutContent() {
           />
         </div>
 
-        <Card className="mb-12 shadow-lg dark:bg-gray-800">
+        <Card className="mb-8 sm:mb-12 shadow-lg dark:bg-gray-800">
           <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-t-lg">
             <CardTitle className="text-2xl font-bold">Our Technology</CardTitle>
           </CardHeader>
@@ -138,7 +130,7 @@ export default function AboutContent() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
           <TechCard
             title="Performance"
             icon={<Zap className="h-6 w-6 text-yellow-500" />}
@@ -171,18 +163,10 @@ export default function AboutContent() {
           />
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-4 mb-8 sm:mb-12">
           <Link href="/" passHref>
             <Button 
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => {
-                addToast({
-                  title: "Great choice!",
-                  description: "Let's find your next opportunity",
-                  type: "success",
-                  duration: 3000
-                });
-              }}
+              className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
             >
               <Search className="mr-2 h-4 w-4" />
               Start Searching
@@ -190,15 +174,7 @@ export default function AboutContent() {
           </Link>
           <Link href="/notifications" passHref>
             <Button 
-              className="bg-purple-600 hover:bg-purple-700"
-              onClick={() => {
-                addToast({
-                  title: "Stay in the loop!",
-                  description: "Set up job alerts tailored to your needs",
-                  type: "info",
-                  duration: 3000
-                });
-              }}
+              className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
             >
               <Mail className="mr-2 h-4 w-4" />
               Set Up Alerts
