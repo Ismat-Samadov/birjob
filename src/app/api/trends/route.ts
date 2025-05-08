@@ -119,26 +119,41 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       // Empty array will be returned if there's an error
     }
     
-    // Get common job categories for filters - FIXED THIS SECTION
+    // Get common job categories for filters - SIMPLIFIED APPROACH
     let filters: string[] = ['all'];
     try {
-      // Fix the query to use the first word of the title, not a non-existent "keyword" column
-      const commonCategories = await prisma.$queryRaw<Array<{word: string, count: bigint}>>`
-        SELECT 
-          SUBSTRING(LOWER(title) FROM 1 FOR POSITION(' ' IN LOWER(title) + ' ') - 1) as word, 
-          COUNT(*) as count
-        FROM jobs_jobpost
-        GROUP BY word
-        HAVING COUNT(*) > 5 AND LENGTH(word) > 1
-        ORDER BY count DESC
-        LIMIT 5
-      `;
+      // Define some hardcoded common job title prefixes
+      const commonPrefixes = ['software', 'senior', 'data', 'marketing', 'sales', 'project', 'developer', 'engineer', 'manager'];
       
-      const validKeywords = commonCategories
-        .map(item => item.word)
-        .filter(word => word && word.trim() !== '');
+      // For each prefix, check if there are matching jobs
+      const availablePrefixes = [];
       
-      filters = ['all', ...validKeywords];
+      for (const prefix of commonPrefixes) {
+        try {
+          const count = await prisma.jobs_jobpost.count({
+            where: {
+              title: {
+                contains: prefix,
+                mode: 'insensitive'
+              }
+            }
+          });
+          
+          if (count > 3) { // Only include if there are at least 3 matches
+            availablePrefixes.push(prefix);
+          }
+        } catch (error) {
+          console.error(`Error checking prefix ${prefix}:`, error);
+          // Continue with next prefix
+        }
+      }
+      
+      // Sort by what's available
+      if (availablePrefixes.length > 0) {
+        filters = ['all', ...availablePrefixes];
+      } else {
+        filters = ['all'];
+      }
     } catch (error) {
       console.error('Error getting filter categories:', error);
       // If we can't get filter categories, just use 'all'
