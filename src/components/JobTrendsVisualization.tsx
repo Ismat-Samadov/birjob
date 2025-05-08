@@ -110,6 +110,7 @@ const JobTrendsVisualization: React.FC = () => {
       action: 'View',
       label: 'Trends Page'
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFilterChange = (filter: string): void => {
@@ -377,14 +378,14 @@ const JobTrendsVisualization: React.FC = () => {
                 <h4 className="text-md font-medium text-blue-600 dark:text-blue-400">Target Active Sources</h4>
                 <p className="text-gray-700 dark:text-gray-300">
                   Focus your job search efforts on the platforms currently hosting the most relevant listings. 
-                  Create accounts and set up job alerts on these primary sources to ensure you don't miss new opportunities.
+                  Create accounts and set up job alerts on these primary sources to ensure you don&apos;t miss new opportunities.
                 </p>
               </div>
               
               <div className="space-y-3">
                 <h4 className="text-md font-medium text-purple-600 dark:text-purple-400">Use Common Job Title Formats</h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  When searching for jobs, use the exact job title formats shown in the "Top Job Titles" section. 
+                  When searching for jobs, use the exact job title formats shown in the &quot;Top Job Titles&quot; section. 
                   Many job boards use keyword matching, so aligning your search terms with how employers post positions 
                   will yield better results.
                 </p>
@@ -393,7 +394,7 @@ const JobTrendsVisualization: React.FC = () => {
               <div className="space-y-3">
                 <h4 className="text-md font-medium text-green-600 dark:text-green-400">Align with Job Categories</h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  The "Job Categories" visualization shows the most common first words in job titles. 
+                  The &quot;Job Categories&quot; visualization shows the most common first words in job titles. 
                   Use these insights to understand which position levels (senior, junior, etc.) and types 
                   are most prevalent, and tailor your application materials accordingly.
                 </p>
@@ -403,7 +404,7 @@ const JobTrendsVisualization: React.FC = () => {
                 <h4 className="text-md font-medium text-amber-600 dark:text-amber-400">Set Up BirJob Notifications</h4>
                 <p className="text-gray-700 dark:text-gray-300">
                   Based on these insights, configure your BirJob notification preferences using the most common job titles 
-                  and categories as keywords. This ensures you'll receive alerts for relevant positions as soon as they're 
+                  and categories as keywords. This ensures you&apos;ll receive alerts for relevant positions as soon as they&apos;re 
                   aggregated in our system.
                 </p>
               </div>

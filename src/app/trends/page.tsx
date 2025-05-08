@@ -15,7 +15,7 @@ export default function TrendsPage() {
             Current Job Market Trends
           </h1>
           <p className="text-center text-gray-600 dark:text-gray-400 mb-4 max-w-3xl mx-auto">
-            Explore what's happening right now in the job market. This dashboard shows the latest data 
+            Explore what&apos;s happening right now in the job market. This dashboard shows the latest data 
             from our most recent scraping cycle, highlighting active job sources, top positions, 
             and trending job categories.
           </p>
@@ -44,7 +44,7 @@ export default function TrendsPage() {
               </p>
               <p>
                 The <span className="font-medium">Job Categories</span> tab extracts the first word from each job title 
-                (converted to lowercase) to help identify common position types like "senior," "junior," or "lead." 
+                (converted to lowercase) to help identify common position types like &quot;senior,&quot; &quot;junior,&quot; or &quot;lead.&quot; 
                 This provides insight into the current demand for different position levels and types.
               </p>
               <p>
