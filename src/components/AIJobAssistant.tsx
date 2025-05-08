@@ -1,4 +1,3 @@
-// src/components/AIJobAssistant.tsx
 "use client";
 
 import { useState } from "react";
@@ -94,7 +93,7 @@ export default function AIJobAssistant() {
                       <Bot className="h-4 w-4" />
                     )}
                   </div>
-                  <div className="whitespace-pre-wrap">{message.content}</div>
+                  <div className="whitespace-pre-wrap text-sm sm:text-base break-words">{message.content}</div>
                 </div>
               </div>
             </div>
@@ -116,7 +115,7 @@ export default function AIJobAssistant() {
           )}
         </div>
         
-        <form onSubmit={handleSubmit} className="flex space-x-2">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -124,8 +123,13 @@ export default function AIJobAssistant() {
             disabled={isLoading}
             className="flex-1 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
           />
-          <Button type="submit" disabled={isLoading}>
-            <Send className="h-4 w-4" />
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
+            <Send className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Send</span>
           </Button>
         </form>
       </CardContent>
