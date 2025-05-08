@@ -3,201 +3,342 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart2, PieChart } from 'lucide-react';
+import { BarChart2, PieChart, Loader2 } from 'lucide-react';
+import { useToast } from "@/context/ToastContext";
+import { useAnalytics } from '@/lib/hooks/useAnalytics';
 
-// Sample data - would be replaced with real data from your API
-const sampleSourceData = [
-  { name: 'LinkedIn', value: 45 },
-  { name: 'Indeed', value: 32 },
-  { name: 'Glassdoor', value: 18 },
-  { name: 'Company Sites', value: 28 },
-  { name: 'AngelList', value: 8 },
-  { name: 'StackOverflow', value: 12 }
-];
+// Define interface for source data
+interface SourceData {
+  name: string;
+  value: number;
+}
 
-const sampleTrendData = [
-  { month: 'Jan', count: 240 },
-  { month: 'Feb', count: 260 },
-  { month: 'Mar', count: 280 },
-  { month: 'Apr', count: 310 },
-  { month: 'May', count: 350 },
-  { month: 'Jun', count: 390 }
-];
+// Define interface for trend data
+interface TrendData {
+  date: string;
+  count: number;
+}
+
+// Interface for API response
+interface TrendsResponse {
+  sourceData: SourceData[];
+  trendData: TrendData[];
+  filters: string[];
+  totalJobs: number;
+}
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#4CAF50', '#e91e63', '#9c27b0'];
 
 const JobTrendsVisualization = () => {
   const [activeTab, setActiveTab] = useState('sources');
-  const [trendData, setTrendData] = useState(sampleTrendData);
-  const [sourceData, setSourceData] = useState(sampleSourceData);
-  const [isLoading, setIsLoading] = useState(false);
+  const [trendData, setTrendData] = useState<TrendData[]>([]);
+  const [sourceData, setSourceData] = useState<SourceData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [filters, setFilters] = useState<string[]>(['all']);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const { addToast } = useToast();
+  const { trackEvent } = useAnalytics();
 
-  // Simulate fetching data from API
+  // Function to fetch data from API
   const fetchData = async (filter = 'all') => {
     setIsLoading(true);
+    setError(null);
     
-    // In a real implementation, this would be an API call
-    setTimeout(() => {
-      // Simulate filtering by modifying sample data
-      if (filter === 'dev') {
-        setSourceData([
-          { name: 'LinkedIn', value: 40 },
-          { name: 'GitHub Jobs', value: 35 },
-          { name: 'StackOverflow', value: 25 },
-          { name: 'Indeed', value: 20 },
-          { name: 'AngelList', value: 15 }
-        ]);
-      } else if (filter === 'marketing') {
-        setSourceData([
-          { name: 'LinkedIn', value: 50 },
-          { name: 'Indeed', value: 40 },
-          { name: 'Glassdoor', value: 30 },
-          { name: 'Company Sites', value: 25 },
-          { name: 'MediaBistro', value: 20 }
-        ]);
-      } else {
-        setSourceData(sampleSourceData);
+    try {
+      const response = await fetch(`/api/trends?filter=${filter}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch data: ${response.status}`);
       }
       
+      const data: TrendsResponse = await response.json();
+      
+      setSourceData(data.sourceData);
+      setTrendData(data.trendData);
+      setFilters(['all', ...data.filters]);
+      setTotalJobs(data.totalJobs);
+      
+      // Track successful data load
+      trackEvent({
+        category: 'Trends',
+        action: 'Data Loaded',
+        label: `Filter: ${filter}`
+      });
+    } catch (err) {
+      console.error('Error fetching trend data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load trend data');
+      
+      addToast({
+        title: "Error",
+        description: "Failed to load trend data. Please try again later.",
+        type: "destructive",
+        duration: 5000
+      });
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(activeFilter);
+    // Track page view
+    trackEvent({
+      category: 'Trends',
+      action: 'View',
+      label: 'Trends Page'
+    });
   }, []);
 
   const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
     fetchData(filter);
+    
+    // Track filter change
+    trackEvent({
+      category: 'Trends',
+      action: 'Filter Change',
+      label: filter
+    });
   };
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    
+    // Track tab change
+    trackEvent({
+      category: 'Trends',
+      action: 'Tab Change',
+      label: tab
+    });
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  // Calculate total value for source data
+  const totalSourceValue = sourceData.reduce((acc, curr) => acc + curr.value, 0);
+
   return (
-    <Card className="w-full shadow-lg dark:bg-gray-800">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
-        <CardTitle className="text-xl font-bold">Job Market Trends</CardTitle>
-      </CardHeader>
-      
-      <CardContent className="p-6">
-        <div className="flex flex-col space-y-6">
-          <div className="flex justify-between items-center">
-            <div className="flex space-x-4">
-              <Button 
-                variant={activeTab === 'sources' ? "default" : "outline"} 
-                onClick={() => setActiveTab('sources')}
-                className="flex items-center"
-                size="sm"
-              >
-                <PieChart className="h-4 w-4 mr-2" />
-                Job Sources
-              </Button>
-              <Button 
-                variant={activeTab === 'trends' ? "default" : "outline"} 
-                onClick={() => setActiveTab('trends')}
-                className="flex items-center"
-                size="sm"
-              >
-                <BarChart2 className="h-4 w-4 mr-2" />
-                Monthly Trends
-              </Button>
+    <div className="space-y-6">
+      <Card className="w-full shadow-lg dark:bg-gray-800">
+        <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+          <CardTitle className="text-xl font-bold">Job Market Trends</CardTitle>
+        </CardHeader>
+        
+        <CardContent className="p-6">
+          <div className="flex flex-col space-y-6">
+            <div className="flex justify-between items-center flex-wrap gap-4">
+              <div className="flex space-x-4">
+                <Button 
+                  variant={activeTab === 'sources' ? "default" : "outline"} 
+                  onClick={() => handleTabChange('sources')}
+                  className="flex items-center"
+                  size="sm"
+                >
+                  <PieChart className="h-4 w-4 mr-2" />
+                  Job Sources
+                </Button>
+                <Button 
+                  variant={activeTab === 'trends' ? "default" : "outline"} 
+                  onClick={() => handleTabChange('trends')}
+                  className="flex items-center"
+                  size="sm"
+                >
+                  <BarChart2 className="h-4 w-4 mr-2" />
+                  Job Trends
+                </Button>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {filters.map((filter, index) => (
+                  <Button 
+                    key={index}
+                    variant={activeFilter === filter ? "default" : "outline"} 
+                    onClick={() => handleFilterChange(filter)}
+                    size="sm"
+                    disabled={isLoading}
+                  >
+                    {filter === 'all' ? 'All Jobs' : filter}
+                  </Button>
+                ))}
+              </div>
             </div>
             
-            {activeTab === 'sources' && (
-              <div className="flex gap-2">
-                <Button 
-                  variant={isLoading ? "outline" : "default"} 
-                  onClick={() => handleFilterChange('all')}
-                  size="sm"
-                >
-                  All Jobs
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleFilterChange('dev')}
-                  size="sm"
-                >
-                  Development
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleFilterChange('marketing')}
-                  size="sm"
-                >
-                  Marketing
-                </Button>
+            {/* Stats summary */}
+            {!isLoading && !error && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                  <div className="text-xs text-blue-500 dark:text-blue-300 uppercase font-semibold">Total Jobs</div>
+                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{totalJobs.toLocaleString()}</div>
+                </div>
+                
+                <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4">
+                  <div className="text-xs text-purple-500 dark:text-purple-300 uppercase font-semibold">Sources</div>
+                  <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{sourceData.length}</div>
+                </div>
+                
+                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+                  <div className="text-xs text-green-500 dark:text-green-300 uppercase font-semibold">Last Updated</div>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                    {trendData.length > 0 ? formatDate(trendData[trendData.length - 1].date) : 'N/A'}
+                  </div>
+                </div>
               </div>
             )}
-          </div>
-          
-          {activeTab === 'sources' ? (
-            <div className="h-80 w-full">
-              {isLoading ? (
-                <div className="h-full flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                    {sourceData.map((item, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div 
-                          className="w-4 h-4 rounded-full" 
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                        ></div>
-                        <div className="flex-1">
-                          <div className="text-sm font-medium dark:text-gray-200">{item.name}</div>
-                          <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                            <div 
-                              className="absolute top-0 left-0 h-full rounded-full" 
-                              style={{ 
-                                width: `${(item.value / Math.max(...sourceData.map(d => d.value))) * 100}%`,
-                                backgroundColor: COLORS[index % COLORS.length] 
-                              }}
-                            ></div>
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                            {item.value} jobs ({Math.round((item.value / sourceData.reduce((acc, curr) => acc + curr.value, 0)) * 100)}%)
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="h-80 w-full">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="w-full">
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="text-sm font-medium dark:text-gray-200">Monthly Job Listings</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Last 6 months</div>
-                  </div>
-                  <div className="w-full h-64 flex items-end space-x-1 lg:space-x-2">
-                    {trendData.map((item, index) => (
-                      <div key={index} className="flex-1 flex flex-col items-center">
-                        <div className="mb-2 text-xs">{Math.round((item.count / Math.max(...trendData.map(d => d.count))) * 100)}%</div>
-                        <div 
-                          className="w-full bg-blue-500 dark:bg-blue-600 rounded-t-lg transition-all duration-500 ease-in-out"
-                          style={{ 
-                            height: `${(item.count / Math.max(...trendData.map(d => d.count))) * 100}%`,
-                            maxHeight: '100%'
-                          }}
-                        ></div>
-                        <div className="mt-2 text-xs dark:text-gray-300">{item.month}</div>
-                      </div>
-                    ))}
-                  </div>
+            
+            {isLoading ? (
+              <div className="h-80 w-full flex items-center justify-center">
+                <div className="flex flex-col items-center">
+                  <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+                  <p className="mt-4 text-gray-500 dark:text-gray-400">Loading job market data...</p>
                 </div>
               </div>
+            ) : error ? (
+              <div className="h-80 w-full flex items-center justify-center">
+                <div className="text-center p-6 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 rounded-lg">
+                  <p className="text-red-600 dark:text-red-400">{error}</p>
+                  <Button 
+                    onClick={() => fetchData(activeFilter)} 
+                    className="mt-4"
+                    variant="outline"
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              </div>
+            ) : activeTab === 'sources' ? (
+              <div className="h-80 w-full">
+                {sourceData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center">
+                    <p className="text-gray-500 dark:text-gray-400">No source data available for the selected filter.</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                      {sourceData.map((item, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <div 
+                            className="w-4 h-4 rounded-full" 
+                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          ></div>
+                          <div className="flex-1">
+                            <div className="text-sm font-medium dark:text-gray-200">{item.name}</div>
+                            <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div 
+                                className="absolute top-0 left-0 h-full rounded-full" 
+                                style={{ 
+                                  width: `${(item.value / Math.max(...sourceData.map(d => d.value))) * 100}%`,
+                                  backgroundColor: COLORS[index % COLORS.length] 
+                                }}
+                              ></div>
+                            </div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                              {item.value.toLocaleString()} jobs ({totalSourceValue > 0 ? Math.round((item.value / totalSourceValue) * 100) : 0}%)
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="h-80 w-full">
+                {trendData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center">
+                    <p className="text-gray-500 dark:text-gray-400">No trend data available for the selected filter.</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="w-full">
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="text-sm font-medium dark:text-gray-200">Job Listings Over Time</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {trendData.length > 0 ? 
+                            `${formatDate(trendData[0].date)} - ${formatDate(trendData[trendData.length - 1].date)}` : 
+                            'No data available'}
+                        </div>
+                      </div>
+                      <div className="w-full h-64 flex items-end space-x-1 lg:space-x-2">
+                        {trendData.map((item, index) => (
+                          <div key={index} className="flex-1 flex flex-col items-center group relative">
+                            <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none transition-opacity z-10">
+                              {item.count.toLocaleString()} jobs on {formatDate(item.date)}
+                            </div>
+                            <div 
+                              className="w-full bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-500 rounded-t-lg transition-all duration-300 ease-in-out cursor-pointer"
+                              style={{ 
+                                height: `${(item.count / Math.max(...trendData.map(d => d.count))) * 100}%`,
+                                maxHeight: '100%',
+                                minHeight: '4px'
+                              }}
+                            ></div>
+                            <div className="mt-2 text-xs dark:text-gray-300 truncate w-full text-center">
+                              {formatDate(item.date)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <p>This visualization shows real job market data aggregated from over 50 sources. Use the filters to focus on specific job categories or sources.</p>
             </div>
-          )}
-          
-          <div className="text-sm text-gray-500 dark:text-gray-400 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p>This visualization shows the distribution of job listings across different sources and monthly trends. Use the tabs to switch between views.</p>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <Card className="w-full shadow-lg dark:bg-gray-800">
+        <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-t-lg">
+          <CardTitle className="text-xl font-bold">Insights & Analysis</CardTitle>
+        </CardHeader>
+        
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium dark:text-gray-200">What This Data Means For You</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="text-md font-medium text-blue-600 dark:text-blue-400">Source Distribution</h4>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Understanding which platforms host the most job listings helps you prioritize where to focus your job search efforts. The source distribution shows you exactly which job boards are most active in your field of interest.
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="text-md font-medium text-purple-600 dark:text-purple-400">Temporal Trends</h4>
+                <p className="text-gray-700 dark:text-gray-300">
+                  The trends chart reveals hiring patterns over time. These patterns can help you time your job application for maximum effectiveness - apply when companies are actively posting new positions.
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="text-md font-medium text-green-600 dark:text-green-400">Category Filters</h4>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Use the category filters to see trends specific to your industry or role. This helps you understand if your field is growing or contracting compared to the overall job market.
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="text-md font-medium text-amber-600 dark:text-amber-400">Strategic Advantage</h4>
+                <p className="text-gray-700 dark:text-gray-300">
+                  When you know which platforms have the most relevant listings for your skills, you can create targeted alerts on those specific platforms, increasing your chances of finding the perfect opportunity.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
