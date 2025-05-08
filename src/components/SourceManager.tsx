@@ -127,7 +127,7 @@ export default function SourceManager({ email }: SourceManagerProps) {
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
             <h3 className="text-lg font-medium dark:text-gray-200">Select job sources to monitor</h3>
             <div className="flex gap-2">
               <Button 
@@ -156,7 +156,7 @@ export default function SourceManager({ email }: SourceManagerProps) {
           {sources.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-400 italic">No job sources available</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {sources.map((source) => (
                 <div key={source.id} className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
                   <input 
@@ -169,7 +169,7 @@ export default function SourceManager({ email }: SourceManagerProps) {
                   />
                   <label 
                     htmlFor={`source-${source.id}`}
-                    className="text-sm font-medium cursor-pointer flex-1 dark:text-gray-200"
+                    className="text-sm font-medium cursor-pointer flex-1 dark:text-gray-200 truncate"
                   >
                     {source.source}
                   </label>
@@ -182,7 +182,7 @@ export default function SourceManager({ email }: SourceManagerProps) {
             <Button 
               onClick={saveSourcePreferences}
               disabled={isLoading}
-              className="w-full md:w-auto"
+              className="w-full sm:w-auto"
             >
               <FilterIcon className="w-4 h-4 mr-2" />
               Save Source Preferences

@@ -69,9 +69,9 @@ export default function JobCard({ title, company, source, apply_link, created_at
   return (
     <Card className="job-card hover:shadow-md transition-shadow duration-200 dark:bg-gray-800">
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
           <div>
-            <h3 className="text-xl font-semibold job-title dark:text-white">{title}</h3>
+            <h3 className="text-lg sm:text-xl font-semibold job-title dark:text-white">{title}</h3>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               <p className="text-sm text-gray-500 dark:text-gray-400 job-company">{company}</p>
               {source && (
@@ -83,7 +83,7 @@ export default function JobCard({ title, company, source, apply_link, created_at
           </div>
           <Button
             onClick={handleApply}
-            className="ml-4 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
+            className="w-full sm:w-auto sm:ml-4 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
           >
             Apply <ExternalLink className="ml-1 h-4 w-4" />
           </Button>

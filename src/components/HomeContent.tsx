@@ -179,14 +179,14 @@ export default function HomeContent() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen p-4 sm:p-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-white">
+          <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white">
             BirJob
           </h1>
           <div className="w-full max-w-xl mx-auto">
-            <div className="relative flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-grow">
                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                 <Input
@@ -202,25 +202,27 @@ export default function HomeContent() {
                   </div>
                 )}
               </div>
-              <Button
-                variant="outline"
-                onClick={toggleSourceFilter}
-                className="flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-                aria-expanded={showSourceFilter}
-              >
-                <FilterIcon className="h-4 w-4" />
-                {selectedSource ? <span className="hidden sm:inline">Filter: {selectedSource}</span> : <span className="hidden sm:inline">Filter</span>}
-              </Button>
-              {(search || selectedSource) && (
+              <div className="flex gap-2 mt-2 sm:mt-0">
                 <Button
-                  variant="ghost"
-                  onClick={clearFilters}
-                  className="flex items-center dark:text-gray-300 dark:hover:bg-gray-800"
+                  variant="outline"
+                  onClick={toggleSourceFilter}
+                  className="flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                  aria-expanded={showSourceFilter}
                 >
-                  <X className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-1">Clear</span>
+                  <FilterIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{selectedSource ? `Filter: ${selectedSource}` : 'Filter'}</span>
                 </Button>
-              )}
+                {(search || selectedSource) && (
+                  <Button
+                    variant="ghost"
+                    onClick={clearFilters}
+                    className="flex items-center dark:text-gray-300 dark:hover:bg-gray-800"
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="hidden sm:inline ml-1">Clear</span>
+                  </Button>
+                )}
+              </div>
             </div>
             
             {showSourceFilter && jobsData?.sources && (
@@ -305,17 +307,17 @@ export default function HomeContent() {
         </div>
 
         {jobsData?.metadata && jobsData.jobs.length > 0 && (
-          <div className="flex justify-center gap-4 items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <Button
               onClick={handlePreviousPage}
               disabled={page === 1 || loading}
-              className="font-medium px-6 py-2 transition-all"
+              className="w-full sm:w-auto font-medium px-6 py-2 transition-all"
               variant={page === 1 ? "outline" : "default"}
             >
               Previous
             </Button>
             
-            <div className="flex items-center text-sm font-medium">
+            <div className="flex items-center text-sm font-medium my-2 sm:my-0">
               <span className="hidden sm:block mr-2 dark:text-gray-300">Page</span>
               <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-md">
                 {page}
@@ -329,7 +331,7 @@ export default function HomeContent() {
             <Button
               onClick={handleNextPage}
               disabled={page >= jobsData.metadata.totalPages || loading}
-              className="font-medium px-6 py-2 transition-all"
+              className="w-full sm:w-auto font-medium px-6 py-2 transition-all"
               variant={page >= jobsData.metadata.totalPages ? "outline" : "default"}
             >
               Next

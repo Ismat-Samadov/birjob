@@ -1,4 +1,3 @@
-// src/components/JobTrendsVisualization.tsx
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -174,28 +173,28 @@ const JobTrendsVisualization: React.FC = () => {
         <CardContent className="p-6">
           <div className="flex flex-col space-y-6">
             <div className="flex justify-between items-center flex-wrap gap-4">
-              <div className="flex space-x-4">
+              <div className="flex space-x-2 overflow-x-auto pb-2 w-full sm:w-auto">
                 <Button 
                   variant={activeTab === 'sources' ? "default" : "outline"} 
                   onClick={() => handleTabChange('sources')}
-                  className="flex items-center"
+                  className="flex items-center flex-shrink-0"
                   size="sm"
                 >
                   <PieChart className="h-4 w-4 mr-2" />
-                  Job Sources
+                  Sources
                 </Button>
                 <Button 
                   variant={activeTab === 'titles' ? "default" : "outline"} 
                   onClick={() => handleTabChange('titles')}
-                  className="flex items-center"
+                  className="flex items-center flex-shrink-0"
                   size="sm"
                 >
                   <List className="h-4 w-4 mr-2" />
-                  Top Job Titles
+                  Titles
                 </Button>
               </div>
               
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 w-full sm:w-auto">
                 {filters.map((filter, index) => (
                   <Button 
                     key={index}
@@ -203,6 +202,7 @@ const JobTrendsVisualization: React.FC = () => {
                     onClick={() => handleFilterChange(filter)}
                     size="sm"
                     disabled={isLoading}
+                    className="flex-shrink-0"
                   >
                     {filter === 'all' ? 'All Jobs' : filter}
                   </Button>
@@ -212,7 +212,7 @@ const JobTrendsVisualization: React.FC = () => {
             
             {/* Stats summary */}
             {!isLoading && !error && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <DashboardStatCard
                   title="Total Jobs"
                   value={totalJobs}

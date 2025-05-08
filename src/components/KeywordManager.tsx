@@ -146,7 +146,7 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
               Enter your email to manage job notification keywords
             </p>
             <div className="space-y-4">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   type="email"
                   placeholder="Your email address"
@@ -159,6 +159,7 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
                 <Button 
                   onClick={handleEmailSubmit} 
                   disabled={isLoading}
+                  className="mt-2 sm:mt-0"
                 >
                   {isLoading ? 'Loading...' : 'Continue'}
                 </Button>
@@ -167,8 +168,8 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium dark:text-gray-200">Manage Keywords for: {email}</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="font-medium dark:text-gray-200 mb-2 sm:mb-0">Manage Keywords for: {email}</h3>
               {!propEmail && (
                 <Button 
                   className="text-sm bg-transparent text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -179,7 +180,7 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
               )}
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 type="text"
                 placeholder="Add new keyword"
@@ -192,6 +193,7 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
               <Button 
                 onClick={addKeyword} 
                 disabled={isLoading || !newKeyword.trim()}
+                className="mt-2 sm:mt-0"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add
@@ -203,7 +205,7 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
               {keywords.length === 0 ? (
                 <p className="text-gray-500 dark:text-gray-400 italic">No keywords yet. Add keywords to receive daily job notifications at 1:00 PM UTC.</p>
               ) : (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-2">
                   {keywords.map((keyword, index) => (
                     <div 
                       key={index} 
@@ -214,6 +216,7 @@ export default function KeywordManager({ email: propEmail }: KeywordManagerProps
                         onClick={() => removeKeyword(keyword)}
                         className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                         disabled={isLoading}
+                        aria-label={`Remove keyword ${keyword}`}
                       >
                         <X className="w-4 h-4" />
                       </button>
