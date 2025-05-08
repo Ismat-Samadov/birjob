@@ -1,4 +1,5 @@
-"use client";
+// src/components/EmptyState.tsx
+"use client"
 
 import React, { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
