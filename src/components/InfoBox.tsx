@@ -1,6 +1,8 @@
 import ClientWrapper from "@/components/ClientWrapper";
 import JobTrendsVisualization from "@/components/JobTrendsVisualization";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import InfoBox from "@/components/InfoBox";
+import { Info } from "lucide-react";
 
 export default function TrendsPage() {
   return (
@@ -10,11 +12,19 @@ export default function TrendsPage() {
           <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-6">
             Current Job Market Trends
           </h1>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
+          <p className="text-center text-gray-600 dark:text-gray-400 mb-4 max-w-3xl mx-auto">
             Explore what's happening right now in the job market. This dashboard shows the latest data 
             from our most recent scraping cycle, highlighting active job sources, top positions, 
             and trending job categories.
           </p>
+          
+          <div className="mb-8 max-w-3xl mx-auto">
+            <InfoBox title="About Our Job Data" icon={<Info className="h-5 w-5" />}>
+              This dashboard displays current job market data using our truncate-and-load approach, 
+              meaning it reflects the latest snapshot rather than historical trends. Each new scrape 
+              completely refreshes the data with the most recent available positions.
+            </InfoBox>
+          </div>
           
           <ErrorBoundary>
             <JobTrendsVisualization />

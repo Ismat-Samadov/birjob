@@ -1,3 +1,4 @@
+// src/app/trends/page.tsx
 import ClientWrapper from "@/components/ClientWrapper";
 import JobTrendsVisualization from "@/components/JobTrendsVisualization";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -44,8 +45,7 @@ export default function TrendsPage() {
         </div>
       </div>
     </ClientWrapper>
-  );
-} (
+  ); (
     <ClientWrapper>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
         <div className="container mx-auto px-4 max-w-5xl">
