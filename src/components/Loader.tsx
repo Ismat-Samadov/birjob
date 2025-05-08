@@ -250,11 +250,6 @@ const JobTrendsVisualization: React.FC = () => {
                   value={totalSources}
                   icon={<PieChart className="h-5 w-5" />}
                   bgClass="bg-purple-50 dark:bg-purple-900/30"
-                <DashboardStatCard
-                  title="Active Sources"
-                  value={totalSources}
-                  icon={<PieChart className="h-5 w-5" />}
-                  bgClass="bg-purple-50 dark:bg-purple-900/30"
                   titleClass="text-purple-500 dark:text-purple-300"
                   valueClass="text-purple-700 dark:text-purple-300"
                 />
@@ -272,7 +267,7 @@ const JobTrendsVisualization: React.FC = () => {
             
             {isLoading ? (
               <div className="h-96 w-full flex items-center justify-center">
-                <Loader size="lg" text="Loading job market data..." />
+                <Loader />
               </div>
             ) : error ? (
               <EmptyState

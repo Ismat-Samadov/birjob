@@ -1,3 +1,4 @@
+// src/components/JobTrendsVisualization.tsx
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -245,11 +246,6 @@ const JobTrendsVisualization: React.FC = () => {
                   valueClass="text-blue-700 dark:text-blue-300"
                 />
                 
-                <DashboardStatCard
-                  title="Active Sources"
-                  value={totalSources}
-                  icon={<PieChart className="h-5 w-5" />}
-                  bgClass="bg-purple-50 dark:bg-purple-900/30"
                 <DashboardStatCard
                   title="Active Sources"
                   value={totalSources}
