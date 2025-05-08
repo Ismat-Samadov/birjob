@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Bot, Search } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
 export default function Navbar() {
@@ -30,7 +30,12 @@ export default function Navbar() {
                 <Search className="h-4 w-4 mr-1" />
                 Job Search
               </Link>
-              
+              <Link 
+                href="/ai-assistant" 
+                className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/ai-assistant')}`}>
+                <Bot className="h-4 w-4 mr-1" />
+                AI Assistant
+              </Link>
               <Link 
                 href="/notifications" 
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/notifications')}`}>
