@@ -44,13 +44,13 @@ export default function TrendsPage() {
               </p>
               <p>
                 The <span className="font-medium">Job Sources</span> tab shows which platforms are currently providing the most 
-                job listings, helping you focus your search efforts on the most active job boards. Each source's percentage 
+                job listings, helping you focus your search efforts on the most active job boards. Each source&apos;s percentage 
                 contribution is calculated to show its relative importance in the market.
               </p>
               <p>
                 The <span className="font-medium">Companies</span> tab displays the organizations with the most open positions, 
                 giving you insight into which companies are actively hiring. Company names are analyzed case-insensitively, 
-                ensuring that variations like "Azercell" and "Azercell Company" are correctly grouped together.
+                ensuring that variations like &quot;Azercell&quot; and &quot;Azercell Company&quot; are correctly grouped together.
               </p>
               <p>
                 Use these insights to optimize your job search by focusing on the most active sources and 

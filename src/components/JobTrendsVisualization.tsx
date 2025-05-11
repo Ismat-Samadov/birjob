@@ -384,7 +384,7 @@ const JobTrendsVisualization: React.FC = () => {
                   Source Strategy
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Don't limit yourself to one job board. Our source distribution shows which platforms are most active for your field. 
+                  Don&apos;t limit yourself to one job board. Our source distribution shows which platforms are most active for your field. 
                   Create accounts on the top 3-5 sources to maximize your visibility.
                 </p>
               </div>
