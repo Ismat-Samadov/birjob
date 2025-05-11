@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PieChart, Building, Filter, Info, BarChart3, Clock, AlertCircle, TrendingUp } from 'lucide-react';
+import { PieChart, Building, Filter, Info, BarChart3, Clock, AlertCircle, TrendingUp, Briefcase } from 'lucide-react';
 import { useToast } from "@/context/ToastContext";
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import HorizontalBarChart from './HorizontalBarChart';
@@ -33,6 +33,7 @@ interface TrendsResponse {
   totalJobs: number;
   totalSources: number;
   totalCompanies: number;
+  totalUniquePositions: number;
   lastUpdated: string;
 }
 
@@ -50,6 +51,7 @@ const JobTrendsVisualization: React.FC = () => {
   const [totalJobs, setTotalJobs] = useState<number>(0);
   const [totalSources, setTotalSources] = useState<number>(0);
   const [totalCompanies, setTotalCompanies] = useState<number>(0);
+  const [totalUniquePositions, setTotalUniquePositions] = useState<number>(0);
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const { addToast } = useToast();
@@ -75,6 +77,7 @@ const JobTrendsVisualization: React.FC = () => {
       setTotalJobs(data.totalJobs || 0);
       setTotalSources(data.totalSources || 0);
       setTotalCompanies(data.totalCompanies || 0);
+      setTotalUniquePositions(data.totalUniquePositions || 0);
       setLastUpdated(data.lastUpdated || new Date().toISOString());
       
       // Create a mapping of normalized company names to display names
@@ -235,14 +238,23 @@ const JobTrendsVisualization: React.FC = () => {
             
             {/* Stats summary */}
             {!isLoading && !error && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 <DashboardStatCard
-                  title="Total Jobs"
+                  title="Total Listings"
                   value={totalJobs}
                   icon={<BarChart3 className="h-5 w-5" />}
                   bgClass="bg-blue-50 dark:bg-blue-900/30"
                   titleClass="text-blue-500 dark:text-blue-300"
                   valueClass="text-blue-700 dark:text-blue-300"
+                />
+                
+                <DashboardStatCard
+                  title="Unique Positions"
+                  value={totalUniquePositions}
+                  icon={<Briefcase className="h-5 w-5" />}
+                  bgClass="bg-green-50 dark:bg-green-900/30"
+                  titleClass="text-green-500 dark:text-green-300"
+                  valueClass="text-green-700 dark:text-green-300"
                 />
                 
                 <DashboardStatCard
@@ -255,7 +267,7 @@ const JobTrendsVisualization: React.FC = () => {
                 />
                 
                 <DashboardStatCard
-                  title="Total Companies"
+                  title="Companies Hiring"
                   value={totalCompanies}
                   icon={<Building className="h-5 w-5" />}
                   bgClass="bg-amber-50 dark:bg-amber-900/30"
@@ -267,9 +279,9 @@ const JobTrendsVisualization: React.FC = () => {
                   title="Last Updated"
                   value={lastUpdated ? formatDateTime(lastUpdated) : 'N/A'}
                   icon={<Clock className="h-5 w-5" />}
-                  bgClass="bg-green-50 dark:bg-green-900/30"
-                  titleClass="text-green-500 dark:text-green-300"
-                  valueClass="text-green-700 dark:text-green-300"
+                  bgClass="bg-gray-50 dark:bg-gray-900/30"
+                  titleClass="text-gray-500 dark:text-gray-300"
+                  valueClass="text-gray-700 dark:text-gray-300"
                 />
               </div>
             )}
@@ -296,7 +308,7 @@ const JobTrendsVisualization: React.FC = () => {
                   />
                 ) : (
                   <>
-                    <div className="text-sm font-medium dark:text-gray-200 mb-4">Job Source Distribution</div>
+                    <div className="text-sm font-medium dark:text-gray-200 mb-4">Job Listings by Source</div>
                     <HorizontalBarChart 
                       data={formatSourceData()} 
                       colors={COLORS}
@@ -308,14 +320,15 @@ const JobTrendsVisualization: React.FC = () => {
                         <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Top Sources</h4>
                         {sourceData.slice(0, 3).map((source, idx) => (
                           <div key={idx} className="text-sm text-gray-700 dark:text-gray-300">
-                            <span className="font-medium">{source.name}:</span> {source.percentage?.toFixed(1)}% of jobs
+                            <span className="font-medium">{source.name}:</span> {source.value.toLocaleString()} listings ({source.percentage?.toFixed(1)}%)
                           </div>
                         ))}
                       </div>
                       <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                        <h4 className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">Source Insight</h4>
+                        <h4 className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">Data Context</h4>
                         <p className="text-sm text-gray-700 dark:text-gray-300">
-                          {sourceData[0]?.name} provides {sourceData[0]?.percentage?.toFixed(1)}% of all available positions, making it the primary job source.
+                          Sources show all job listings, including duplicates where the same position appears on multiple job boards. 
+                          Total listings: {totalJobs.toLocaleString()}, Unique positions: {totalUniquePositions.toLocaleString()}.
                         </p>
                       </div>
                     </div>
@@ -324,7 +337,7 @@ const JobTrendsVisualization: React.FC = () => {
               </div>
             ) : (
               <div>
-                <div className="text-sm font-medium dark:text-gray-200 mb-4">Top 25 Hiring Companies</div>
+                <div className="text-sm font-medium dark:text-gray-200 mb-4">Top 25 Companies by Unique Positions</div>
                 {companyData.length === 0 ? (
                   <EmptyState
                     icon={<Building className="h-12 w-12" />}
@@ -344,14 +357,15 @@ const JobTrendsVisualization: React.FC = () => {
                         <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Top Hiring Companies</h4>
                         {companyData.slice(0, 3).map((company, idx) => (
                           <div key={idx} className="text-sm text-gray-700 dark:text-gray-300">
-                            <span className="font-medium">{company.company}:</span> {company.count.toLocaleString()} positions ({company.percentage?.toFixed(1)}%)
+                            <span className="font-medium">{company.company}:</span> {company.count.toLocaleString()} unique positions ({company.percentage?.toFixed(1)}%)
                           </div>
                         ))}
                       </div>
                       <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                        <h4 className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">Company Insights</h4>
+                        <h4 className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">Important Note</h4>
                         <p className="text-sm text-gray-700 dark:text-gray-300">
-                          The top {Math.min(5, companyData.length)} companies represent {companyData.slice(0, 5).reduce((acc, curr) => acc + (curr.percentage || 0), 0).toFixed(1)}% of all job postings.
+                          These numbers represent unique job positions. The same job posted on multiple platforms is counted only once 
+                          per company to give you accurate hiring insights.
                         </p>
                       </div>
                     </div>
@@ -368,8 +382,9 @@ const JobTrendsVisualization: React.FC = () => {
             
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
               <p>
-                This visualization represents the current job market data from our latest scraping cycle. 
-                Job counts are unique based on title, company, and application link to avoid duplicates.
+                This visualization shows current job market data. The <strong>Sources tab</strong> displays all job listings including duplicates 
+                across platforms. The <strong>Companies tab</strong> shows unique positions per company, where identical jobs on different 
+                platforms are counted only once.
               </p>
             </div>
           </div>
@@ -378,57 +393,62 @@ const JobTrendsVisualization: React.FC = () => {
 
       <Card className="w-full shadow-lg dark:bg-gray-800">
         <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-t-lg">
-          <CardTitle className="text-xl font-bold">Advanced Market Insights</CardTitle>
+          <CardTitle className="text-xl font-bold">Understanding the Data</CardTitle>
         </CardHeader>
         
         <CardContent className="p-6">
           <div className="space-y-4">
-            <p className="text-gray-700 dark:text-gray-300">
-              Use these enhanced insights to guide your job search strategy:
-            </p>
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2">Key Insight: Duplicate Jobs</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Many companies post the same job on multiple platforms. Our system tracks <strong>{totalJobs.toLocaleString()} total listings</strong> but 
+                only <strong>{totalUniquePositions.toLocaleString()} unique positions</strong>. This means each position appears on average 
+                across {totalJobs && totalUniquePositions ? (totalJobs / totalUniquePositions).toFixed(1) : 'N/A'} different job boards.
+              </p>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <h4 className="text-md font-medium text-blue-600 dark:text-blue-400 flex items-center">
                   <TrendingUp className="h-4 w-4 mr-2" />
-                  Top Hiring Companies
+                  Unique Job Counting
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Focus your attention on companies actively hiring. The companies at the top of our list have unique job positions available, 
-                  increasing your chances of finding the right opportunity.
+                  Company statistics show truly unique positions by grouping jobs with the same title at the same company, 
+                  regardless of how many job boards they appear on.
                 </p>
               </div>
               
               <div className="space-y-3">
                 <h4 className="text-md font-medium text-purple-600 dark:text-purple-400 flex items-center">
                   <PieChart className="h-4 w-4 mr-2" />
-                  Source Strategy
+                  Source Distribution
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Don&apos;t limit yourself to one job board. Our source distribution shows which platforms are most active for your field. 
-                  Create accounts on the top 3-5 sources to maximize your visibility.
+                  Source statistics include all listings, helping you understand which platforms have the most comprehensive 
+                  coverage and where companies prefer to post their openings.
                 </p>
               </div>
               
               <div className="space-y-3">
                 <h4 className="text-md font-medium text-amber-600 dark:text-amber-400 flex items-center">
                   <Filter className="h-4 w-4 mr-2" />
-                  Company-Based Filtering
+                  Smart Filtering
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Use our company filters to see which sources are best for specific organizations. 
-                  This helps you understand where companies post their jobs most frequently.
+                  When you filter by company, you can see which sources that company uses most frequently. This helps identify 
+                  the best places to find specific companies&apos; job postings.
                 </p>
               </div>
               
               <div className="space-y-3">
                 <h4 className="text-md font-medium text-green-600 dark:text-green-400 flex items-center">
                   <Building className="h-4 w-4 mr-2" />
-                  Company Research
+                  Strategic Insights
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Research the top hiring companies in your field. Understanding their culture, recent news, and growth can 
-                  give you an advantage in applications and interviews.
+                  Focus on companies with high unique position counts for better opportunities. Check multiple sources for the 
+                  same company to ensure you don&apos;t miss any postings.
                 </p>
               </div>
             </div>

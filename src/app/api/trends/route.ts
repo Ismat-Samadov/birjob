@@ -27,6 +27,7 @@ interface TrendsResponse {
   totalSources: number;
   totalCompanies: number;
   lastUpdated: string;
+  totalUniquePositions: number;
 }
 
 // Initialize Prisma client
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       console.log('Source column does not exist in jobs_jobpost table');
     }
     
-    // Get total unique jobs count (using the unique constraint to avoid duplicates)
+    // Get total jobs count (including duplicates across sources)
     let totalJobs = 0;
     try {
       totalJobs = await prisma.jobs_jobpost.count();
@@ -54,11 +55,27 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       console.error('Error counting jobs:', error);
     }
     
-    // Fetch data for source distribution with percentages
+    // Get total UNIQUE positions count (based on title + company only)
+    let totalUniquePositions = 0;
+    try {
+      const uniquePositionsResult = await prisma.$queryRaw<Array<{count: bigint}>>`
+        SELECT COUNT(DISTINCT (LOWER(title) || '::' || LOWER(company))) as count 
+        FROM jobs_jobpost 
+      `;
+      
+      if (uniquePositionsResult.length > 0) {
+        totalUniquePositions = Number(uniquePositionsResult[0].count);
+      }
+    } catch (error) {
+      console.error('Error counting unique positions:', error);
+    }
+    
+    // Fetch data for source distribution
     let sourceData: SourceData[] = [];
     if (hasSourceColumn) {
       try {
         if (filter === 'all') {
+          // Show total jobs per source (including duplicates)
           const sourcesResult = await prisma.$queryRaw<Array<{source: string, count: bigint}>>`
             SELECT COALESCE(source, 'Unknown') as source, COUNT(*) as count 
             FROM jobs_jobpost 
@@ -73,7 +90,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             percentage: totalJobs > 0 ? (Number(item.count) / totalJobs) * 100 : 0
           }));
         } else {
-          // Filter by company name (case-insensitive)
+          // Filter by company name
           const sourcesResult = await prisma.$queryRaw<Array<{source: string, count: bigint}>>`
             SELECT COALESCE(source, 'Unknown') as source, COUNT(*) as count 
             FROM jobs_jobpost 
@@ -96,15 +113,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
     
-    // Fetch top companies with case-insensitive grouping
-    // Note: Due to unique constraint on (title, company, apply_link), duplicates are already handled
+    // Fetch top companies with UNIQUE job counts (not counting duplicates across sources)
     let companyData: CompanyData[] = [];
     try {
       if (filter === 'all') {
+        // Count unique positions per company (title + company combination)
         const companiesResult = await prisma.$queryRaw<Array<{company: string, count: bigint}>>`
-          SELECT LOWER(company) as normalized_company, 
-                 MAX(company) as company,
-                 COUNT(*) as count 
+          SELECT 
+            MAX(company) as company,
+            COUNT(DISTINCT (LOWER(title) || '::' || LOWER(company))) as count 
           FROM jobs_jobpost 
           GROUP BY LOWER(company)
           ORDER BY count DESC 
@@ -114,14 +131,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         companyData = companiesResult.map(item => ({
           company: item.company,
           count: Number(item.count),
-          percentage: totalJobs > 0 ? (Number(item.count) / totalJobs) * 100 : 0
+          percentage: totalUniquePositions > 0 ? (Number(item.count) / totalUniquePositions) * 100 : 0
         }));
       } else {
-        // When a company filter is selected, show only that company's data
+        // When a company filter is selected, show only that company's unique positions
         const companiesResult = await prisma.$queryRaw<Array<{company: string, count: bigint}>>`
-          SELECT LOWER(company) as normalized_company,
-                 MAX(company) as company,
-                 COUNT(*) as count 
+          SELECT 
+            MAX(company) as company,
+            COUNT(DISTINCT (LOWER(title) || '::' || LOWER(company))) as count 
           FROM jobs_jobpost 
           WHERE LOWER(company) = ${filter.toLowerCase()}
           GROUP BY LOWER(company)
@@ -130,24 +147,24 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         companyData = companiesResult.map(item => ({
           company: item.company,
           count: Number(item.count),
-          percentage: totalJobs > 0 ? (Number(item.count) / totalJobs) * 100 : 0
+          percentage: totalUniquePositions > 0 ? (Number(item.count) / totalUniquePositions) * 100 : 0
         }));
       }
     } catch (error) {
       console.error('Error fetching company data:', error);
     }
     
-    // Get filter options - only companies with significant job counts
+    // Get filter options - companies with significant UNIQUE job counts
     let filters: string[] = ['all'];
     try {
-      // Get top companies as filter options (case-insensitive)
-      const topCompanies = await prisma.$queryRaw<Array<{company: string, count: bigint}>>`
-        SELECT LOWER(company) as normalized_company,
-               MAX(company) as company, 
-               COUNT(*) as count 
+      const topCompanies = await prisma.$queryRaw<Array<{company: string, normalized_company: string, count: bigint}>>`
+        SELECT 
+          LOWER(company) as normalized_company,
+          MAX(company) as company,
+          COUNT(DISTINCT (LOWER(title) || '::' || LOWER(company))) as count 
         FROM jobs_jobpost 
         GROUP BY LOWER(company)
-        HAVING COUNT(*) >= 5
+        HAVING COUNT(DISTINCT (LOWER(title) || '::' || LOWER(company))) >= 5
         ORDER BY count DESC 
         LIMIT 10
       `;
@@ -160,7 +177,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       filters = ['all'];
     }
     
-    // Get total distinct companies count (case-insensitive)
+    // Get total distinct companies count
     let totalCompanies = 0;
     try {
       const companiesCountResult = await prisma.$queryRaw<Array<{count: bigint}>>`
@@ -215,6 +232,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       totalJobs,
       totalSources,
       totalCompanies,
+      totalUniquePositions,
       lastUpdated
     };
     
@@ -231,6 +249,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         totalJobs: 0,
         totalSources: 0,
         totalCompanies: 0,
+        totalUniquePositions: 0,
         lastUpdated: new Date().toISOString()
       },
       { status: 500 }
