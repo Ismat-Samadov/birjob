@@ -16,14 +16,15 @@ export default function TrendsPage() {
           </h1>
           <p className="text-center text-gray-600 dark:text-gray-400 mb-4 max-w-3xl mx-auto">
             Explore what&apos;s happening right now in the job market. This dashboard shows the latest data 
-            from our most recent scraping cycle, highlighting active job sources and top positions.
+            from our most recent scraping cycle, highlighting active job sources and top hiring companies.
           </p>
           
           <div className="mb-8 max-w-3xl mx-auto">
             <InfoBox title="About Our Job Data" icon={<Info className="h-5 w-5" />}>
               This dashboard displays current job market data using our truncate-and-load approach, 
               meaning it reflects the latest snapshot rather than historical trends. Each new scrape 
-              completely refreshes the data with the most recent available positions.
+              completely refreshes the data with the most recent available positions. All company 
+              analytics are case-insensitive to ensure accurate grouping regardless of formatting.
             </InfoBox>
           </div>
           
@@ -43,15 +44,17 @@ export default function TrendsPage() {
               </p>
               <p>
                 The <span className="font-medium">Job Sources</span> tab shows which platforms are currently providing the most 
-                job listings, helping you focus your search efforts on the most active job boards.
+                job listings, helping you focus your search efforts on the most active job boards. Each source's percentage 
+                contribution is calculated to show its relative importance in the market.
               </p>
               <p>
-                The <span className="font-medium">Top Job Titles</span> tab displays the most common job titles in our database, 
-                giving you insight into which positions are most frequently posted.
+                The <span className="font-medium">Companies</span> tab displays the organizations with the most open positions, 
+                giving you insight into which companies are actively hiring. Company names are analyzed case-insensitively, 
+                ensuring that variations like "Azercell" and "Azercell Company" are correctly grouped together.
               </p>
               <p>
                 Use these insights to optimize your job search by focusing on the most active sources and 
-                tailoring your resume to match the most in-demand job titles.
+                targeting companies that are actively recruiting for multiple positions.
               </p>
             </div>
           </div>

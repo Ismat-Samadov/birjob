@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PieChart, List, Filter, Info, BarChart3, Clock, AlertCircle } from 'lucide-react';
+import { PieChart, Building, Filter, Info, BarChart3, Clock, AlertCircle, TrendingUp } from 'lucide-react';
 import { useToast } from "@/context/ToastContext";
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import HorizontalBarChart from './HorizontalBarChart';
@@ -15,21 +15,24 @@ import Loader from './Loader';
 interface SourceData {
   name: string;
   value: number;
+  percentage?: number;
 }
 
-// Define interface for job title data
-interface JobTitleData {
-  title: string;
+// Define interface for company data
+interface CompanyData {
+  company: string;
   count: number;
+  percentage?: number;
 }
 
 // Interface for API response
 interface TrendsResponse {
   sourceData: SourceData[];
-  jobTitleData: JobTitleData[];
+  companyData: CompanyData[];
   filters: string[];
   totalJobs: number;
   totalSources: number;
+  totalCompanies: number;
   lastUpdated: string;
 }
 
@@ -37,14 +40,15 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#4CAF50'
                 '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39'];
 
 const JobTrendsVisualization: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'sources' | 'titles'>('sources');
+  const [activeTab, setActiveTab] = useState<'sources' | 'companies'>('sources');
   const [sourceData, setSourceData] = useState<SourceData[]>([]);
-  const [jobTitleData, setJobTitleData] = useState<JobTitleData[]>([]);
+  const [companyData, setCompanyData] = useState<CompanyData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [filters, setFilters] = useState<string[]>(['all']);
   const [totalJobs, setTotalJobs] = useState<number>(0);
   const [totalSources, setTotalSources] = useState<number>(0);
+  const [totalCompanies, setTotalCompanies] = useState<number>(0);
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const { addToast } = useToast();
@@ -65,10 +69,11 @@ const JobTrendsVisualization: React.FC = () => {
       const data: TrendsResponse = await response.json();
       
       setSourceData(data.sourceData || []);
-      setJobTitleData(data.jobTitleData || []);
+      setCompanyData(data.companyData || []);
       setFilters(['all', ...(data.filters || [])]);
       setTotalJobs(data.totalJobs || 0);
       setTotalSources(data.totalSources || 0);
+      setTotalCompanies(data.totalCompanies || 0);
       setLastUpdated(data.lastUpdated || new Date().toISOString());
       
       // Track successful data load
@@ -115,7 +120,7 @@ const JobTrendsVisualization: React.FC = () => {
     });
   };
 
-  const handleTabChange = (tab: 'sources' | 'titles'): void => {
+  const handleTabChange = (tab: 'sources' | 'companies'): void => {
     setActiveTab(tab);
     
     // Track tab change
@@ -153,14 +158,14 @@ const JobTrendsVisualization: React.FC = () => {
     }));
   };
 
-  const formatJobTitleData = () => {
-    return jobTitleData.map(item => ({
-      label: item.title,
+  const formatCompanyData = () => {
+    return companyData.map(item => ({
+      label: item.company,
       value: item.count
     }));
   };
 
-  // Calculate total values
+  // Calculate total values for percentages
   const totalSourceValue = sourceData.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
@@ -184,13 +189,13 @@ const JobTrendsVisualization: React.FC = () => {
                   Sources
                 </Button>
                 <Button 
-                  variant={activeTab === 'titles' ? "default" : "outline"} 
-                  onClick={() => handleTabChange('titles')}
+                  variant={activeTab === 'companies' ? "default" : "outline"} 
+                  onClick={() => handleTabChange('companies')}
                   className="flex items-center flex-shrink-0"
                   size="sm"
                 >
-                  <List className="h-4 w-4 mr-2" />
-                  Titles
+                  <Building className="h-4 w-4 mr-2" />
+                  Companies
                 </Button>
               </div>
               
@@ -212,7 +217,7 @@ const JobTrendsVisualization: React.FC = () => {
             
             {/* Stats summary */}
             {!isLoading && !error && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <DashboardStatCard
                   title="Total Jobs"
                   value={totalJobs}
@@ -229,6 +234,15 @@ const JobTrendsVisualization: React.FC = () => {
                   bgClass="bg-purple-50 dark:bg-purple-900/30"
                   titleClass="text-purple-500 dark:text-purple-300"
                   valueClass="text-purple-700 dark:text-purple-300"
+                />
+                
+                <DashboardStatCard
+                  title="Total Companies"
+                  value={totalCompanies}
+                  icon={<Building className="h-5 w-5" />}
+                  bgClass="bg-amber-50 dark:bg-amber-900/30"
+                  titleClass="text-amber-500 dark:text-amber-300"
+                  valueClass="text-amber-700 dark:text-amber-300"
                 />
                 
                 <DashboardStatCard
@@ -271,10 +285,20 @@ const JobTrendsVisualization: React.FC = () => {
                       totalValue={totalSourceValue}
                       emptyMessage="No source data available for the selected filter."
                     />
-                    <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                      <div className="flex items-center justify-center">
-                        <Filter className="h-4 w-4 mr-2" />
-                        <span>Data from {totalSources} sources as of {formatDateTime(lastUpdated)}</span>
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Top Sources</h4>
+                        {sourceData.slice(0, 3).map((source, idx) => (
+                          <div key={idx} className="text-sm text-gray-700 dark:text-gray-300">
+                            <span className="font-medium">{source.name}:</span> {source.percentage?.toFixed(1)}% of jobs
+                          </div>
+                        ))}
+                      </div>
+                      <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                        <h4 className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">Source Insight</h4>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          {sourceData[0]?.name} provides {sourceData[0]?.percentage?.toFixed(1)}% of all available positions, making it the primary job source.
+                        </p>
                       </div>
                     </div>
                   </>
@@ -282,25 +306,43 @@ const JobTrendsVisualization: React.FC = () => {
               </div>
             ) : (
               <div>
-                <div className="text-sm font-medium dark:text-gray-200 mb-4">Top 15 Job Titles</div>
-                {jobTitleData.length === 0 ? (
+                <div className="text-sm font-medium dark:text-gray-200 mb-4">Top 25 Hiring Companies</div>
+                {companyData.length === 0 ? (
                   <EmptyState
-                    icon={<List className="h-12 w-12" />}
-                    title="No Job Title Data Available"
-                    message="There are no job titles available for the selected filter."
+                    icon={<Building className="h-12 w-12" />}
+                    title="No Company Data Available"
+                    message="There are no companies available for the selected filter."
                   />
                 ) : (
-                  <HorizontalBarChart 
-                    data={formatJobTitleData()} 
-                    colors={COLORS} 
-                    showPercentages={false}
-                    emptyMessage="No job title data available for the selected filter."
-                  />
+                  <>
+                    <HorizontalBarChart 
+                      data={formatCompanyData()} 
+                      colors={COLORS} 
+                      showPercentages={false}
+                      emptyMessage="No company data available for the selected filter."
+                    />
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Top Hiring Companies</h4>
+                        {companyData.slice(0, 3).map((company, idx) => (
+                          <div key={idx} className="text-sm text-gray-700 dark:text-gray-300">
+                            <span className="font-medium">{company.company}:</span> {company.count.toLocaleString()} positions ({company.percentage?.toFixed(1)}%)
+                          </div>
+                        ))}
+                      </div>
+                      <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                        <h4 className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">Company Insights</h4>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          The top {Math.min(5, companyData.length)} companies represent {companyData.slice(0, 5).reduce((acc, curr) => acc + (curr.percentage || 0), 0).toFixed(1)}% of all job postings.
+                        </p>
+                      </div>
+                    </div>
+                  </>
                 )}
                 <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
                   <div className="flex items-center justify-center">
-                    <List className="h-4 w-4 mr-2" />
-                    <span>Based on {totalJobs.toLocaleString()} job listings</span>
+                    <Building className="h-4 w-4 mr-2" />
+                    <span>Data from {totalCompanies.toLocaleString()} unique companies</span>
                   </div>
                 </div>
               </div>
@@ -315,47 +357,57 @@ const JobTrendsVisualization: React.FC = () => {
 
       <Card className="w-full shadow-lg dark:bg-gray-800">
         <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-t-lg">
-          <CardTitle className="text-xl font-bold">Actionable Insights</CardTitle>
+          <CardTitle className="text-xl font-bold">Advanced Market Insights</CardTitle>
         </CardHeader>
         
         <CardContent className="p-6">
           <div className="space-y-4">
             <p className="text-gray-700 dark:text-gray-300">
-              Use these insights to optimize your job search strategy right now:
+              Use these enhanced insights to guide your job search strategy:
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <h4 className="text-md font-medium text-blue-600 dark:text-blue-400">Target Active Sources</h4>
+                <h4 className="text-md font-medium text-blue-600 dark:text-blue-400 flex items-center">
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Top Hiring Companies
+                </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Focus your job search efforts on the platforms currently hosting the most relevant listings. 
-                  Create accounts and set up job alerts on these primary sources to ensure you don&apos;t miss new opportunities.
+                  Focus your attention on companies actively hiring. The companies at the top of our list have the most open positions, 
+                  increasing your chances of finding the right opportunity.
                 </p>
               </div>
               
               <div className="space-y-3">
-                <h4 className="text-md font-medium text-purple-600 dark:text-purple-400">Use Common Job Title Formats</h4>
+                <h4 className="text-md font-medium text-purple-600 dark:text-purple-400 flex items-center">
+                  <PieChart className="h-4 w-4 mr-2" />
+                  Source Strategy
+                </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  When searching for jobs, use the exact job title formats shown in the &quot;Top Job Titles&quot; section. 
-                  Many job boards use keyword matching, so aligning your search terms with how employers post positions 
-                  will yield better results.
+                  Don't limit yourself to one job board. Our source distribution shows which platforms are most active for your field. 
+                  Create accounts on the top 3-5 sources to maximize your visibility.
                 </p>
               </div>
               
               <div className="space-y-3">
-                <h4 className="text-md font-medium text-amber-600 dark:text-amber-400">Set Up BirJob Notifications</h4>
+                <h4 className="text-md font-medium text-amber-600 dark:text-amber-400 flex items-center">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter-Based Targeting
+                </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Based on these insights, configure your BirJob notification preferences using the most common job titles 
-                  as keywords. This ensures you&apos;ll receive alerts for relevant positions as soon as they&apos;re 
-                  aggregated in our system.
+                  Use our filters to identify which sources and companies are strongest for specific roles or industries. 
+                  This helps you target your applications more effectively and avoid wasting time on less relevant opportunities.
                 </p>
               </div>
               
               <div className="space-y-3">
-                <h4 className="text-md font-medium text-green-600 dark:text-green-400">Track Trending Positions</h4>
+                <h4 className="text-md font-medium text-green-600 dark:text-green-400 flex items-center">
+                  <Building className="h-4 w-4 mr-2" />
+                  Company Research
+                </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Keep an eye on the job sources and titles that appear most frequently. These trends can help you identify 
-                  which skills and qualifications are most in-demand, allowing you to tailor your application materials accordingly.
+                  Research the top hiring companies in your field. Understanding their culture, recent news, and growth can 
+                  give you an advantage in applications and interviews.
                 </p>
               </div>
             </div>

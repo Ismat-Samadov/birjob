@@ -10,19 +10,22 @@ export const dynamic = 'force-dynamic';
 interface SourceData {
   name: string;
   value: number;
+  percentage?: number;
 }
 
-interface JobTitleData {
-  title: string;
+interface CompanyData {
+  company: string;
   count: number;
+  percentage?: number;
 }
 
 interface TrendsResponse {
   sourceData: SourceData[];
-  jobTitleData: JobTitleData[];
+  companyData: CompanyData[];
   filters: string[];
   totalJobs: number;
   totalSources: number;
+  totalCompanies: number;
   lastUpdated: string;
 }
 
@@ -37,14 +40,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Check if source column exists
     let hasSourceColumn = true;
     try {
-      // Try a simple query to see if the source column exists
       await prisma.$queryRaw`SELECT source FROM jobs_jobpost LIMIT 1`;
     } catch (error) {
       hasSourceColumn = false;
       console.log('Source column does not exist in jobs_jobpost table');
     }
     
-    // Fetch data for source distribution
+    // Get total jobs count for percentages
+    let totalJobs = 0;
+    try {
+      totalJobs = await prisma.jobs_jobpost.count();
+    } catch (error) {
+      console.error('Error counting jobs:', error);
+    }
+    
+    // Fetch data for source distribution with percentages
     let sourceData: SourceData[] = [];
     if (hasSourceColumn) {
       try {
@@ -54,78 +64,98 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             FROM jobs_jobpost 
             GROUP BY source 
             ORDER BY count DESC
-            LIMIT 20
+            LIMIT 25
           `;
           
           sourceData = sourcesResult.map(item => ({
             name: item.source,
-            value: Number(item.count)
+            value: Number(item.count),
+            percentage: totalJobs > 0 ? (Number(item.count) / totalJobs) * 100 : 0
           }));
         } else {
-          // Filter by job title or company containing the filter keyword
+          // Filter by job title or company containing the filter keyword (case-insensitive)
           const sourcesResult = await prisma.$queryRaw<Array<{source: string, count: bigint}>>`
             SELECT COALESCE(source, 'Unknown') as source, COUNT(*) as count 
             FROM jobs_jobpost 
             WHERE (LOWER(title) LIKE ${`%${filter.toLowerCase()}%`} OR LOWER(company) LIKE ${`%${filter.toLowerCase()}%`})
             GROUP BY source 
             ORDER BY count DESC
-            LIMIT 20
+            LIMIT 25
           `;
+          
+          const filteredTotal = sourcesResult.reduce((acc, item) => acc + Number(item.count), 0);
           
           sourceData = sourcesResult.map(item => ({
             name: item.source,
-            value: Number(item.count)
+            value: Number(item.count),
+            percentage: filteredTotal > 0 ? (Number(item.count) / filteredTotal) * 100 : 0
           }));
         }
       } catch (error) {
         console.error('Error fetching source data:', error);
-        // Empty array will be returned if there's an error
       }
     }
     
-    // Fetch top 15 job titles
-    let jobTitleData: JobTitleData[] = [];
+    // Fetch top companies with case-insensitive grouping
+    let companyData: CompanyData[] = [];
     try {
       if (filter === 'all') {
-        const jobTitlesResult = await prisma.$queryRaw<Array<{title: string, count: bigint}>>`
-          SELECT LOWER(title) as title, COUNT(*) as count 
+        const companiesResult = await prisma.$queryRaw<Array<{company: string, count: bigint}>>`
+          SELECT LOWER(company) as normalized_company, 
+                 MAX(company) as company,
+                 COUNT(*) as count 
           FROM jobs_jobpost 
-          GROUP BY LOWER(title) 
+          GROUP BY LOWER(company)
           ORDER BY count DESC 
-          LIMIT 15
+          LIMIT 25
         `;
         
-        jobTitleData = jobTitlesResult.map(item => ({
-          title: item.title,
-          count: Number(item.count)
+        companyData = companiesResult.map(item => ({
+          company: item.company,
+          count: Number(item.count),
+          percentage: totalJobs > 0 ? (Number(item.count) / totalJobs) * 100 : 0
         }));
       } else {
-        const jobTitlesResult = await prisma.$queryRaw<Array<{title: string, count: bigint}>>`
-          SELECT LOWER(title) as title, COUNT(*) as count 
+        const companiesResult = await prisma.$queryRaw<Array<{company: string, count: bigint}>>`
+          SELECT LOWER(company) as normalized_company,
+                 MAX(company) as company,
+                 COUNT(*) as count 
           FROM jobs_jobpost 
           WHERE (LOWER(title) LIKE ${`%${filter.toLowerCase()}%`} OR LOWER(company) LIKE ${`%${filter.toLowerCase()}%`})
-          GROUP BY LOWER(title) 
+          GROUP BY LOWER(company)
           ORDER BY count DESC 
-          LIMIT 15
+          LIMIT 25
         `;
         
-        jobTitleData = jobTitlesResult.map(item => ({
-          title: item.title,
-          count: Number(item.count)
+        const filteredTotal = companiesResult.reduce((acc, item) => acc + Number(item.count), 0);
+        
+        companyData = companiesResult.map(item => ({
+          company: item.company,
+          count: Number(item.count),
+          percentage: filteredTotal > 0 ? (Number(item.count) / filteredTotal) * 100 : 0
         }));
       }
     } catch (error) {
-      console.error('Error fetching job titles:', error);
-      // Empty array will be returned if there's an error
+      console.error('Error fetching company data:', error);
     }
     
-    // Get common job categories for filters - SIMPLIFIED APPROACH
+    // Get common filter categories based on companies and titles
     let filters: string[] = ['all'];
     try {
-      // Define some hardcoded common job title prefixes
-      const commonPrefixes = ['software', 'senior', 'data', 'marketing', 'sales', 'project', 'developer', 'engineer', 'manager'];
+      // Get top companies as filter options (case-insensitive)
+      const topCompanies = await prisma.$queryRaw<Array<{company: string, count: bigint}>>`
+        SELECT LOWER(company) as normalized_company,
+               MAX(company) as company, 
+               COUNT(*) as count 
+        FROM jobs_jobpost 
+        GROUP BY LOWER(company)
+        HAVING COUNT(*) >= 5
+        ORDER BY count DESC 
+        LIMIT 10
+      `;
       
-      // For each prefix, check if there are matching jobs
+      // Get common title prefixes as filter options (case-insensitive)
+      const commonPrefixes = ['software', 'senior', 'data', 'marketing', 'sales', 'project', 'developer', 'engineer', 'manager'];
       const availablePrefixes = [];
       
       for (const prefix of commonPrefixes) {
@@ -139,33 +169,42 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             }
           });
           
-          if (count > 3) { // Only include if there are at least 3 matches
+          if (count > 5) {
             availablePrefixes.push(prefix);
           }
         } catch (error) {
           console.error(`Error checking prefix ${prefix}:`, error);
-          // Continue with next prefix
         }
       }
       
-      // Sort by what's available
-      if (availablePrefixes.length > 0) {
-        filters = ['all', ...availablePrefixes];
-      } else {
-        filters = ['all'];
-      }
+      // Combine company names and title prefixes for filters
+      filters = ['all'];
+      
+      // Add top companies to filters
+      filters.push(...topCompanies.slice(0, 5).map(item => item.company));
+      
+      // Add common title prefixes
+      filters.push(...availablePrefixes.slice(0, 5));
+      
     } catch (error) {
       console.error('Error getting filter categories:', error);
-      // If we can't get filter categories, just use 'all'
       filters = ['all'];
     }
     
-    // Get total job count
-    let totalJobs = 0;
+    // Get total distinct companies count (case-insensitive)
+    let totalCompanies = 0;
     try {
-      totalJobs = await prisma.jobs_jobpost.count();
+      const companiesCountResult = await prisma.$queryRaw<Array<{count: bigint}>>`
+        SELECT COUNT(DISTINCT LOWER(company)) as count 
+        FROM jobs_jobpost 
+        WHERE company IS NOT NULL
+      `;
+      
+      if (companiesCountResult.length > 0) {
+        totalCompanies = Number(companiesCountResult[0].count);
+      }
     } catch (error) {
-      console.error('Error counting jobs:', error);
+      console.error('Error counting companies:', error);
     }
     
     // Get total distinct sources count
@@ -202,10 +241,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     
     const response: TrendsResponse = {
       sourceData,
-      jobTitleData,
+      companyData,
       filters,
       totalJobs,
       totalSources,
+      totalCompanies,
       lastUpdated
     };
     
@@ -217,10 +257,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         error: 'Failed to fetch trend data', 
         details: error instanceof Error ? error.message : 'Unknown error',
         sourceData: [],
-        jobTitleData: [],
+        companyData: [],
         filters: ['all'],
         totalJobs: 0,
         totalSources: 0,
+        totalCompanies: 0,
         lastUpdated: new Date().toISOString()
       },
       { status: 500 }
