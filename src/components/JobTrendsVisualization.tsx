@@ -46,6 +46,7 @@ const JobTrendsVisualization: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [filters, setFilters] = useState<string[]>(['all']);
+  const [companyLabels, setCompanyLabels] = useState<{[key: string]: string}>({});
   const [totalJobs, setTotalJobs] = useState<number>(0);
   const [totalSources, setTotalSources] = useState<number>(0);
   const [totalCompanies, setTotalCompanies] = useState<number>(0);
@@ -70,11 +71,22 @@ const JobTrendsVisualization: React.FC = () => {
       
       setSourceData(data.sourceData || []);
       setCompanyData(data.companyData || []);
-      setFilters(['all', ...(data.filters || [])]);
+      setFilters(data.filters || ['all']);
       setTotalJobs(data.totalJobs || 0);
       setTotalSources(data.totalSources || 0);
       setTotalCompanies(data.totalCompanies || 0);
       setLastUpdated(data.lastUpdated || new Date().toISOString());
+      
+      // Create a mapping of normalized company names to display names
+      const labels: {[key: string]: string} = { all: 'All Jobs' };
+      if (filter === 'all') {
+        // Only when viewing all data, build the company label mapping
+        data.companyData.forEach(company => {
+          const normalized = company.company.toLowerCase();
+          labels[normalized] = company.company;
+        });
+      }
+      setCompanyLabels(labels);
       
       // Track successful data load
       trackEvent({
@@ -165,6 +177,12 @@ const JobTrendsVisualization: React.FC = () => {
     }));
   };
 
+  // Get display label for filter
+  const getFilterLabel = (filter: string): string => {
+    if (filter === 'all') return 'All Jobs';
+    return companyLabels[filter] || filter;
+  };
+
   // Calculate total values for percentages
   const totalSourceValue = sourceData.reduce((acc, curr) => acc + curr.value, 0);
 
@@ -209,7 +227,7 @@ const JobTrendsVisualization: React.FC = () => {
                     disabled={isLoading}
                     className="flex-shrink-0"
                   >
-                    {filter === 'all' ? 'All Jobs' : filter}
+                    {getFilterLabel(filter)}
                   </Button>
                 ))}
               </div>
@@ -349,7 +367,10 @@ const JobTrendsVisualization: React.FC = () => {
             )}
             
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <p>This visualization represents the current job market data from our latest scraping cycle. Data is refreshed completely with each new scrape using a truncate-and-load approach.</p>
+              <p>
+                This visualization represents the current job market data from our latest scraping cycle. 
+                Job counts are unique based on title, company, and application link to avoid duplicates.
+              </p>
             </div>
           </div>
         </CardContent>
@@ -373,7 +394,7 @@ const JobTrendsVisualization: React.FC = () => {
                   Top Hiring Companies
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Focus your attention on companies actively hiring. The companies at the top of our list have the most open positions, 
+                  Focus your attention on companies actively hiring. The companies at the top of our list have unique job positions available, 
                   increasing your chances of finding the right opportunity.
                 </p>
               </div>
@@ -392,11 +413,11 @@ const JobTrendsVisualization: React.FC = () => {
               <div className="space-y-3">
                 <h4 className="text-md font-medium text-amber-600 dark:text-amber-400 flex items-center">
                   <Filter className="h-4 w-4 mr-2" />
-                  Filter-Based Targeting
+                  Company-Based Filtering
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Use our filters to identify which sources and companies are strongest for specific roles or industries. 
-                  This helps you target your applications more effectively and avoid wasting time on less relevant opportunities.
+                  Use our company filters to see which sources are best for specific organizations. 
+                  This helps you understand where companies post their jobs most frequently.
                 </p>
               </div>
               

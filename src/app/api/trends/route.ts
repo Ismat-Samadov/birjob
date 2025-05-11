@@ -46,7 +46,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       console.log('Source column does not exist in jobs_jobpost table');
     }
     
-    // Get total jobs count for percentages
+    // Get total unique jobs count (using the unique constraint to avoid duplicates)
     let totalJobs = 0;
     try {
       totalJobs = await prisma.jobs_jobpost.count();
@@ -73,11 +73,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             percentage: totalJobs > 0 ? (Number(item.count) / totalJobs) * 100 : 0
           }));
         } else {
-          // Filter by job title or company containing the filter keyword (case-insensitive)
+          // Filter by company name (case-insensitive)
           const sourcesResult = await prisma.$queryRaw<Array<{source: string, count: bigint}>>`
             SELECT COALESCE(source, 'Unknown') as source, COUNT(*) as count 
             FROM jobs_jobpost 
-            WHERE (LOWER(title) LIKE ${`%${filter.toLowerCase()}%`} OR LOWER(company) LIKE ${`%${filter.toLowerCase()}%`})
+            WHERE LOWER(company) = ${filter.toLowerCase()}
             GROUP BY source 
             ORDER BY count DESC
             LIMIT 25
@@ -97,6 +97,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
     
     // Fetch top companies with case-insensitive grouping
+    // Note: Due to unique constraint on (title, company, apply_link), duplicates are already handled
     let companyData: CompanyData[] = [];
     try {
       if (filter === 'all') {
@@ -116,30 +117,27 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           percentage: totalJobs > 0 ? (Number(item.count) / totalJobs) * 100 : 0
         }));
       } else {
+        // When a company filter is selected, show only that company's data
         const companiesResult = await prisma.$queryRaw<Array<{company: string, count: bigint}>>`
           SELECT LOWER(company) as normalized_company,
                  MAX(company) as company,
                  COUNT(*) as count 
           FROM jobs_jobpost 
-          WHERE (LOWER(title) LIKE ${`%${filter.toLowerCase()}%`} OR LOWER(company) LIKE ${`%${filter.toLowerCase()}%`})
+          WHERE LOWER(company) = ${filter.toLowerCase()}
           GROUP BY LOWER(company)
-          ORDER BY count DESC 
-          LIMIT 25
         `;
-        
-        const filteredTotal = companiesResult.reduce((acc, item) => acc + Number(item.count), 0);
         
         companyData = companiesResult.map(item => ({
           company: item.company,
           count: Number(item.count),
-          percentage: filteredTotal > 0 ? (Number(item.count) / filteredTotal) * 100 : 0
+          percentage: totalJobs > 0 ? (Number(item.count) / totalJobs) * 100 : 0
         }));
       }
     } catch (error) {
       console.error('Error fetching company data:', error);
     }
     
-    // Get common filter categories based on companies and titles
+    // Get filter options - only companies with significant job counts
     let filters: string[] = ['all'];
     try {
       // Get top companies as filter options (case-insensitive)
@@ -154,37 +152,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         LIMIT 10
       `;
       
-      // Get common title prefixes as filter options (case-insensitive)
-      const commonPrefixes = ['software', 'senior', 'data', 'marketing', 'sales', 'project', 'developer', 'engineer', 'manager'];
-      const availablePrefixes = [];
-      
-      for (const prefix of commonPrefixes) {
-        try {
-          const count = await prisma.jobs_jobpost.count({
-            where: {
-              title: {
-                contains: prefix,
-                mode: 'insensitive'
-              }
-            }
-          });
-          
-          if (count > 5) {
-            availablePrefixes.push(prefix);
-          }
-        } catch (error) {
-          console.error(`Error checking prefix ${prefix}:`, error);
-        }
-      }
-      
-      // Combine company names and title prefixes for filters
-      filters = ['all'];
-      
-      // Add top companies to filters
-      filters.push(...topCompanies.slice(0, 5).map(item => item.company));
-      
-      // Add common title prefixes
-      filters.push(...availablePrefixes.slice(0, 5));
+      // Add top companies to filters (use lowercase for comparison)
+      filters = ['all', ...topCompanies.map(item => item.normalized_company)];
       
     } catch (error) {
       console.error('Error getting filter categories:', error);
