@@ -18,7 +18,7 @@ export default function NotificationPreferences({ email }: NotificationPreferenc
           <div>
             <h3 className="text-lg font-medium mb-4 dark:text-gray-200">Your Daily Job Digest</h3>
             <p className="text-gray-700 dark:text-gray-300">
-              You will receive one email each day at 1:00 PM UTC with all new job matches found in the last 24 hours.
+              You will receive one email each day at 09:00 AM UTC with all new job matches found in the last 24 hours.
             </p>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
               Each daily email includes:
@@ -33,7 +33,7 @@ export default function NotificationPreferences({ email }: NotificationPreferenc
           
           <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-md">
             <p className="text-sm text-blue-800 dark:text-blue-300">
-              <strong>Note:</strong> We check for new jobs every 24 hours. To ensure you receive relevant notifications, keep your keywords list updated with the terms you&apos;re most interested in.
+              <strong>Note:</strong> We check for new jobs every 5 hours. To ensure you receive relevant notifications, keep your keywords list updated with the terms you&apos;re most interested in.
             </p>
           </div>
           
