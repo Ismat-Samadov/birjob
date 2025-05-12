@@ -152,14 +152,15 @@ export async function GET(request: Request) {
       }
     }
     
-    // Get top companies for filtering
+    // Get top companies for filtering - FIXED QUERY
     let companies: string[] = [];
     try {
-      const companiesResult = await prisma.$queryRaw<{company: string}[]>`
-        SELECT DISTINCT company FROM jobs_jobpost
+      const companiesResult = await prisma.$queryRaw<{company: string, count: bigint}[]>`
+        SELECT company, COUNT(*) as count
+        FROM jobs_jobpost
         WHERE company IS NOT NULL
         GROUP BY company
-        ORDER BY COUNT(*) DESC
+        ORDER BY count DESC
         LIMIT 20
       `;
       companies = companiesResult.map(row => row.company);
