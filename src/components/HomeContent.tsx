@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { FilterIcon, X, Search as SearchIcon, Bell, Search } from 'lucide-react';
+import { FilterIcon, X, Search as SearchIcon, Bell, Search, Building } from 'lucide-react';
 import JobCard from '@/components/JobCard';
 import LazyLoad from '@/components/LazyLoad';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import FeatureSpotlight from '@/components/FeatureSpotlight';
+import FilterButton from '@/components/FilterButton';
 
 interface Job {
   id: number;
@@ -31,6 +32,7 @@ interface JobsMetadata {
 interface JobsResponse {
   jobs: Job[];
   sources: string[];
+  companies: string[];
   metadata: JobsMetadata;
 }
 
@@ -38,7 +40,9 @@ export default function HomeContent() {
   const [jobsData, setJobsData] = useState<JobsResponse | null>(null);
   const [search, setSearch] = useState<string>('');
   const [selectedSource, setSelectedSource] = useState<string>('');
+  const [selectedCompany, setSelectedCompany] = useState<string>('');
   const [showSourceFilter, setShowSourceFilter] = useState<boolean>(false);
+  const [showCompanyFilter, setShowCompanyFilter] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -74,6 +78,17 @@ export default function HomeContent() {
         });
       }
       
+      if (selectedCompany) {
+        queryParams.append('company', selectedCompany);
+        
+        // Track company filter use
+        trackEvent({
+          category: 'Filter',
+          action: 'Company Filter',
+          label: selectedCompany
+        });
+      }
+      
       queryParams.append('page', page.toString());
       
       const response = await fetch(
@@ -103,7 +118,7 @@ export default function HomeContent() {
       // Set a small delay before removing the searching state for better UX
       setTimeout(() => setIsSearching(false), 300);
     }
-  }, [debouncedSearch, selectedSource, page, trackEvent]);
+  }, [debouncedSearch, selectedSource, selectedCompany, page, trackEvent]);
 
   useEffect(() => {
     fetchJobs();
@@ -116,6 +131,11 @@ export default function HomeContent() {
 
   const handleSourceChange = (source: string) => {
     setSelectedSource(source);
+    setPage(1);
+  };
+  
+  const handleCompanyChange = (company: string) => {
+    setSelectedCompany(company);
     setPage(1);
   };
 
@@ -158,6 +178,7 @@ export default function HomeContent() {
   const clearFilters = () => {
     setSearch('');
     setSelectedSource('');
+    setSelectedCompany('');
     setPage(1);
     
     // Track clear filters event
@@ -169,12 +190,25 @@ export default function HomeContent() {
 
   const toggleSourceFilter = () => {
     setShowSourceFilter(!showSourceFilter);
+    if (showCompanyFilter) setShowCompanyFilter(false);
     
     // Track filter toggle
     trackEvent({
       category: 'UI',
       action: 'Toggle Source Filter',
       label: showSourceFilter ? 'Hide' : 'Show'
+    });
+  };
+  
+  const toggleCompanyFilter = () => {
+    setShowCompanyFilter(!showCompanyFilter);
+    if (showSourceFilter) setShowSourceFilter(false);
+    
+    // Track filter toggle
+    trackEvent({
+      category: 'UI',
+      action: 'Toggle Company Filter',
+      label: showCompanyFilter ? 'Hide' : 'Show'
     });
   };
 
@@ -203,16 +237,23 @@ export default function HomeContent() {
                 )}
               </div>
               <div className="flex gap-2 mt-2 sm:mt-0">
-                <Button
-                  variant="outline"
+                <FilterButton
+                  icon={FilterIcon}
+                  label="Source"
+                  isActive={showSourceFilter}
                   onClick={toggleSourceFilter}
-                  className="flex items-center gap-1 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
-                  aria-expanded={showSourceFilter}
-                >
-                  <FilterIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{selectedSource ? `Filter: ${selectedSource}` : 'Filter'}</span>
-                </Button>
-                {(search || selectedSource) && (
+                  value={selectedSource}
+                />
+                
+                <FilterButton
+                  icon={Building}
+                  label="Company"
+                  isActive={showCompanyFilter}
+                  onClick={toggleCompanyFilter}
+                  value={selectedCompany}
+                />
+                
+                {(search || selectedSource || selectedCompany) && (
                   <Button
                     variant="ghost"
                     onClick={clearFilters}
@@ -250,13 +291,54 @@ export default function HomeContent() {
               </div>
             )}
             
+            {showCompanyFilter && jobsData?.companies && (
+              <div className="mt-2 p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md shadow-sm animate-in slide-in-from-top duration-300 ease-in-out">
+                <Label className="block mb-2 font-medium text-gray-700 dark:text-gray-300">Filter by Company:</Label>
+                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                  <Button
+                    variant={!selectedCompany ? "default" : "outline"}
+                    onClick={() => handleCompanyChange('')}
+                    className="text-xs py-1 h-8 dark:border-gray-700"
+                  >
+                    All
+                  </Button>
+                  {jobsData.companies.map((company) => (
+                    <Button
+                      key={company}
+                      variant={selectedCompany === company ? "default" : "outline"}
+                      onClick={() => handleCompanyChange(company)}
+                      className="text-xs py-1 h-8 dark:border-gray-700"
+                    >
+                      {company}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {jobsData?.metadata && (
               <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4 p-2 bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
                 <p>Last Updated: {new Date(jobsData.metadata.latestScrapeDate).toLocaleString()}</p>
                 <p className="font-medium">
-                  Found {jobsData.metadata.totalJobs} {selectedSource ? `${selectedSource} ` : ''}jobs
+                  Found {jobsData.metadata.totalJobs} jobs
                   {search ? ` matching "${search}"` : ''}
                 </p>
+                {(selectedSource || selectedCompany) && (
+                  <div className="flex flex-wrap justify-center gap-2 mt-2">
+                    {selectedSource && (
+                      <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded-full flex items-center">
+                        <FilterIcon className="h-3 w-3 mr-1" />
+                        Source: {selectedSource}
+                      </span>
+                    )}
+                    {selectedCompany && (
+                      <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 text-xs px-2 py-1 rounded-full flex items-center">
+                        <Building className="h-3 w-3 mr-1" />
+                        Company: {selectedCompany}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -284,7 +366,7 @@ export default function HomeContent() {
                 <SearchIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
                 <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No jobs found</h3>
                 <p className="text-gray-500 dark:text-gray-400">
-                  {search || selectedSource ? 
+                  {search || selectedSource || selectedCompany ? 
                     `Try adjusting your search or filters to see more results.` : 
                     `There are currently no job listings available.`}
                 </p>

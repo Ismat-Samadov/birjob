@@ -39,6 +39,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const search = searchParams.get('search') || ''
   const source = searchParams.get('source') || ''
+  const company = searchParams.get('company') || '' // Add company filter parameter
   const page = parseInt(searchParams.get('page') || '1')
   const pageSize = 10
 
@@ -84,6 +85,11 @@ export async function GET(request: Request) {
       sqlQuery = Prisma.sql`${sqlQuery} AND source = ${source}`;
     }
     
+    // Add company filter if provided
+    if (company) {
+      sqlQuery = Prisma.sql`${sqlQuery} AND LOWER(company) = ${company.toLowerCase()}`;
+    }
+    
     // Add ordering and pagination
     sqlQuery = Prisma.sql`
       ${sqlQuery} 
@@ -114,6 +120,10 @@ export async function GET(request: Request) {
       countQuery = Prisma.sql`${countQuery} AND source = ${source}`;
     }
     
+    if (company) {
+      countQuery = Prisma.sql`${countQuery} AND LOWER(company) = ${company.toLowerCase()}`;
+    }
+    
     // Get total count
     const totalCount = await prisma.$queryRaw<[{count: string | number}]>(countQuery);
     
@@ -141,6 +151,21 @@ export async function GET(request: Request) {
         console.error('Error fetching sources:', error);
       }
     }
+    
+    // Get top companies for filtering
+    let companies: string[] = [];
+    try {
+      const companiesResult = await prisma.$queryRaw<{company: string}[]>`
+        SELECT DISTINCT company FROM jobs_jobpost
+        WHERE company IS NOT NULL
+        GROUP BY company
+        ORDER BY COUNT(*) DESC
+        LIMIT 20
+      `;
+      companies = companiesResult.map(row => row.company);
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+    }
 
     // Process jobs to format bigints
     const processedJobs = processDbResult(jobsQuery);
@@ -153,6 +178,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       jobs: processedJobs,
       sources: sources, // Add sources for filtering
+      companies: companies, // Add companies for filtering
       metadata: {
         latestScrapeDate: latestDate,
         totalJobs: totalJobs,
