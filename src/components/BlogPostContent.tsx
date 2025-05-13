@@ -257,8 +257,22 @@ interface BlogPostContentProps {
 }
 
 export default function BlogPostContent({ slug }: BlogPostContentProps) {
-  const [post, setPost] = useState<any>(null);
-  const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
+  interface BlogPost {
+    id: number;
+    title: string;
+    excerpt: string;
+    content: string;
+    author: string;
+    date: string;
+    readTime: string;
+    category: string;
+    slug: string;
+    tags: string[];
+    relatedPosts?: number[];
+  }
+  
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { trackPageView, trackEvent } = useAnalytics();
   const { addToast } = useToast();

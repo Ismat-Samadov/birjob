@@ -22,19 +22,24 @@ export default function ClientWrapper({
   );
 }
 
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error | null;
+}
+
 // Simple error boundary to catch and handle client-side errors
-class ErrorBoundary extends React.Component<{children: ReactNode}, {hasError: boolean}> {
+class ErrorBoundary extends React.Component<{children: ReactNode}, ErrorBoundaryState> {
   constructor(props: {children: ReactNode}) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError() {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     // Update state so the next render shows the fallback UI
-    return { hasError: true };
+    return { hasError: true, error };
   }
 
-  componentDidCatch(error: any, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // You can log the error to an error reporting service
     console.error("Client component error:", error, errorInfo);
   }
