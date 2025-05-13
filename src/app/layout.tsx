@@ -10,7 +10,10 @@ import ScrollToTop from '@/components/ScrollToTop';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'BirJob',
+  title: {
+    template: '%s | BirJob',
+    default: 'BirJob - Your Ultimate Job Aggregator',
+  },
   description: 'Job board aggregator showing opportunities from multiple sources',
   icons: {
     icon: [

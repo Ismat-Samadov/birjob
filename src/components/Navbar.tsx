@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, Bot, Search, BarChart2, Menu, X } from 'lucide-react';
+import { Bell, Bot, Search, BarChart2, Menu, X, BookOpen } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -62,6 +62,12 @@ export default function Navbar() {
                 AI Assistant
               </Link>
               <Link 
+                href="/blog" 
+                className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/blog')}`}>
+                <BookOpen className="h-4 w-4 mr-1" />
+                Blog
+              </Link>
+              <Link 
                 href="/notifications" 
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/notifications')}`}>
                 <Bell className="h-4 w-4 mr-1" />
@@ -112,6 +118,13 @@ export default function Navbar() {
             >
               <Bot className="h-5 w-5 mr-2" />
               AI Assistant
+            </Link>
+            <Link 
+              href="/blog" 
+              className={`${pathname === '/blog' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
+            >
+              <BookOpen className="h-5 w-5 mr-2" />
+              Blog
             </Link>
             <Link 
               href="/notifications" 
