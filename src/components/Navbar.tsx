@@ -1,29 +1,47 @@
 "use client"
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { Bell, Bot, Search, BarChart2, Menu, X, BookOpen } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 
 export default function Navbar() {
-  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [currentPath, setCurrentPath] = useState('/');
   
   // Handle mounting to avoid hydration issues
   useEffect(() => {
     setIsMounted(true);
+    // Set current path on initial load
+    setCurrentPath(window.location.pathname);
   }, []);
   
-  // Close mobile menu when clicking outside or changing route
+  // Use a safer alternative to usePathname which requires Suspense
   useEffect(() => {
+    const handleRouteChange = () => {
+      setCurrentPath(window.location.pathname);
+      setIsMenuOpen(false);
+    };
+
+    // Listen for client-side navigation
+    window.addEventListener('popstate', handleRouteChange);
+
+    // Clean up the event listener
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, []);
+
+  // Track click navigation to update current path
+  const handleLinkClick = useCallback((path: string) => {
+    setCurrentPath(path);
     setIsMenuOpen(false);
-  }, [pathname]);
+  }, []);
   
   const isActive = (path: string) => {
-    return pathname === path ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-500';
+    return currentPath === path ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-500';
   };
 
   if (!isMounted) {
@@ -35,7 +53,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center">
+            <Link href="/" onClick={() => handleLinkClick('/')} className="flex-shrink-0 flex items-center">
               <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">BirJob</span>
             </Link>
           </div>
@@ -45,30 +63,35 @@ export default function Navbar() {
             <nav className="flex space-x-6">
               <Link 
                 href="/" 
+                onClick={() => handleLinkClick('/')}
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/')}`}>
                 <Search className="h-4 w-4 mr-1" />
                 Job Search
               </Link>
               <Link 
-                href="/trends" 
+                href="/trends"
+                onClick={() => handleLinkClick('/trends')}
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/trends')}`}>
                 <BarChart2 className="h-4 w-4 mr-1" />
                 Trends
               </Link>
               <Link 
-                href="/ai-assistant" 
+                href="/ai-assistant"
+                onClick={() => handleLinkClick('/ai-assistant')}
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/ai-assistant')}`}>
                 <Bot className="h-4 w-4 mr-1" />
                 AI Assistant
               </Link>
               <Link 
-                href="/blog" 
+                href="/blog"
+                onClick={() => handleLinkClick('/blog')}
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/blog')}`}>
                 <BookOpen className="h-4 w-4 mr-1" />
                 Blog
               </Link>
               <Link 
-                href="/notifications" 
+                href="/notifications"
+                onClick={() => handleLinkClick('/notifications')}
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive('/notifications')}`}>
                 <Bell className="h-4 w-4 mr-1" />
                 Notifications
@@ -100,35 +123,40 @@ export default function Navbar() {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-900 shadow-lg">
             <Link 
               href="/" 
-              className={`${pathname === '/' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
+              onClick={() => handleLinkClick('/')}
+              className={`${currentPath === '/' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
             >
               <Search className="h-5 w-5 mr-2" />
               Job Search
             </Link>
             <Link 
-              href="/trends" 
-              className={`${pathname === '/trends' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
+              href="/trends"
+              onClick={() => handleLinkClick('/trends')}
+              className={`${currentPath === '/trends' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
             >
               <BarChart2 className="h-5 w-5 mr-2" />
               Trends
             </Link>
             <Link 
-              href="/ai-assistant" 
-              className={`${pathname === '/ai-assistant' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
+              href="/ai-assistant"
+              onClick={() => handleLinkClick('/ai-assistant')}
+              className={`${currentPath === '/ai-assistant' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
             >
               <Bot className="h-5 w-5 mr-2" />
               AI Assistant
             </Link>
             <Link 
-              href="/blog" 
-              className={`${pathname === '/blog' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
+              href="/blog"
+              onClick={() => handleLinkClick('/blog')}
+              className={`${currentPath === '/blog' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
             >
               <BookOpen className="h-5 w-5 mr-2" />
               Blog
             </Link>
             <Link 
-              href="/notifications" 
-              className={`${pathname === '/notifications' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
+              href="/notifications"
+              onClick={() => handleLinkClick('/notifications')}
+              className={`${currentPath === '/notifications' ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'} block px-3 py-2 rounded-md text-base font-medium flex items-center`}
             >
               <Bell className="h-5 w-5 mr-2" />
               Notifications

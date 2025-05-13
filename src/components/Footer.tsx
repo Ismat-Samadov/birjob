@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { BookOpen } from "lucide-react";
 import { useAnalytics } from "@/lib/hooks/useAnalytics";
 
 export default function Footer() {

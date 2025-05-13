@@ -1,13 +1,20 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import ClientWrapper from '@/components/ClientWrapper';
+import { Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Providers } from '@/components/Providers';
 import ScrollToTop from '@/components/ScrollToTop';
 
 const inter = Inter({ subsets: ['latin'] });
+
+// Simple loading component
+const Loading = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
 
 export const metadata: Metadata = {
   title: {
@@ -44,14 +51,20 @@ export default function RootLayout({
       <body className={`${inter.className} mobile-overflow-fix`}>
         <Providers>
           <div className="flex flex-col min-h-screen">
-            <ClientWrapper>
+            <Suspense fallback={<div className="h-16 bg-white dark:bg-gray-900 shadow-sm"></div>}>
               <Navbar />
-            </ClientWrapper>
-            <main className="flex-grow">{children}</main>
-            <Footer />
-            <ClientWrapper>
+            </Suspense>
+            <main className="flex-grow">
+              <Suspense fallback={<Loading />}>
+                {children}
+              </Suspense>
+            </main>
+            <Suspense fallback={<div className="h-48 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"></div>}>
+              <Footer />
+            </Suspense>
+            <Suspense fallback={null}>
               <ScrollToTop />
-            </ClientWrapper>
+            </Suspense>
           </div>
         </Providers>
       </body>
