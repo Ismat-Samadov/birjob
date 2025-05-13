@@ -18,7 +18,7 @@ const blogPosts = [
       <h2>Introduction</h2>
       <p>The job market in 2025 is more dynamic and competitive than ever before. With the rise of AI-driven hiring processes, remote work opportunities, and changing employer expectations, job seekers need to adapt their strategies to stand out from the crowd.</p>
       
-      <p>In this comprehensive guide, we'll explore the most effective job hunting techniques that are working in 2025, based on current industry trends and feedback from hiring managers across various sectors.</p>
+      <p>In this comprehensive guide, we&apos;ll explore the most effective job hunting techniques that are working in 2025, based on current industry trends and feedback from hiring managers across various sectors.</p>
       
       <h2>1. Optimize Your Online Presence</h2>
       <p>Your digital footprint matters more than ever. Employers typically research candidates online before making hiring decisions. Ensure your LinkedIn profile is complete and showcases your professional achievements with quantifiable results. Consider creating a personal website that serves as a portfolio of your work and skills.</p>
@@ -48,7 +48,7 @@ const blogPosts = [
       <h2>5. Personalize Your Applications</h2>
       <p>Generic applications rarely make it past the initial screening. Take the time to tailor your resume and cover letter for each position, highlighting relevant skills and experiences that match the job description.</p>
       
-      <p>Research the company thoroughly and reference specific aspects of their business or culture that appeal to you, showing that you've done your homework.</p>
+      <p>Research the company thoroughly and reference specific aspects of their business or culture that appeal to you, showing that you&apos;ve done your homework.</p>
       
       <h2>6. Prepare for Modern Interview Formats</h2>
       <p>Interviews in 2025 often include a mix of traditional, behavioral, technical, and AI-driven assessments. Practice for various formats, including video interviews, asynchronous interviews (where you record responses to questions), and virtual reality assessments.</p>
@@ -59,16 +59,16 @@ const blogPosts = [
       <p>With hybrid and remote work models now the norm in many industries, employers look for candidates who can demonstrate effectiveness outside traditional office environments. Highlight your experience with digital collaboration tools, self-management, and communication skills essential for remote work.</p>
       
       <h2>8. Tap Into the Hidden Job Market</h2>
-      <p>Many positions are filled without ever being publicly advertised. Gain access to this hidden job market by developing relationships with recruiters, joining industry-specific communities, and directly approaching companies you'd like to work for, even if they haven't posted relevant openings.</p>
+      <p>Many positions are filled without ever being publicly advertised. Gain access to this hidden job market by developing relationships with recruiters, joining industry-specific communities, and directly approaching companies you&apos;d like to work for, even if they haven&apos;t posted relevant openings.</p>
       
       <h2>9. Focus on Value and Results</h2>
-      <p>Employers hire people who can solve problems and add value. Instead of merely listing your responsibilities, emphasize the concrete results you've achieved in previous roles. Quantify your impact whenever possible with specific metrics and outcomes.</p>
+      <p>Employers hire people who can solve problems and add value. Instead of merely listing your responsibilities, emphasize the concrete results you&apos;ve achieved in previous roles. Quantify your impact whenever possible with specific metrics and outcomes.</p>
       
       <h2>10. Maintain Resilience and Persistence</h2>
-      <p>Job hunting can be challenging and sometimes disheartening. Develop a resilient mindset by setting realistic expectations, celebrating small wins, and learning from rejections. Maintain a consistent schedule for your job search activities, and don't hesitate to adjust your approach based on the feedback you receive.</p>
+      <p>Job hunting can be challenging and sometimes disheartening. Develop a resilient mindset by setting realistic expectations, celebrating small wins, and learning from rejections. Maintain a consistent schedule for your job search activities, and don&apos;t hesitate to adjust your approach based on the feedback you receive.</p>
       
       <h2>Conclusion</h2>
-      <p>The most successful job seekers in 2025 combine technological savvy with traditional relationship-building skills. By implementing these ten strategies, you'll position yourself effectively in a competitive market and increase your chances of landing not just any job, but the right job for your career goals and personal aspirations.</p>
+      <p>The most successful job seekers in 2025 combine technological savvy with traditional relationship-building skills. By implementing these ten strategies, you&apos;ll position yourself effectively in a competitive market and increase your chances of landing not just any job, but the right job for your career goals and personal aspirations.</p>
       
       <p>Remember that job hunting is a skill in itself—one that improves with practice and persistence. Stay adaptable, keep learning, and approach the process with confidence in the value you bring to potential employers.</p>
     `,
@@ -86,7 +86,7 @@ const blogPosts = [
     excerpt: "Learn how to optimize your resume for Applicant Tracking Systems while still making it appealing to human recruiters.",
     content: `
       <h2>Introduction</h2>
-      <p>In today's digital job market, your resume must impress both automated systems and human recruiters. Before your resume reaches a hiring manager's desk, it often needs to pass through an Applicant Tracking System (ATS). These sophisticated software programs scan, sort, and rank resumes based on specific criteria.</p>
+      <p>In today&apos;s digital job market, your resume must impress both automated systems and human recruiters. Before your resume reaches a hiring manager&apos;s desk, it often needs to pass through an Applicant Tracking System (ATS). These sophisticated software programs scan, sort, and rank resumes based on specific criteria.</p>
       
       <p>This comprehensive guide will help you create a resume that successfully navigates ATS filters while still engaging human readers who make the final hiring decisions.</p>
       
@@ -115,7 +115,7 @@ const blogPosts = [
       </ul>
       
       <h3>2. Optimize with Strategic Keywords</h3>
-      <p>Keywords are crucial for ATS success. Here's how to use them effectively:</p>
+      <p>Keywords are crucial for ATS success. Here&apos;s how to use them effectively:</p>
       <ul>
         <li>Carefully analyze the job description for important terms and phrases</li>
         <li>Include exact matches of technical skills, certifications, and software mentioned</li>
@@ -170,8 +170,8 @@ const blogPosts = [
       <h2>Common ATS Mistakes to Avoid</h2>
       <ul>
         <li>Using creative file names (stick to YourName_Resume.pdf)</li>
-        <li>Including information in headers or footers (ATS often can't read these areas)</li>
-        <li>Using creative section headings (stick to standard terms like "Experience" rather than "Where I've Made an Impact")</li>
+        <li>Including information in headers or footers (ATS often can&apos;t read these areas)</li>
+        <li>Using creative section headings (stick to standard terms like "Experience" rather than "Where I&apos;ve Made an Impact")</li>
         <li>Submitting a resume with spelling or grammatical errors</li>
         <li>Keyword stuffing (unnaturally forcing keywords into your resume)</li>
         <li>Using graphics, logos, or photos</li>
@@ -186,9 +186,9 @@ const blogPosts = [
       </ul>
       
       <h2>Conclusion</h2>
-      <p>Creating an ATS-friendly resume doesn't mean sacrificing quality or personality. By understanding how these systems work and implementing these strategies, you can craft a resume that successfully passes through digital filters while still impressing human recruiters.</p>
+      <p>Creating an ATS-friendly resume doesn&apos;t mean sacrificing quality or personality. By understanding how these systems work and implementing these strategies, you can craft a resume that successfully passes through digital filters while still impressing human recruiters.</p>
       
-      <p>Remember, the goal is not just to get past the ATS but to present yourself as the best candidate for the job. With a well-optimized, compelling resume, you'll significantly increase your chances of landing interviews for positions that align with your career goals.</p>
+      <p>Remember, the goal is not just to get past the ATS but to present yourself as the best candidate for the job. With a well-optimized, compelling resume, you&apos;ll significantly increase your chances of landing interviews for positions that align with your career goals.</p>
     `,
     author: "HR Specialist",
     date: "May 5, 2025",
@@ -252,25 +252,25 @@ const blogPosts = [
   }
 ];
 
+interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  date: string;
+  readTime: string;
+  category: string;
+  slug: string;
+  tags: string[];
+  relatedPosts?: number[];
+}
+
 interface BlogPostContentProps {
   slug: string;
 }
 
 export default function BlogPostContent({ slug }: BlogPostContentProps) {
-  interface BlogPost {
-    id: number;
-    title: string;
-    excerpt: string;
-    content: string;
-    author: string;
-    date: string;
-    readTime: string;
-    category: string;
-    slug: string;
-    tags: string[];
-    relatedPosts?: number[];
-  }
-  
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -291,7 +291,7 @@ export default function BlogPostContent({ slug }: BlogPostContentProps) {
         
         // Get related posts
         if (foundPost.relatedPosts && foundPost.relatedPosts.length > 0) {
-          const related = blogPosts.filter(p => foundPost.relatedPosts.includes(p.id));
+          const related = blogPosts.filter(p => foundPost.relatedPosts?.includes(p.id));
           setRelatedPosts(related);
         }
         
@@ -390,7 +390,7 @@ export default function BlogPostContent({ slug }: BlogPostContentProps) {
               Post Not Found
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Sorry, the blog post you're looking for doesn't exist or has been moved.
+              Sorry, the blog post you&apos;re looking for doesn&apos;t exist or has been moved.
             </p>
             <Link href="/blog" passHref>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
