@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Tag, ArrowLeft, Share2, Bookmark, TrendingUp, ThumbsUp, MessageCircle, Copy, MessageSquare, Heart, Twitter, Facebook, LinkedIn } from "lucide-react";
+import {  Clock, Tag, ArrowLeft, Share2, Bookmark, TrendingUp, ThumbsUp, MessageCircle, Copy, MessageSquare, Heart, Twitter, Facebook, Linkedin } from "lucide-react";
 import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
@@ -843,7 +843,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                       });
                     }}
                   >
-                    <LinkedIn className="h-4 w-4 mr-2" />
+                    <Linkedin className="h-4 w-4 mr-2" />
                     LinkedIn
                   </Button>
                   <Button
