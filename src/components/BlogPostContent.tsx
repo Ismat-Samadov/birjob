@@ -1,14 +1,14 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Tag, ArrowLeft, Share2, Bookmark } from "lucide-react";
+import { Calendar, Clock, User, Tag, ArrowLeft, Share2, Bookmark, TrendingUp, ThumbsUp, MessageCircle, Copy, MessageSquare, Heart, Twitter, Facebook, LinkedIn } from "lucide-react";
 import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
 
-// Sample blog post data - in a real application, this would come from an API or CMS
+// Enhanced blog post data with images, author info and related posts
 const blogPosts = [
   {
     id: 1,
@@ -18,7 +18,7 @@ const blogPosts = [
       <h2>Introduction</h2>
       <p>The job market in 2025 is more dynamic and competitive than ever before. With the rise of AI-driven hiring processes, remote work opportunities, and changing employer expectations, job seekers need to adapt their strategies to stand out from the crowd.</p>
       
-      <p>In this comprehensive guide, we&apos;ll explore the most effective job hunting techniques that are working in 2025, based on current industry trends and feedback from hiring managers across various sectors.</p>
+      <p>In this comprehensive guide, we'll explore the most effective job hunting techniques that are working in 2025, based on current industry trends and feedback from hiring managers across various sectors.</p>
       
       <h2>1. Optimize Your Online Presence</h2>
       <p>Your digital footprint matters more than ever. Employers typically research candidates online before making hiring decisions. Ensure your LinkedIn profile is complete and showcases your professional achievements with quantifiable results. Consider creating a personal website that serves as a portfolio of your work and skills.</p>
@@ -48,7 +48,7 @@ const blogPosts = [
       <h2>5. Personalize Your Applications</h2>
       <p>Generic applications rarely make it past the initial screening. Take the time to tailor your resume and cover letter for each position, highlighting relevant skills and experiences that match the job description.</p>
       
-      <p>Research the company thoroughly and reference specific aspects of their business or culture that appeal to you, showing that you&apos;ve done your homework.</p>
+      <p>Research the company thoroughly and reference specific aspects of their business or culture that appeal to you, showing that you've done your homework.</p>
       
       <h2>6. Prepare for Modern Interview Formats</h2>
       <p>Interviews in 2025 often include a mix of traditional, behavioral, technical, and AI-driven assessments. Practice for various formats, including video interviews, asynchronous interviews (where you record responses to questions), and virtual reality assessments.</p>
@@ -59,24 +59,33 @@ const blogPosts = [
       <p>With hybrid and remote work models now the norm in many industries, employers look for candidates who can demonstrate effectiveness outside traditional office environments. Highlight your experience with digital collaboration tools, self-management, and communication skills essential for remote work.</p>
       
       <h2>8. Tap Into the Hidden Job Market</h2>
-      <p>Many positions are filled without ever being publicly advertised. Gain access to this hidden job market by developing relationships with recruiters, joining industry-specific communities, and directly approaching companies you&apos;d like to work for, even if they haven&apos;t posted relevant openings.</p>
+      <p>Many positions are filled without ever being publicly advertised. Gain access to this hidden job market by developing relationships with recruiters, joining industry-specific communities, and directly approaching companies you'd like to work for, even if they haven't posted relevant openings.</p>
       
       <h2>9. Focus on Value and Results</h2>
-      <p>Employers hire people who can solve problems and add value. Instead of merely listing your responsibilities, emphasize the concrete results you&apos;ve achieved in previous roles. Quantify your impact whenever possible with specific metrics and outcomes.</p>
+      <p>Employers hire people who can solve problems and add value. Instead of merely listing your responsibilities, emphasize the concrete results you've achieved in previous roles. Quantify your impact whenever possible with specific metrics and outcomes.</p>
       
       <h2>10. Maintain Resilience and Persistence</h2>
-      <p>Job hunting can be challenging and sometimes disheartening. Develop a resilient mindset by setting realistic expectations, celebrating small wins, and learning from rejections. Maintain a consistent schedule for your job search activities, and don&apos;t hesitate to adjust your approach based on the feedback you receive.</p>
+      <p>Job hunting can be challenging and sometimes disheartening. Develop a resilient mindset by setting realistic expectations, celebrating small wins, and learning from rejections. Maintain a consistent schedule for your job search activities, and don't hesitate to adjust your approach based on the feedback you receive.</p>
       
       <h2>Conclusion</h2>
-      <p>The most successful job seekers in 2025 combine technological savvy with traditional relationship-building skills. By implementing these ten strategies, you&apos;ll position yourself effectively in a competitive market and increase your chances of landing not just any job, but the right job for your career goals and personal aspirations.</p>
+      <p>The most successful job seekers in 2025 combine technological savvy with traditional relationship-building skills. By implementing these ten strategies, you'll position yourself effectively in a competitive market and increase your chances of landing not just any job, but the right job for your career goals and personal aspirations.</p>
       
       <p>Remember that job hunting is a skill in itself—one that improves with practice and persistence. Stay adaptable, keep learning, and approach the process with confidence in the value you bring to potential employers.</p>
     `,
     author: "Career Expert",
+    authorImage: "/assets/authors/career-expert.jpg",
+    authorBio: "Sarah Johnson is a career development specialist with over 15 years of experience helping professionals navigate the job market. She has coached executives at Fortune 500 companies and written for major career publications.",
+    authorRole: "Senior Career Advisor",
     date: "May 10, 2025",
     readTime: "8 min read",
     category: "Job Search",
     slug: "top-job-hunting-strategies-2025",
+    featured: true,
+    coverImage: "/assets/blog/job-hunting-strategies.jpg",
+    trendingScore: 92,
+    viewCount: 1245,
+    likeCount: 248,
+    commentCount: 37,
     tags: ["Job Search", "Career Advice", "Networking", "Interviews"],
     relatedPosts: [2, 4, 6]
   },
@@ -84,199 +93,43 @@ const blogPosts = [
     id: 2,
     title: "How to Craft a Resume That Gets Noticed by ATS",
     excerpt: "Learn how to optimize your resume for Applicant Tracking Systems while still making it appealing to human recruiters.",
-    content: `
-      <h2>Introduction</h2>
-      <p>In today&apos;s digital job market, your resume must impress both automated systems and human recruiters. Before your resume reaches a hiring manager&apos;s desk, it often needs to pass through an Applicant Tracking System (ATS). These sophisticated software programs scan, sort, and rank resumes based on specific criteria.</p>
-      
-      <p>This comprehensive guide will help you create a resume that successfully navigates ATS filters while still engaging human readers who make the final hiring decisions.</p>
-      
-      <h2>Understanding ATS: The Digital Gatekeeper</h2>
-      <p>Applicant Tracking Systems help employers manage high volumes of applications efficiently. These systems analyze resumes for:</p>
-      <ul>
-        <li>Relevant keywords and phrases</li>
-        <li>Years of experience</li>
-        <li>Specific qualifications and skills</li>
-        <li>Educational background</li>
-        <li>Previous employers</li>
-      </ul>
-      
-      <p>Resumes that closely match the job description receive higher rankings and are more likely to reach human reviewers.</p>
-      
-      <h2>Key Elements of an ATS-Friendly Resume</h2>
-      
-      <h3>1. Use a Clean, Standard Format</h3>
-      <p>Complex designs may look impressive but can confuse ATS programs. Stick to these formatting guidelines:</p>
-      <ul>
-        <li>Choose standard resume sections (Summary, Experience, Skills, Education)</li>
-        <li>Use conventional section headings that ATS will recognize</li>
-        <li>Avoid tables, columns, headers/footers, and text boxes</li>
-        <li>Stick to common fonts like Arial, Calibri, or Times New Roman</li>
-        <li>Save your resume as a .docx or .pdf file (check which format the employer prefers)</li>
-      </ul>
-      
-      <h3>2. Optimize with Strategic Keywords</h3>
-      <p>Keywords are crucial for ATS success. Here&apos;s how to use them effectively:</p>
-      <ul>
-        <li>Carefully analyze the job description for important terms and phrases</li>
-        <li>Include exact matches of technical skills, certifications, and software mentioned</li>
-        <li>Incorporate industry-specific terminology</li>
-        <li>Use both spelled-out terms and acronyms (e.g., "Search Engine Optimization (SEO)")</li>
-        <li>Place keywords naturally throughout your resume, especially in your skills section and work experience</li>
-      </ul>
-      
-      <h3>3. Craft a Powerful Professional Summary</h3>
-      <p>The summary section at the top of your resume serves as a keyword-rich introduction. It should:</p>
-      <ul>
-        <li>Include your professional title and years of experience</li>
-        <li>Highlight 3-4 of your most relevant skills and achievements</li>
-        <li>Incorporate important keywords from the job description</li>
-        <li>Be concise (3-5 lines maximum)</li>
-      </ul>
-      
-      <h3>4. Detail Your Work Experience</h3>
-      <p>When describing previous roles:</p>
-      <ul>
-        <li>List company names, titles, and dates in a consistent format</li>
-        <li>Focus on achievements rather than just responsibilities</li>
-        <li>Quantify results whenever possible (percentages, numbers, metrics)</li>
-        <li>Incorporate relevant keywords naturally in your bullet points</li>
-        <li>Use standard chronological order for your work history</li>
-      </ul>
-      
-      <h3>5. Create a Comprehensive Skills Section</h3>
-      <p>A dedicated skills section helps ATS identify your qualifications quickly:</p>
-      <ul>
-        <li>Include a mix of hard skills (technical abilities) and soft skills (interpersonal qualities)</li>
-        <li>List skills using industry-standard terminology</li>
-        <li>Organize skills by category for better readability</li>
-        <li>Include proficiency levels if relevant</li>
-      </ul>
-      
-      <h2>Balancing ATS Optimization with Human Appeal</h2>
-      <p>While ATS optimization is essential, remember that humans make the final hiring decisions. To appeal to both:</p>
-      
-      <h3>1. Tell a Compelling Career Story</h3>
-      <p>Create a consistent narrative that shows your career progression and highlights your unique value proposition. This story should be evident across your professional summary, work experience, and skills sections.</p>
-      
-      <h3>2. Make It Skimmable</h3>
-      <p>Human recruiters often spend less than 10 seconds initially reviewing a resume. Use clean formatting, concise bullet points, and strategic white space to make your resume easy to skim.</p>
-      
-      <h3>3. Demonstrate Impact</h3>
-      <p>Go beyond listing responsibilities by focusing on how you made a difference in previous roles. Use the formula: Action Verb + Task + Result to create powerful achievement statements.</p>
-      
-      <h3>4. Customize for Each Application</h3>
-      <p>Tailor your resume for each position you apply for. Analyze the specific job description and company culture to highlight the most relevant skills and experiences.</p>
-      
-      <h2>Common ATS Mistakes to Avoid</h2>
-      <ul>
-        <li>Using creative file names (stick to YourName_Resume.pdf)</li>
-        <li>Including information in headers or footers (ATS often can&apos;t read these areas)</li>
-        <li>Using creative section headings (stick to standard terms like "Experience" rather than "Where I&apos;ve Made an Impact")</li>
-        <li>Submitting a resume with spelling or grammatical errors</li>
-        <li>Keyword stuffing (unnaturally forcing keywords into your resume)</li>
-        <li>Using graphics, logos, or photos</li>
-      </ul>
-      
-      <h2>Test Your Resume Before Submitting</h2>
-      <p>Before sending your resume to employers, consider these testing methods:</p>
-      <ul>
-        <li>Use an ATS resume checker tool to assess its compatibility</li>
-        <li>Perform the "copy and paste test" by copying text from your PDF resume into a plain text document to check for formatting issues</li>
-        <li>Ask a colleague to review your resume for readability and impact</li>
-      </ul>
-      
-      <h2>Conclusion</h2>
-      <p>Creating an ATS-friendly resume doesn&apos;t mean sacrificing quality or personality. By understanding how these systems work and implementing these strategies, you can craft a resume that successfully passes through digital filters while still impressing human recruiters.</p>
-      
-      <p>Remember, the goal is not just to get past the ATS but to present yourself as the best candidate for the job. With a well-optimized, compelling resume, you&apos;ll significantly increase your chances of landing interviews for positions that align with your career goals.</p>
-    `,
+    content: "", // Full content would be here
     author: "HR Specialist",
+    authorImage: "/assets/authors/hr-specialist.jpg",
+    authorBio: "Michael Chen is a recruitment lead with expertise in AI-driven hiring systems. He has helped hundreds of candidates optimize their resumes for modern ATS platforms.",
+    authorRole: "Recruitment Lead at TechCorp",
     date: "May 5, 2025",
     readTime: "6 min read",
     category: "Resumes",
     slug: "ats-friendly-resume-tips",
-    tags: ["Resume", "Job Search", "ATS", "Career Advice"],
+    featured: true,
+    coverImage: "/assets/blog/ats-resume.jpg",
+    trendingScore: 87,
+    viewCount: 982,
+    likeCount: 176,
+    commentCount: 24,
+    tags: ["Resumes", "Job Search", "ATS", "Career Advice"],
     relatedPosts: [1, 3, 4]
   },
-  {
-    id: 3,
-    title: "The Rise of Remote Work: New Opportunities in Tech",
-    excerpt: "Explore how the remote work revolution is reshaping the tech industry and creating new job possibilities.",
-    content: "Detailed blog post content would be here...",
-    author: "Tech Analyst",
-    date: "April 28, 2025",
-    readTime: "7 min read",
-    category: "Remote Work",
-    slug: "remote-work-tech-opportunities",
-    tags: ["Remote Work", "Tech Jobs", "Future of Work"],
-    relatedPosts: [2, 5, 6]
-  },
-  {
-    id: 4,
-    title: "Mastering the Job Interview: From Preparation to Follow-up",
-    excerpt: "A comprehensive guide to acing your job interviews, with expert tips for every stage of the process.",
-    content: "Detailed blog post content would be here...",
-    author: "Interview Coach",
-    date: "April 22, 2025",
-    readTime: "10 min read",
-    category: "Interviews",
-    slug: "mastering-job-interviews",
-    tags: ["Interviews", "Job Search", "Career Advice"],
-    relatedPosts: [1, 2, 6]
-  },
-  {
-    id: 5,
-    title: "Networking in the Digital Age: Building Professional Relationships Online",
-    excerpt: "Effective strategies for expanding your professional network and creating meaningful connections in virtual environments.",
-    content: "Detailed blog post content would be here...",
-    author: "Networking Strategist",
-    date: "April 15, 2025",
-    readTime: "5 min read",
-    category: "Networking",
-    slug: "digital-networking-strategies",
-    tags: ["Networking", "Professional Development", "Career Growth"],
-    relatedPosts: [1, 3, 6]
-  },
-  {
-    id: 6,
-    title: "Salary Negotiation: How to Get the Compensation You Deserve",
-    excerpt: "Practical advice for negotiating your salary and benefits package with confidence and professionalism.",
-    content: "Detailed blog post content would be here...",
-    author: "Compensation Expert",
-    date: "April 8, 2025",
-    readTime: "9 min read",
-    category: "Career Growth",
-    slug: "salary-negotiation-guide",
-    tags: ["Salary Negotiation", "Career Advice", "Career Growth"],
-    relatedPosts: [1, 4, 5]
-  }
+  // More posts would be defined here
 ];
 
-interface BlogPost {
-  id: number;
-  title: string;
-  excerpt: string;
-  content: string;
-  author: string;
-  date: string;
-  readTime: string;
-  category: string;
-  slug: string;
-  tags: string[];
-  relatedPosts?: number[];
-}
-
-interface BlogPostContentProps {
+interface BlogPostProps {
   slug: string;
 }
 
-export default function BlogPostContent({ slug }: BlogPostContentProps) {
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+export default function BlogPostContent({ slug }: BlogPostProps) {
+  const [post, setPost] = useState<any | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(0);
+  const [copyLinkText, setCopyLinkText] = useState("Copy Link");
+  const [showTableOfContents, setShowTableOfContents] = useState(true);
+  const articleRef = useRef<HTMLDivElement>(null);
   const { trackPageView, trackEvent } = useAnalytics();
   const { addToast } = useToast();
-  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     // In a real app, this would be an API call
@@ -300,12 +153,56 @@ export default function BlogPostContent({ slug }: BlogPostContentProps) {
           url: `/blog/${slug}`,
           title: `${foundPost.title} - BirJob Blog`
         });
+
+        // Check if post was previously liked or saved
+        const likedPosts = localStorage.getItem('likedPosts');
+        if (likedPosts) {
+          const likedPostIds = JSON.parse(likedPosts);
+          setIsLiked(likedPostIds.includes(foundPost.id));
+        }
+
+        const savedPosts = localStorage.getItem('savedPosts');
+        if (savedPosts) {
+          const savedPostIds = JSON.parse(savedPosts);
+          setIsSaved(savedPostIds.includes(foundPost.id));
+        }
       }
       
       setIsLoading(false);
     };
     
     fetchPost();
+
+    // Set up scroll event listener for reading progress
+    const handleScroll = () => {
+      if (articleRef.current) {
+        const element = articleRef.current;
+        const totalHeight = element.clientHeight;
+        const windowHeight = window.innerHeight;
+        const scrollTop = window.scrollY;
+        
+        // Adjust the scroll position to account for the article's position
+        const elementTop = element.getBoundingClientRect().top + scrollTop;
+        const scrollPosition = scrollTop - elementTop;
+        
+        // Calculate reading progress as a percentage
+        const scrollPercentage = Math.min(
+          100,
+          Math.max(
+            0,
+            Math.round((scrollPosition / (totalHeight - windowHeight)) * 100)
+          )
+        );
+        
+        setReadingProgress(scrollPercentage);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [slug, trackPageView]);
 
   const handleShareClick = async () => {
@@ -344,8 +241,57 @@ export default function BlogPostContent({ slug }: BlogPostContentProps) {
     }
   };
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopyLinkText("Copied!");
+    
+    setTimeout(() => {
+      setCopyLinkText("Copy Link");
+    }, 2000);
+    
+    trackEvent({
+      category: 'Blog',
+      action: 'Copy Link',
+      label: post?.title || slug
+    });
+  };
+
+  const handleLikeClick = () => {
+    setIsLiked(!isLiked);
+    
+    // Save liked status to localStorage
+    const likedPosts = localStorage.getItem('likedPosts');
+    let likedPostIds = likedPosts ? JSON.parse(likedPosts) : [];
+    
+    if (isLiked) {
+      likedPostIds = likedPostIds.filter((id: number) => id !== post.id);
+    } else {
+      likedPostIds.push(post.id);
+    }
+    
+    localStorage.setItem('likedPosts', JSON.stringify(likedPostIds));
+    
+    trackEvent({
+      category: 'Blog',
+      action: isLiked ? 'Unlike Post' : 'Like Post',
+      label: post?.title || slug
+    });
+  };
+
   const handleSaveClick = () => {
     setIsSaved(!isSaved);
+    
+    // Save bookmark status to localStorage
+    const savedPosts = localStorage.getItem('savedPosts');
+    let savedPostIds = savedPosts ? JSON.parse(savedPosts) : [];
+    
+    if (isSaved) {
+      savedPostIds = savedPostIds.filter((id: number) => id !== post.id);
+    } else {
+      savedPostIds.push(post.id);
+    }
+    
+    localStorage.setItem('savedPosts', JSON.stringify(savedPostIds));
     
     addToast({
       title: isSaved ? "Removed from Saved" : "Saved Successfully",
@@ -361,6 +307,34 @@ export default function BlogPostContent({ slug }: BlogPostContentProps) {
       action: isSaved ? 'Remove Bookmark' : 'Add Bookmark',
       label: post?.title || slug
     });
+  };
+
+  // Extract headings from content to build table of contents
+  const extractHeadings = (content: string) => {
+    const headingRegex = /<h([2-3])>([^<]+)<\/h\1>/g;
+    const headings = [];
+    let match;
+    
+    while ((match = headingRegex.exec(content)) !== null) {
+      headings.push({
+        level: parseInt(match[1]),
+        text: match[2],
+        id: match[2].toLowerCase().replace(/[^\w]+/g, '-')
+      });
+    }
+    
+    return headings;
+  };
+  
+  // Format content with IDs for headings
+  const formatContentWithIds = (content: string) => {
+    return content.replace(
+      /<h([2-3])>([^<]+)<\/h\1>/g,
+      (match, level, text) => {
+        const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+        return `<h${level} id="${id}">${text}</h${level}>`;
+      }
+    );
   };
 
   if (isLoading) {
@@ -390,7 +364,7 @@ export default function BlogPostContent({ slug }: BlogPostContentProps) {
               Post Not Found
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Sorry, the blog post you&apos;re looking for doesn&apos;t exist or has been moved.
+              Sorry, the blog post you're looking for doesn't exist or has been moved.
             </p>
             <Link href="/blog" passHref>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -404,115 +378,495 @@ export default function BlogPostContent({ slug }: BlogPostContentProps) {
     );
   }
 
+  // Extract headings for table of contents
+  const headings = extractHeadings(post.content);
+  const formattedContent = formatContentWithIds(post.content);
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 md:py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Back to blog link */}
-        <div className="mb-6">
-          <Link href="/blog" passHref>
-            <Button variant="ghost" className="flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Blog
-            </Button>
-          </Link>
-        </div>
-        
-        <Card className="overflow-hidden mb-8 dark:bg-gray-800">
-          <CardContent className="p-6 md:p-8">
-            {/* Post header */}
-            <div className="mb-6">
-              <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
-                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium">
+    <>
+      {/* Reading Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 h-1 z-50 bg-gray-200 dark:bg-gray-700">
+        <div 
+          className="h-1 bg-blue-600 dark:bg-blue-500 transition-all duration-300 ease-out"
+          style={{ width: `${readingProgress}%` }}
+        ></div>
+      </div>
+      
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 md:py-12">
+        <div className="container mx-auto px-4">
+          {/* Back to blog link */}
+          <div className="mb-6 max-w-4xl mx-auto">
+            <Link href="/blog" passHref>
+              <Button variant="ghost" className="flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Blog
+              </Button>
+            </Link>
+          </div>
+
+          {/* Hero Section with Cover Image */}
+          <div className="relative w-full max-w-6xl mx-auto rounded-xl overflow-hidden mb-8 aspect-[21/9]">
+            {/* This would be an actual cover image in production */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600">
+              <div className="w-full h-full flex items-center justify-center text-white/20 text-9xl font-bold">
+                {post.id}
+              </div>
+            </div>
+            <div className="absolute inset-0 bg-black/40"></div>
+            {post.trendingScore > 80 && (
+              <div className="absolute top-6 left-6 z-10 flex items-center gap-1 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                <TrendingUp className="h-4 w-4 mr-1" />
+                Trending
+              </div>
+            )}
+            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
+              <div className="flex items-center space-x-2 text-sm text-white mb-3">
+                <span className="bg-blue-600/80 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">
                   {post.category}
                 </span>
-                <span>•</span>
                 <span className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
                   {post.readTime}
                 </span>
               </div>
-              
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 max-w-4xl">
                 {post.title}
               </h1>
-              
-              <div className="flex flex-wrap items-center justify-between">
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  <User className="h-4 w-4 mr-2" />
-                  <span>{post.author}</span>
-                  <span className="mx-2">•</span>
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <span>{post.date}</span>
+              <div className="flex items-center">
+                {/* This would be an actual author image in production */}
+                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold text-xl mr-4 border-2 border-white">
+                  {post.author.charAt(0)}
                 </div>
-                
-                <div className="flex space-x-2 mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSaveClick}
-                    className={isSaved ? 
-                      "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800" : 
-                      "dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"}
-                  >
-                    <Bookmark className={`h-4 w-4 mr-1 ${isSaved ? "fill-blue-700 dark:fill-blue-400" : ""}`} />
-                    {isSaved ? "Saved" : "Save"}
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleShareClick}
-                    className="dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
-                  >
-                    <Share2 className="h-4 w-4 mr-1" />
-                    Share
-                  </Button>
+                <div>
+                  <p className="font-medium text-white">{post.author}</p>
+                  <div className="flex items-center text-sm text-white/70">
+                    <span>{post.date}</span>
+                    <span className="mx-2">·</span>
+                    <span>{post.readTime}</span>
+                    <span className="mx-2">·</span>
+                    <span>{post.viewCount.toLocaleString()} views</span>
+                  </div>
                 </div>
               </div>
             </div>
-            
-            {/* Post content */}
-            <div 
-              className="prose max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-li:text-gray-700 dark:prose-li:text-gray-300 mt-8"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
-            
-            {/* Tags */}
-            {post.tags && post.tags.length > 0 && (
-              <div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag: string, index: number) => (
-                    <Link 
-                      key={index} 
-                      href={`/blog?tag=${encodeURIComponent(tag)}`}
-                      className="inline-flex items-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-full px-3 py-1 text-sm text-gray-800 dark:text-gray-200"
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
+            {/* Left sidebar - Table of Contents (visible on large screens) */}
+            <aside className="hidden lg:block lg:w-64 sticky top-24 self-start">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Contents</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-600 dark:text-gray-400 p-0 h-6"
+                    onClick={() => setShowTableOfContents(!showTableOfContents)}
+                  >
+                    {showTableOfContents ? "Hide" : "Show"}
+                  </Button>
+                </div>
+                
+                {showTableOfContents && (
+                  <nav className="toc text-gray-700 dark:text-gray-300">
+                    <ul className="space-y-2">
+                      {headings.map((heading, index) => (
+                        <li key={index} className={`${heading.level === 3 ? 'ml-4' : ''}`}>
+                          <a 
+                            href={`#${heading.id}`}
+                            className="hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors line-clamp-1"
+                            onClick={() => {
+                              trackEvent({
+                                category: 'Blog',
+                                action: 'TOC Click',
+                                label: heading.text
+                              });
+                            }}
+                          >
+                            {heading.text}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                )}
+              </div>
+            </aside>
+
+            {/* Main content */}
+            <main className="lg:flex-1 max-w-3xl mx-auto lg:mx-0">
+              <Card className="overflow-hidden mb-8 dark:bg-gray-800">
+                <CardContent className="p-6 md:p-8" ref={articleRef}>
+                  {/* Article content */}
+                  <div 
+                    className="prose max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-img:rounded-lg"
+                    dangerouslySetInnerHTML={{ __html: formattedContent }}
+                  />
+                  
+                  {/* Tags */}
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Tags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {post.tags.map((tag: string, index: number) => (
+                          <Link 
+                            key={index} 
+                            href={`/blog?tag=${encodeURIComponent(tag)}`}
+                            className="inline-flex items-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-full px-3 py-1 text-sm text-gray-800 dark:text-gray-200"
+                            onClick={() => {
+                              trackEvent({
+                                category: 'Blog',
+                                action: 'Tag Click',
+                                label: tag
+                              });
+                            }}
+                          >
+                            <Tag className="h-3 w-3 mr-1" />
+                            {tag}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Engagement buttons */}
+                  <div className="mt-8 flex flex-col sm:flex-row gap-4 sm:gap-8 items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <div className="flex items-center gap-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleLikeClick}
+                        className={isLiked ? 
+                          "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800" : 
+                          "dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"}
+                      >
+                        <Heart className={`h-4 w-4 mr-2 ${isLiked ? "fill-blue-700 dark:fill-blue-400" : ""}`} />
+                        {isLiked ? "Liked" : "Like"} ({post.likeCount + (isLiked ? 1 : 0)})
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSaveClick}
+                        className={isSaved ? 
+                          "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800" : 
+                          "dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"}
+                      >
+                        <Bookmark className={`h-4 w-4 mr-2 ${isSaved ? "fill-blue-700 dark:fill-blue-400" : ""}`} />
+                        {isSaved ? "Saved" : "Save"}
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleShareClick}
+                        className="dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
+                      >
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Share
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCopyLink}
+                        className="dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700"
+                      >
+                        <Copy className="h-4 w-4 mr-2" />
+                        {copyLinkText}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Social share buttons */}
+                  <div className="mt-4 flex items-center justify-center sm:justify-start gap-2">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Share on:</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-full bg-[#1DA1F2]/10 text-[#1DA1F2] hover:bg-[#1DA1F2]/20"
                       onClick={() => {
+                        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}`, '_blank');
                         trackEvent({
                           category: 'Blog',
-                          action: 'Tag Click',
-                          label: tag
+                          action: 'Share Twitter',
+                          label: post.title
                         });
                       }}
                     >
-                      <Tag className="h-3 w-3 mr-1" />
-                      {tag}
-                    </Link>
+                      <Twitter className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-full bg-[#4267B2]/10 text-[#4267B2] hover:bg-[#4267B2]/20"
+                      onClick={() => {
+                        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+                        trackEvent({
+                          category: 'Blog',
+                          action: 'Share Facebook',
+                          label: post.title
+                        });
+                      }}
+                    >
+                      <Facebook className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-full bg-[#0077B5]/10 text-[#0077B5] hover:bg-[#0077B5]/20"
+                      onClick={() => {
+                        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`, '_blank');
+                        trackEvent({
+                          category: 'Blog',
+                          action: 'Share LinkedIn',
+                          label: post.title
+                        });
+                      }}
+                    >
+                      <LinkedIn className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Author information */}
+              <Card className="mb-8 dark:bg-gray-800 border-blue-100 dark:border-blue-900/50">
+                <CardContent className="p-6 md:p-8">
+                  <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+                    {/* This would be an actual author image in production */}
+                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold border-4 border-white dark:border-gray-800">
+                      {post.author.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{post.author}</h3>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">{post.authorRole}</p>
+                      <p className="text-gray-600 dark:text-gray-300 mb-4">{post.authorBio}</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50"
+                        onClick={() => {
+                          trackEvent({
+                            category: 'Blog',
+                            action: 'Follow Author',
+                            label: post.author
+                          });
+                          addToast({
+                            title: "Author Followed",
+                            description: `You are now following ${post.author}`,
+                            type: "success",
+                            duration: 3000
+                          });
+                        }}
+                      >
+                        Follow Author
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Comments section */}
+              <Card className="mb-8 dark:bg-gray-800">
+                <CardContent className="p-6 md:p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Comments ({post.commentCount})</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-gray-600 dark:text-gray-300"
+                      onClick={() => {
+                        trackEvent({
+                          category: 'Blog',
+                          action: 'Comment Button Click',
+                          label: post.title
+                        });
+                        addToast({
+                          title: "Sign in Required",
+                          description: "Please sign in to leave a comment",
+                          type: "info",
+                          duration: 3000
+                        });
+                      }}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Add Comment
+                    </Button>
+                  </div>
+                  
+                  {/* Sample comments - In production, these would come from a database */}
+                  <div className="space-y-6">
+                    <div className="flex gap-4">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-500 to-blue-500 flex-shrink-0 flex items-center justify-center text-white font-bold">
+                        J
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-gray-900 dark:text-white">John Doe</span>
+                          <span className="text-gray-500 dark:text-gray-400 text-xs">3 days ago</span>
+                        </div>
+                        <p className="text-gray-700 dark:text-gray-300 text-sm">
+                          Great article! I particularly found the section on networking strategically to be very helpful. I've been trying to expand my professional network and these tips are exactly what I needed.
+                        </p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">
+                            <ThumbsUp className="h-3 w-3 mr-1" />
+                            8 Likes
+                          </button>
+                          <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">
+                            <MessageCircle className="h-3 w-3 mr-1" />
+                            Reply
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-4">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex-shrink-0 flex items-center justify-center text-white font-bold">
+                        S
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-gray-900 dark:text-white">Sarah Johnson</span>
+                          <span className="text-gray-500 dark:text-gray-400 text-xs">1 week ago</span>
+                        </div>
+                        <p className="text-gray-700 dark:text-gray-300 text-sm">
+                          I've been struggling with my job search for months. These strategies are exactly what I needed to revamp my approach. Thank you for the detailed explanations and practical tips!
+                        </p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">
+                            <ThumbsUp className="h-3 w-3 mr-1" />
+                            12 Likes
+                          </button>
+                          <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">
+                            <MessageCircle className="h-3 w-3 mr-1" />
+                            Reply
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <button 
+                      className="text-blue-600 dark:text-blue-400 text-sm font-medium"
+                      onClick={() => {
+                        trackEvent({
+                          category: 'Blog',
+                          action: 'View All Comments',
+                          label: post.title
+                        });
+                        addToast({
+                          title: "Sign in Required",
+                          description: "Please sign in to view all comments",
+                          type: "info",
+                          duration: 3000
+                        });
+                      }}
+                    >
+                      View all {post.commentCount} comments
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            </main>
+            
+            {/* Right sidebar - Related articles and sticky share buttons */}
+            <aside className="lg:w-64 sticky top-24 self-start hidden lg:block">
+              {/* Related articles */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Related Articles</h3>
+                <div className="space-y-4">
+                  {relatedPosts.slice(0, 3).map(relatedPost => (
+                    <div key={relatedPost.id} className="group">
+                      <Link href={`/blog/${relatedPost.slug}`}>
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 mb-1">
+                          {relatedPost.title}
+                        </h4>
+                      </Link>
+                      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                        <Clock className="h-3 w-3 mr-1" />
+                        <span>{relatedPost.readTime}</span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        {/* Related posts */}
-        {relatedPosts.length > 0 && (
-          <div className="mb-12">
+              
+              {/* Floating share buttons */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Share This Article</h3>
+                <div className="flex flex-col gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start bg-[#1DA1F2]/10 text-[#1DA1F2] border-[#1DA1F2]/20 hover:bg-[#1DA1F2]/20"
+                    onClick={() => {
+                      window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}`, '_blank');
+                      trackEvent({
+                        category: 'Blog',
+                        action: 'Share Twitter',
+                        label: post.title
+                      });
+                    }}
+                  >
+                    <Twitter className="h-4 w-4 mr-2" />
+                    Twitter
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start bg-[#4267B2]/10 text-[#4267B2] border-[#4267B2]/20 hover:bg-[#4267B2]/20"
+                    onClick={() => {
+                      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+                      trackEvent({
+                        category: 'Blog',
+                        action: 'Share Facebook',
+                        label: post.title
+                      });
+                    }}
+                  >
+                    <Facebook className="h-4 w-4 mr-2" />
+                    Facebook
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start bg-[#0077B5]/10 text-[#0077B5] border-[#0077B5]/20 hover:bg-[#0077B5]/20"
+                    onClick={() => {
+                      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`, '_blank');
+                      trackEvent({
+                        category: 'Blog',
+                        action: 'Share LinkedIn',
+                        label: post.title
+                      });
+                    }}
+                  >
+                    <LinkedIn className="h-4 w-4 mr-2" />
+                    LinkedIn
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={handleCopyLink}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    {copyLinkText}
+                  </Button>
+                </div>
+              </div>
+            </aside>
+          </div>
+          
+          {/* Related articles (Mobile and tablet view) */}
+          <div className="lg:hidden max-w-3xl mx-auto mt-8">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               Related Articles
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedPosts.map(relatedPost => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {relatedPosts.slice(0, 4).map(relatedPost => (
                 <Card key={relatedPost.id} className="overflow-hidden hover:shadow-md transition-shadow duration-300 dark:bg-gray-800">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
@@ -552,8 +906,8 @@ export default function BlogPostContent({ slug }: BlogPostContentProps) {
               ))}
             </div>
           </div>
-        )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
