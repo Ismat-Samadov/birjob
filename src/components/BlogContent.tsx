@@ -15,7 +15,7 @@ const blogPosts = [
     title: "Top 10 Job Hunting Strategies for 2025",
     excerpt: "Discover the most effective techniques to stand out in today's competitive job market and land your dream job.",
     author: "Career Expert",
-    authorImage: "/assets/authors/career-expert.jpg",
+    authorImage: "public/author.jpg",
     authorRole: "Senior Career Advisor",
     date: "May 10, 2025",
     readTime: "8 min read",
