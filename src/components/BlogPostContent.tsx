@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {  Clock, Tag, ArrowLeft, Share2, Bookmark, TrendingUp, ThumbsUp, MessageCircle, Copy, MessageSquare, Heart, Twitter, Facebook, Linkedin } from "lucide-react";
+import { 
+  ArrowLeft, Bookmark, Clock, Copy, Share2, ThumbsUp, 
+  MessageCircle, MessageSquare, Heart, Tag, TrendingUp
+} from "lucide-react";
 import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
@@ -18,7 +21,7 @@ const blogPosts = [
       <h2>Introduction</h2>
       <p>The job market in 2025 is more dynamic and competitive than ever before. With the rise of AI-driven hiring processes, remote work opportunities, and changing employer expectations, job seekers need to adapt their strategies to stand out from the crowd.</p>
       
-      <p>In this comprehensive guide, we'll explore the most effective job hunting techniques that are working in 2025, based on current industry trends and feedback from hiring managers across various sectors.</p>
+      <p>In this comprehensive guide, we&apos;ll explore the most effective job hunting techniques that are working in 2025, based on current industry trends and feedback from hiring managers across various sectors.</p>
       
       <h2>1. Optimize Your Online Presence</h2>
       <p>Your digital footprint matters more than ever. Employers typically research candidates online before making hiring decisions. Ensure your LinkedIn profile is complete and showcases your professional achievements with quantifiable results. Consider creating a personal website that serves as a portfolio of your work and skills.</p>
@@ -48,7 +51,7 @@ const blogPosts = [
       <h2>5. Personalize Your Applications</h2>
       <p>Generic applications rarely make it past the initial screening. Take the time to tailor your resume and cover letter for each position, highlighting relevant skills and experiences that match the job description.</p>
       
-      <p>Research the company thoroughly and reference specific aspects of their business or culture that appeal to you, showing that you've done your homework.</p>
+      <p>Research the company thoroughly and reference specific aspects of their business or culture that appeal to you, showing that you&apos;ve done your homework.</p>
       
       <h2>6. Prepare for Modern Interview Formats</h2>
       <p>Interviews in 2025 often include a mix of traditional, behavioral, technical, and AI-driven assessments. Practice for various formats, including video interviews, asynchronous interviews (where you record responses to questions), and virtual reality assessments.</p>
@@ -59,16 +62,16 @@ const blogPosts = [
       <p>With hybrid and remote work models now the norm in many industries, employers look for candidates who can demonstrate effectiveness outside traditional office environments. Highlight your experience with digital collaboration tools, self-management, and communication skills essential for remote work.</p>
       
       <h2>8. Tap Into the Hidden Job Market</h2>
-      <p>Many positions are filled without ever being publicly advertised. Gain access to this hidden job market by developing relationships with recruiters, joining industry-specific communities, and directly approaching companies you'd like to work for, even if they haven't posted relevant openings.</p>
+      <p>Many positions are filled without ever being publicly advertised. Gain access to this hidden job market by developing relationships with recruiters, joining industry-specific communities, and directly approaching companies you&apos;d like to work for, even if they haven&apos;t posted relevant openings.</p>
       
       <h2>9. Focus on Value and Results</h2>
-      <p>Employers hire people who can solve problems and add value. Instead of merely listing your responsibilities, emphasize the concrete results you've achieved in previous roles. Quantify your impact whenever possible with specific metrics and outcomes.</p>
+      <p>Employers hire people who can solve problems and add value. Instead of merely listing your responsibilities, emphasize the concrete results you&apos;ve achieved in previous roles. Quantify your impact whenever possible with specific metrics and outcomes.</p>
       
       <h2>10. Maintain Resilience and Persistence</h2>
-      <p>Job hunting can be challenging and sometimes disheartening. Develop a resilient mindset by setting realistic expectations, celebrating small wins, and learning from rejections. Maintain a consistent schedule for your job search activities, and don't hesitate to adjust your approach based on the feedback you receive.</p>
+      <p>Job hunting can be challenging and sometimes disheartening. Develop a resilient mindset by setting realistic expectations, celebrating small wins, and learning from rejections. Maintain a consistent schedule for your job search activities, and don&apos;t hesitate to adjust your approach based on the feedback you receive.</p>
       
       <h2>Conclusion</h2>
-      <p>The most successful job seekers in 2025 combine technological savvy with traditional relationship-building skills. By implementing these ten strategies, you'll position yourself effectively in a competitive market and increase your chances of landing not just any job, but the right job for your career goals and personal aspirations.</p>
+      <p>The most successful job seekers in 2025 combine technological savvy with traditional relationship-building skills. By implementing these ten strategies, you&apos;ll position yourself effectively in a competitive market and increase your chances of landing not just any job, but the right job for your career goals and personal aspirations.</p>
       
       <p>Remember that job hunting is a skill in itself—one that improves with practice and persistence. Stay adaptable, keep learning, and approach the process with confidence in the value you bring to potential employers.</p>
     `,
@@ -119,8 +122,8 @@ interface BlogPostProps {
 }
 
 export default function BlogPostContent({ slug }: BlogPostProps) {
-  const [post, setPost] = useState<any | null>(null);
-  const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
+  const [post, setPost] = useState<Record<string, any> | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<Record<string, any>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -264,9 +267,9 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     let likedPostIds = likedPosts ? JSON.parse(likedPosts) : [];
     
     if (isLiked) {
-      likedPostIds = likedPostIds.filter((id: number) => id !== post.id);
+      likedPostIds = likedPostIds.filter((id: number) => id !== post?.id);
     } else {
-      likedPostIds.push(post.id);
+      likedPostIds.push(post?.id);
     }
     
     localStorage.setItem('likedPosts', JSON.stringify(likedPostIds));
@@ -286,9 +289,9 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     let savedPostIds = savedPosts ? JSON.parse(savedPosts) : [];
     
     if (isSaved) {
-      savedPostIds = savedPostIds.filter((id: number) => id !== post.id);
+      savedPostIds = savedPostIds.filter((id: number) => id !== post?.id);
     } else {
-      savedPostIds.push(post.id);
+      savedPostIds.push(post?.id);
     }
     
     localStorage.setItem('savedPosts', JSON.stringify(savedPostIds));
@@ -364,7 +367,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
               Post Not Found
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Sorry, the blog post you're looking for doesn't exist or has been moved.
+              Sorry, the blog post you&apos;re looking for doesn&apos;t exist or has been moved.
             </p>
             <Link href="/blog" passHref>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -595,8 +598,10 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                           label: post.title
                         });
                       }}
+                      aria-label="Share on Twitter"
                     >
-                      <Twitter className="h-4 w-4" />
+                      <span className="sr-only">Twitter</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
                     </Button>
                     <Button
                       variant="ghost"
@@ -610,8 +615,10 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                           label: post.title
                         });
                       }}
+                      aria-label="Share on Facebook"
                     >
-                      <Facebook className="h-4 w-4" />
+                      <span className="sr-only">Facebook</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                     </Button>
                     <Button
                       variant="ghost"
@@ -625,8 +632,10 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                           label: post.title
                         });
                       }}
+                      aria-label="Share on LinkedIn"
                     >
-                      <LinkedIn className="h-4 w-4" />
+                      <span className="sr-only">LinkedIn</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                     </Button>
                   </div>
                 </CardContent>
@@ -709,7 +718,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                           <span className="text-gray-500 dark:text-gray-400 text-xs">3 days ago</span>
                         </div>
                         <p className="text-gray-700 dark:text-gray-300 text-sm">
-                          Great article! I particularly found the section on networking strategically to be very helpful. I've been trying to expand my professional network and these tips are exactly what I needed.
+                          Great article! I particularly found the section on networking strategically to be very helpful. I&apos;ve been trying to expand my professional network and these tips are exactly what I needed.
                         </p>
                         <div className="flex items-center gap-4 mt-2">
                           <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">
@@ -734,7 +743,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                           <span className="text-gray-500 dark:text-gray-400 text-xs">1 week ago</span>
                         </div>
                         <p className="text-gray-700 dark:text-gray-300 text-sm">
-                          I've been struggling with my job search for months. These strategies are exactly what I needed to revamp my approach. Thank you for the detailed explanations and practical tips!
+                          I&apos;ve been struggling with my job search for months. These strategies are exactly what I needed to revamp my approach. Thank you for the detailed explanations and practical tips!
                         </p>
                         <div className="flex items-center gap-4 mt-2">
                           <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">
@@ -810,8 +819,11 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                         label: post.title
                       });
                     }}
+                    aria-label="Share on Twitter"
                   >
-                    <Twitter className="h-4 w-4 mr-2" />
+                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                     Twitter
                   </Button>
                   <Button
@@ -826,8 +838,11 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                         label: post.title
                       });
                     }}
+                    aria-label="Share on Facebook"
                   >
-                    <Facebook className="h-4 w-4 mr-2" />
+                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                     Facebook
                   </Button>
                   <Button
@@ -842,8 +857,12 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                         label: post.title
                       });
                     }}
+                    aria-label="Share on LinkedIn"
                   >
-                    <Linkedin className="h-4 w-4 mr-2" />
+                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2V9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="4" cy="4" r="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                     LinkedIn
                   </Button>
                   <Button

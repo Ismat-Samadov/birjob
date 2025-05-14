@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {Clock, ChevronRight, Bookmark, TrendingUp } from "lucide-react";
+import { Clock, ChevronRight, Bookmark, TrendingUp } from "lucide-react";
 import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
