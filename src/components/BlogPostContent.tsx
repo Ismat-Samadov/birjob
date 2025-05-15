@@ -76,7 +76,7 @@ const blogPosts = [
       <p>Remember that job hunting is a skill in itself—one that improves with practice and persistence. Stay adaptable, keep learning, and approach the process with confidence in the value you bring to potential employers.</p>
     `,
     author: "Career Expert",
-    authorImage: "/assets/authors/career-expert.jpg",
+    authorImage: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
     authorBio: "Sarah Johnson is a career development specialist with over 15 years of experience helping professionals navigate the job market. She has coached executives at Fortune 500 companies and written for major career publications.",
     authorRole: "Senior Career Advisor",
     date: "May 10, 2025",
@@ -84,7 +84,7 @@ const blogPosts = [
     category: "Job Search",
     slug: "top-job-hunting-strategies-2025",
     featured: true,
-    coverImage: "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3RyYXRlZ3l8ZW58MHx8MHx8fDA%3D",
+    coverImage: "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0",
     trendingScore: 92,
     viewCount: 1245,
     likeCount: 248,
@@ -96,9 +96,9 @@ const blogPosts = [
     id: 2,
     title: "How to Craft a Resume That Gets Noticed by ATS",
     excerpt: "Learn how to optimize your resume for Applicant Tracking Systems while still making it appealing to human recruiters.",
-    content: "", // Full content would be here
+    content: "Full ATS resume optimization content would go here", 
     author: "HR Specialist",
-    authorImage: "/assets/authors/hr-specialist.jpg",
+    authorImage: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
     authorBio: "Michael Chen is a recruitment lead with expertise in AI-driven hiring systems. He has helped hundreds of candidates optimize their resumes for modern ATS platforms.",
     authorRole: "Recruitment Lead at TechCorp",
     date: "May 5, 2025",
@@ -106,7 +106,7 @@ const blogPosts = [
     category: "Resumes",
     slug: "ats-friendly-resume-tips",
     featured: true,
-    coverImage: "/assets/blog/ats-resume.jpg",
+    coverImage: "https://images.unsplash.com/photo-1586281380117-5a60ae2050cc?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     trendingScore: 87,
     viewCount: 982,
     likeCount: 176,
@@ -114,7 +114,50 @@ const blogPosts = [
     tags: ["Resumes", "Job Search", "ATS", "Career Advice"],
     relatedPosts: [1, 3, 4]
   },
-  // More posts would be defined here
+  {
+    id: 3,
+    title: "The Rise of Remote Work: New Opportunities in Tech",
+    excerpt: "Explore how the remote work revolution is reshaping the tech industry and creating new job possibilities.",
+    content: "Full remote work opportunities content would go here",
+    author: "Tech Analyst",
+    authorImage: "https://images.unsplash.com/photo-1580518324671-c2f0833a3af3?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
+    authorBio: "Alex Rivera is a technology trends researcher specializing in workplace transformation and distributed teams.",
+    authorRole: "Technology Trends Researcher",
+    date: "April 28, 2025",
+    readTime: "7 min read",
+    category: "Remote Work",
+    slug: "remote-work-tech-opportunities",
+    featured: false,
+    coverImage: "https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    trendingScore: 75,
+    viewCount: 756,
+    likeCount: 142,
+    commentCount: 18,
+    tags: ["Remote Work", "Tech Jobs", "Future of Work"],
+    relatedPosts: [1, 2, 5]
+  },
+  {
+    id: 4,
+    title: "Mastering the Job Interview: From Preparation to Follow-up",
+    excerpt: "A comprehensive guide to acing your job interviews, with expert tips for every stage of the process.",
+    content: "Full interview mastery content would go here",
+    author: "Interview Coach",
+    authorImage: "https://images.unsplash.com/photo-1565423529726-0c920b6b6f1c?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
+    authorBio: "James Wilson is an executive interview trainer who has helped thousands of professionals land their dream jobs through effective interview preparation.",
+    authorRole: "Executive Interview Trainer",
+    date: "April 22, 2025",
+    readTime: "10 min read",
+    category: "Interviews",
+    slug: "mastering-job-interviews",
+    featured: false,
+    coverImage: "https://images.unsplash.com/photo-1529519654731-a0525bc4f835?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    trendingScore: 68,
+    viewCount: 689,
+    likeCount: 137,
+    commentCount: 22,
+    tags: ["Interviews", "Job Search", "Career Advice"],
+    relatedPosts: [1, 2, 6]
+  }
 ];
 
 interface BlogPostProps {
@@ -409,12 +452,11 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
 
           {/* Hero Section with Cover Image */}
           <div className="relative w-full max-w-6xl mx-auto rounded-xl overflow-hidden mb-8 aspect-[21/9]">
-            {/* This would be an actual cover image in production */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600">
-              <div className="w-full h-full flex items-center justify-center text-white/20 text-9xl font-bold">
-                {post.id}
-              </div>
-            </div>
+            <img 
+              src={post.coverImage} 
+              alt={post.title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
             <div className="absolute inset-0 bg-black/40"></div>
             {post.trendingScore > 80 && (
               <div className="absolute top-6 left-6 z-10 flex items-center gap-1 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
@@ -436,10 +478,11 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                 {post.title}
               </h1>
               <div className="flex items-center">
-                {/* This would be an actual author image in production */}
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold text-xl mr-4 border-2 border-white">
-                  {post.author.charAt(0)}
-                </div>
+                <img 
+                  src={post.authorImage}
+                  alt={post.author}
+                  className="h-12 w-12 rounded-full object-cover mr-4 border-2 border-white"
+                />
                 <div>
                   <p className="font-medium text-white">{post.author}</p>
                   <div className="flex items-center text-sm text-white/70">
@@ -645,10 +688,11 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
               <Card className="mb-8 dark:bg-gray-800 border-blue-100 dark:border-blue-900/50">
                 <CardContent className="p-6 md:p-8">
                   <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
-                    {/* This would be an actual author image in production */}
-                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold border-4 border-white dark:border-gray-800">
-                      {post.author.charAt(0)}
-                    </div>
+                    <img 
+                      src={post.authorImage}
+                      alt={post.author}
+                      className="h-24 w-24 rounded-full object-cover border-4 border-white dark:border-gray-800"
+                    />
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{post.author}</h3>
                       <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">{post.authorRole}</p>
@@ -709,9 +753,11 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                   {/* Sample comments - In production, these would come from a database */}
                   <div className="space-y-6">
                     <div className="flex gap-4">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-500 to-blue-500 flex-shrink-0 flex items-center justify-center text-white font-bold">
-                        J
-                      </div>
+                      <img 
+                        src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
+                        alt="John Doe"
+                        className="h-10 w-10 rounded-full object-cover flex-shrink-0"
+                      />
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold text-gray-900 dark:text-white">John Doe</span>
@@ -734,9 +780,11 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                     </div>
                     
                     <div className="flex gap-4">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex-shrink-0 flex items-center justify-center text-white font-bold">
-                        S
-                      </div>
+                      <img 
+                        src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
+                        alt="Sarah Johnson"
+                        className="h-10 w-10 rounded-full object-cover flex-shrink-0"
+                      />
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold text-gray-900 dark:text-white">Sarah Johnson</span>
@@ -790,6 +838,13 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                   {relatedPosts.slice(0, 3).map(relatedPost => (
                     <div key={relatedPost.id} className="group">
                       <Link href={`/blog/${relatedPost.slug}`}>
+                        <div className="mb-2 aspect-[16/9] overflow-hidden rounded">
+                          <img 
+                            src={relatedPost.coverImage}
+                            alt={relatedPost.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                          />
+                        </div>
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 mb-1">
                           {relatedPost.title}
                         </h4>
@@ -886,7 +941,14 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {relatedPosts.slice(0, 4).map(relatedPost => (
-                <Card key={relatedPost.id} className="overflow-hidden hover:shadow-md transition-shadow duration-300 dark:bg-gray-800">
+                <Card key={relatedPost.id} className="overflow-hidden hover:shadow-md transition-all duration-300 group dark:bg-gray-800">
+                  <div className="aspect-[16/9] overflow-hidden">
+                    <img 
+                      src={relatedPost.coverImage}
+                      alt={relatedPost.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                    />
+                  </div>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
                       <span className="flex items-center">
@@ -898,9 +960,11 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                         {relatedPost.readTime}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                      {relatedPost.title}
-                    </h3>
+                    <Link href={`/blog/${relatedPost.slug}`}>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                        {relatedPost.title}
+                      </h3>
+                    </Link>
                     <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm line-clamp-2">
                       {relatedPost.excerpt}
                     </p>

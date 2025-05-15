@@ -8,21 +8,21 @@ import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
 
-// Enhanced blog post data with images and additional metadata
+// Enhanced blog post data with Unsplash image URLs
 const blogPosts = [
   {
     id: 1,
     title: "Top 10 Job Hunting Strategies for 2025",
     excerpt: "Discover the most effective techniques to stand out in today's competitive job market and land your dream job.",
     author: "Career Expert",
-    authorImage: "/pulic/author.jpg",
+    authorImage: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
     authorRole: "Senior Career Advisor",
     date: "May 10, 2025",
     readTime: "8 min read",
     category: "Job Search",
     slug: "top-job-hunting-strategies-2025",
     featured: true,
-    coverImage: "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3RyYXRlZ3l8ZW58MHx8MHx8fDA%3D",
+    coverImage: "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0",
     trendingScore: 92,
     viewCount: 1245,
     tags: ["Job Search", "Career Advice", "Networking", "Interviews"]
@@ -32,31 +32,34 @@ const blogPosts = [
     title: "How to Craft a Resume That Gets Noticed by ATS",
     excerpt: "Learn how to optimize your resume for Applicant Tracking Systems while still making it appealing to human recruiters.",
     author: "HR Specialist",
-    authorImage: "/assets/authors/hr-specialist.jpg",
+    authorImage: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
     authorRole: "Recruitment Lead at TechCorp",
     date: "May 5, 2025",
     readTime: "6 min read",
     category: "Resumes",
     slug: "ats-friendly-resume-tips",
     featured: true,
-    coverImage: "/assets/blog/ats-resume.jpg",
+    coverImage: "https://images.unsplash.com/photo-1586281380117-5a60ae2050cc?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     trendingScore: 87,
     viewCount: 982,
-    tags: ["Resumes", "Job Search", "ATS", "Career Advice"]
+    likeCount: 176,
+    commentCount: 24,
+    tags: ["Resumes", "Job Search", "ATS", "Career Advice"],
+    relatedPosts: [1, 3, 4]
   },
   {
     id: 3,
     title: "The Rise of Remote Work: New Opportunities in Tech",
     excerpt: "Explore how the remote work revolution is reshaping the tech industry and creating new job possibilities.",
     author: "Tech Analyst",
-    authorImage: "/assets/authors/tech-analyst.jpg",
+    authorImage: "https://images.unsplash.com/photo-1580518324671-c2f0833a3af3?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
     authorRole: "Technology Trends Researcher",
     date: "April 28, 2025",
     readTime: "7 min read",
     category: "Remote Work",
     slug: "remote-work-tech-opportunities",
     featured: false,
-    coverImage: "/assets/blog/remote-work.jpg",
+    coverImage: "https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     trendingScore: 75,
     viewCount: 756,
     tags: ["Remote Work", "Tech Jobs", "Future of Work"]
@@ -66,14 +69,14 @@ const blogPosts = [
     title: "Mastering the Job Interview: From Preparation to Follow-up",
     excerpt: "A comprehensive guide to acing your job interviews, with expert tips for every stage of the process.",
     author: "Interview Coach",
-    authorImage: "/assets/authors/interview-coach.jpg",
+    authorImage: "https://images.unsplash.com/photo-1565423529726-0c920b6b6f1c?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
     authorRole: "Executive Interview Trainer",
     date: "April 22, 2025",
     readTime: "10 min read",
     category: "Interviews",
     slug: "mastering-job-interviews",
     featured: false,
-    coverImage: "/assets/blog/job-interview.jpg",
+    coverImage: "https://images.unsplash.com/photo-1529519654731-a0525bc4f835?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     trendingScore: 68,
     viewCount: 689,
     tags: ["Interviews", "Job Search", "Career Advice"]
@@ -83,14 +86,14 @@ const blogPosts = [
     title: "Networking in the Digital Age: Building Professional Relationships Online",
     excerpt: "Effective strategies for expanding your professional network and creating meaningful connections in virtual environments.",
     author: "Networking Strategist",
-    authorImage: "/assets/authors/networking-strategist.jpg",
+    authorImage: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
     authorRole: "Professional Networking Consultant",
     date: "April 15, 2025",
     readTime: "5 min read",
     category: "Networking",
     slug: "digital-networking-strategies",
     featured: false,
-    coverImage: "/assets/blog/digital-networking.jpg",
+    coverImage: "https://images.unsplash.com/photo-1605999006862-83d68439d6f3?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     trendingScore: 63,
     viewCount: 542,
     tags: ["Networking", "Professional Development", "Career Growth"]
@@ -100,14 +103,14 @@ const blogPosts = [
     title: "Salary Negotiation: How to Get the Compensation You Deserve",
     excerpt: "Practical advice for negotiating your salary and benefits package with confidence and professionalism.",
     author: "Compensation Expert",
-    authorImage: "/assets/authors/compensation-expert.jpg",
+    authorImage: "https://images.unsplash.com/photo-1589386417686-0d34b5903d23?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
     authorRole: "Salary Negotiation Specialist",
     date: "April 8, 2025",
     readTime: "9 min read",
     category: "Career Growth",
     slug: "salary-negotiation-guide",
     featured: false,
-    coverImage: "/assets/blog/salary-negotiation.jpg",
+    coverImage: "https://images.unsplash.com/photo-1534951009808-766178b47a4f?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     trendingScore: 58,
     viewCount: 478,
     tags: ["Salary Negotiation", "Career Advice", "Career Growth"]
@@ -229,8 +232,13 @@ export default function BlogContent() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Hero Section */}
-        <div className="relative rounded-2xl overflow-hidden mb-16 bg-gradient-to-r from-blue-600 to-purple-600">
-          <div className="absolute inset-0 bg-black/20 z-10"></div>
+        <div className="relative rounded-2xl overflow-hidden mb-16">
+          <img 
+            src="https://images.unsplash.com/photo-1522071901873-411886a10004?w=1200&auto=format&fit=crop&q=80&ixlib=rb-4.0.3" 
+            alt="Blog hero image" 
+            className="w-full h-full object-cover absolute inset-0"
+          />
+          <div className="absolute inset-0 bg-black/40 z-10"></div>
           <div className="relative z-20 py-16 px-6 sm:px-12 text-white">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -258,10 +266,6 @@ export default function BlogContent() {
               </div>
             </div>
           </div>
-          <div className="absolute inset-0 z-0 opacity-20">
-            {/* This would be a background pattern or texture */}
-            <div className="w-full h-full bg-gradient-to-br from-blue-500/30 to-purple-500/30"></div>
-          </div>
         </div>
 
         {/* Featured posts section */}
@@ -275,12 +279,11 @@ export default function BlogContent() {
               .map(post => (
                 <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group dark:bg-gray-800 border-0 shadow-md">
                   <div className="relative aspect-[16/9] overflow-hidden">
-                    {/* This would be an actual image in production */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 group-hover:scale-105 transition-transform duration-500 ease-in-out">
-                      <div className="w-full h-full flex items-center justify-center text-white/20 text-9xl font-bold">
-                        {post.id}
-                      </div>
-                    </div>
+                    <img 
+                      src={post.coverImage} 
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                    />
                     <div className="absolute top-4 right-4 z-10">
                       <Button
                         variant="ghost"
@@ -321,10 +324,11 @@ export default function BlogContent() {
                     
                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                       <div className="flex items-center">
-                        {/* This would be an actual author image in production */}
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold mr-3">
-                          {post.author.charAt(0)}
-                        </div>
+                        <img 
+                          src={post.authorImage}
+                          alt={post.author}
+                          className="h-10 w-10 rounded-full object-cover mr-3"
+                        />
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white text-sm">{post.author}</p>
                           <p className="text-gray-500 dark:text-gray-400 text-xs">{post.date}</p>
@@ -379,12 +383,11 @@ export default function BlogContent() {
           {filteredPosts.map(post => (
             <Card key={post.id} className="overflow-hidden hover:shadow-md transition-all duration-300 group dark:bg-gray-800 h-full flex flex-col border border-gray-200 dark:border-gray-700">
               <div className="relative aspect-video overflow-hidden">
-                {/* This would be an actual image in production */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 opacity-90 group-hover:scale-105 transition-transform duration-500 ease-in-out">
-                  <div className="w-full h-full flex items-center justify-center text-white/20 text-6xl font-bold">
-                    {post.id}
-                  </div>
-                </div>
+                <img 
+                  src={post.coverImage} 
+                  alt={post.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent h-1/2"></div>
                 <div className="absolute top-3 right-3 z-10">
                   <Button
@@ -417,10 +420,11 @@ export default function BlogContent() {
                 </p>
                 <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
                   <div className="flex items-center">
-                    {/* This would be an actual author image in production */}
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold mr-2 text-xs">
-                      {post.author.charAt(0)}
-                    </div>
+                    <img 
+                      src={post.authorImage}
+                      alt={post.author}
+                      className="h-8 w-8 rounded-full object-cover mr-2"
+                    />
                     <div className="text-xs">
                       <p className="font-medium text-gray-900 dark:text-white">{post.author}</p>
                       <p className="text-gray-500 dark:text-gray-400">{post.date}</p>
@@ -454,21 +458,38 @@ export default function BlogContent() {
             Trending Topics
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {["Resume Building", "Remote Jobs", "Interview Techniques", "Networking Strategies"].map((topic, index) => (
+            {[
+              {
+                title: "Resume Building",
+                image: "https://images.unsplash.com/photo-1586281380117-5a60ae2050cc?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+              },
+              {
+                title: "Remote Jobs",
+                image: "https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+              },
+              {
+                title: "Interview Techniques",
+                image: "https://images.unsplash.com/photo-1529519654731-a0525bc4f835?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+              },
+              {
+                title: "Networking Strategies",
+                image: "https://images.unsplash.com/photo-1605999006862-83d68439d6f3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+              }
+            ].map((topic, index) => (
               <Card 
                 key={index} 
                 className="overflow-hidden hover:shadow-md transition-all duration-300 group dark:bg-gray-800 cursor-pointer"
-                onClick={() => handleCategoryChange(topic === "Remote Jobs" ? "Remote Work" : (topic === "Resume Building" ? "Resumes" : (topic === "Interview Techniques" ? "Interviews" : "Networking")))}
+                onClick={() => handleCategoryChange(topic.title === "Remote Jobs" ? "Remote Work" : (topic.title === "Resume Building" ? "Resumes" : (topic.title === "Interview Techniques" ? "Interviews" : "Networking")))}
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
-                  {/* This would be an actual image in production */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 opacity-80 group-hover:scale-105 transition-transform duration-500 ease-in-out">
-                    <div className="w-full h-full flex items-center justify-center text-white/20 text-5xl font-bold">
-                      {index + 1}
-                    </div>
-                  </div>
+                  <img 
+                    src={topic.image} 
+                    alt={topic.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                  />
+                  <div className="absolute inset-0 bg-black/40"></div>
                   <div className="absolute inset-0 flex items-center justify-center text-center">
-                    <h3 className="text-xl font-bold text-white px-4 z-10">{topic}</h3>
+                    <h3 className="text-xl font-bold text-white px-4 z-10">{topic.title}</h3>
                   </div>
                 </div>
               </Card>
@@ -508,13 +529,13 @@ export default function BlogContent() {
                     By subscribing, you agree to our privacy policy and consent to receive updates from our company.
                   </p>
                 </div>
-                <div className="md:w-2/5 bg-blue-600 dark:bg-blue-800 hidden md:block relative">
-                  {/* This would be an actual newsletter image in production */}
-                  <div className="absolute inset-0 opacity-20">
-                    <div className="w-full h-full flex items-center justify-center text-white text-9xl font-bold">
-                      @
-                    </div>
-                  </div>
+                <div className="md:w-2/5 hidden md:block relative">
+                  <img 
+                    src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
+                    alt="Newsletter signup"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-blue-600/50"></div>
                   <div className="absolute inset-0 flex items-center justify-center p-6">
                     <div className="text-white text-center">
                       <h4 className="text-xl font-bold mb-2">Weekly Digest</h4>
