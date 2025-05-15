@@ -1,3 +1,4 @@
+// src/components/BlogPostContent.tsx
 "use client"
 
 import { useState, useEffect, useRef } from 'react';
@@ -11,162 +12,37 @@ import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
 
-// Enhanced blog post data with images, author info and related posts
-const blogPosts = [
-  {
-    id: 1,
-    title: "Top 10 Job Hunting Strategies for 2025",
-    excerpt: "Discover the most effective techniques to stand out in today's competitive job market and land your dream job.",
-    content: `
-      <h2>Introduction</h2>
-      <p>The job market in 2025 is more dynamic and competitive than ever before. With the rise of AI-driven hiring processes, remote work opportunities, and changing employer expectations, job seekers need to adapt their strategies to stand out from the crowd.</p>
-      
-      <p>In this comprehensive guide, we&apos;ll explore the most effective job hunting techniques that are working in 2025, based on current industry trends and feedback from hiring managers across various sectors.</p>
-      
-      <h2>1. Optimize Your Online Presence</h2>
-      <p>Your digital footprint matters more than ever. Employers typically research candidates online before making hiring decisions. Ensure your LinkedIn profile is complete and showcases your professional achievements with quantifiable results. Consider creating a personal website that serves as a portfolio of your work and skills.</p>
-      
-      <p>Pro tip: Regularly publish thoughtful content related to your industry to position yourself as a thought leader.</p>
-      
-      <h2>2. Leverage AI Tools for Your Job Search</h2>
-      <p>AI-powered job platforms like BirJob can help you discover opportunities that match your skills and preferences. These tools can save you countless hours by filtering through thousands of listings to find the best matches for your profile.</p>
-      
-      <p>Additionally, use AI resume optimization tools to ensure your resume passes through Applicant Tracking Systems (ATS) while remaining appealing to human recruiters.</p>
-      
-      <h2>3. Develop In-Demand Skills</h2>
-      <p>The skills marketplace evolves rapidly. Stay ahead by continuously developing skills that employers value. In 2025, some of the most in-demand skills include:</p>
-      <ul>
-        <li>Data analysis and interpretation</li>
-        <li>AI and machine learning knowledge</li>
-        <li>Digital collaboration tools expertise</li>
-        <li>Adaptability and resilience</li>
-        <li>Critical thinking and problem-solving</li>
-      </ul>
-      
-      <h2>4. Network Strategically</h2>
-      <p>Despite technological advances, networking remains one of the most effective job search strategies. Instead of focusing on quantity, build meaningful relationships with professionals in your target industry. Engage thoughtfully in online communities, professional groups, and industry events.</p>
-      
-      <p>Remember that networking is about giving value as much as it is about receiving opportunities. Share your expertise, offer help, and be genuinely interested in others.</p>
-      
-      <h2>5. Personalize Your Applications</h2>
-      <p>Generic applications rarely make it past the initial screening. Take the time to tailor your resume and cover letter for each position, highlighting relevant skills and experiences that match the job description.</p>
-      
-      <p>Research the company thoroughly and reference specific aspects of their business or culture that appeal to you, showing that you&apos;ve done your homework.</p>
-      
-      <h2>6. Prepare for Modern Interview Formats</h2>
-      <p>Interviews in 2025 often include a mix of traditional, behavioral, technical, and AI-driven assessments. Practice for various formats, including video interviews, asynchronous interviews (where you record responses to questions), and virtual reality assessments.</p>
-      
-      <p>Develop compelling stories that demonstrate your skills and impact, following the STAR method (Situation, Task, Action, Result).</p>
-      
-      <h2>7. Showcase Your Remote Work Capabilities</h2>
-      <p>With hybrid and remote work models now the norm in many industries, employers look for candidates who can demonstrate effectiveness outside traditional office environments. Highlight your experience with digital collaboration tools, self-management, and communication skills essential for remote work.</p>
-      
-      <h2>8. Tap Into the Hidden Job Market</h2>
-      <p>Many positions are filled without ever being publicly advertised. Gain access to this hidden job market by developing relationships with recruiters, joining industry-specific communities, and directly approaching companies you&apos;d like to work for, even if they haven&apos;t posted relevant openings.</p>
-      
-      <h2>9. Focus on Value and Results</h2>
-      <p>Employers hire people who can solve problems and add value. Instead of merely listing your responsibilities, emphasize the concrete results you&apos;ve achieved in previous roles. Quantify your impact whenever possible with specific metrics and outcomes.</p>
-      
-      <h2>10. Maintain Resilience and Persistence</h2>
-      <p>Job hunting can be challenging and sometimes disheartening. Develop a resilient mindset by setting realistic expectations, celebrating small wins, and learning from rejections. Maintain a consistent schedule for your job search activities, and don&apos;t hesitate to adjust your approach based on the feedback you receive.</p>
-      
-      <h2>Conclusion</h2>
-      <p>The most successful job seekers in 2025 combine technological savvy with traditional relationship-building skills. By implementing these ten strategies, you&apos;ll position yourself effectively in a competitive market and increase your chances of landing not just any job, but the right job for your career goals and personal aspirations.</p>
-      
-      <p>Remember that job hunting is a skill in itself—one that improves with practice and persistence. Stay adaptable, keep learning, and approach the process with confidence in the value you bring to potential employers.</p>
-    `,
-    author: "Career Expert",
-    authorImage: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorBio: "Sarah Johnson is a career development specialist with over 15 years of experience helping professionals navigate the job market. She has coached executives at Fortune 500 companies and written for major career publications.",
-    authorRole: "Senior Career Advisor",
-    date: "May 10, 2025",
-    readTime: "8 min read",
-    category: "Job Search",
-    slug: "top-job-hunting-strategies-2025",
-    featured: true,
-    coverImage: "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0",
-    trendingScore: 92,
-    viewCount: 1245,
-    likeCount: 248,
-    commentCount: 37,
-    tags: ["Job Search", "Career Advice", "Networking", "Interviews"],
-    relatedPosts: [2, 4, 6]
-  },
-  {
-    id: 2,
-    title: "How to Craft a Resume That Gets Noticed by ATS",
-    excerpt: "Learn how to optimize your resume for Applicant Tracking Systems while still making it appealing to human recruiters.",
-    content: "Full ATS resume optimization content would go here", 
-    author: "HR Specialist",
-    authorImage: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorBio: "Michael Chen is a recruitment lead with expertise in AI-driven hiring systems. He has helped hundreds of candidates optimize their resumes for modern ATS platforms.",
-    authorRole: "Recruitment Lead at TechCorp",
-    date: "May 5, 2025",
-    readTime: "6 min read",
-    category: "Resumes",
-    slug: "ats-friendly-resume-tips",
-    featured: true,
-    coverImage: "https://images.unsplash.com/photo-1586281380117-5a60ae2050cc?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    trendingScore: 87,
-    viewCount: 982,
-    likeCount: 176,
-    commentCount: 24,
-    tags: ["Resumes", "Job Search", "ATS", "Career Advice"],
-    relatedPosts: [1, 3, 4]
-  },
-  {
-    id: 3,
-    title: "The Rise of Remote Work: New Opportunities in Tech",
-    excerpt: "Explore how the remote work revolution is reshaping the tech industry and creating new job possibilities.",
-    content: "Full remote work opportunities content would go here",
-    author: "Tech Analyst",
-    authorImage: "https://images.unsplash.com/photo-1580518324671-c2f0833a3af3?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorBio: "Alex Rivera is a technology trends researcher specializing in workplace transformation and distributed teams.",
-    authorRole: "Technology Trends Researcher",
-    date: "April 28, 2025",
-    readTime: "7 min read",
-    category: "Remote Work",
-    slug: "remote-work-tech-opportunities",
-    featured: false,
-    coverImage: "https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    trendingScore: 75,
-    viewCount: 756,
-    likeCount: 142,
-    commentCount: 18,
-    tags: ["Remote Work", "Tech Jobs", "Future of Work"],
-    relatedPosts: [1, 2, 5]
-  },
-  {
-    id: 4,
-    title: "Mastering the Job Interview: From Preparation to Follow-up",
-    excerpt: "A comprehensive guide to acing your job interviews, with expert tips for every stage of the process.",
-    content: "Full interview mastery content would go here",
-    author: "Interview Coach",
-    authorImage: "https://images.unsplash.com/photo-1565423529726-0c920b6b6f1c?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorBio: "James Wilson is an executive interview trainer who has helped thousands of professionals land their dream jobs through effective interview preparation.",
-    authorRole: "Executive Interview Trainer",
-    date: "April 22, 2025",
-    readTime: "10 min read",
-    category: "Interviews",
-    slug: "mastering-job-interviews",
-    featured: false,
-    coverImage: "https://images.unsplash.com/photo-1529519654731-a0525bc4f835?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    trendingScore: 68,
-    viewCount: 689,
-    likeCount: 137,
-    commentCount: 22,
-    tags: ["Interviews", "Job Search", "Career Advice"],
-    relatedPosts: [1, 2, 6]
-  }
-];
+// Define types for blog post
+interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  authorImage: string;
+  authorBio: string;
+  authorRole: string;
+  date: string;
+  readTime: string;
+  category: string;
+  slug: string;
+  coverImage: string;
+  featured: boolean;
+  trendingScore: number;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  tags: string[];
+  relatedPosts: number[];
+}
 
 interface BlogPostProps {
   slug: string;
 }
 
 export default function BlogPostContent({ slug }: BlogPostProps) {
-  const [post, setPost] = useState<Record<string, any> | null>(null);
-  const [relatedPosts, setRelatedPosts] = useState<Record<string, any>[]>([]);
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -178,47 +54,60 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
   const { addToast } = useToast();
 
   useEffect(() => {
-    // In a real app, this would be an API call
-    const fetchPost = () => {
+    const fetchPost = async () => {
       setIsLoading(true);
       
-      // Find the post that matches the slug
-      const foundPost = blogPosts.find(p => p.slug === slug);
-      
-      if (foundPost) {
-        setPost(foundPost);
+      try {
+        const response = await fetch(`/api/blog/${slug}`);
         
-        // Get related posts
-        if (foundPost.relatedPosts && foundPost.relatedPosts.length > 0) {
-          const related = blogPosts.filter(p => foundPost.relatedPosts?.includes(p.id));
-          setRelatedPosts(related);
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Blog post not found');
+          }
+          throw new Error('Failed to fetch blog post');
         }
+        
+        const data = await response.json();
+        
+        setPost(data.post);
+        setRelatedPosts(data.relatedPosts || []);
         
         // Track page view
         trackPageView({
           url: `/blog/${slug}`,
-          title: `${foundPost.title} - BirJob Blog`
+          title: `${data.post.title} - BirJob Blog`
         });
 
         // Check if post was previously liked or saved
         const likedPosts = localStorage.getItem('likedPosts');
         if (likedPosts) {
           const likedPostIds = JSON.parse(likedPosts);
-          setIsLiked(likedPostIds.includes(foundPost.id));
+          setIsLiked(likedPostIds.includes(data.post.id));
         }
 
         const savedPosts = localStorage.getItem('savedPosts');
         if (savedPosts) {
           const savedPostIds = JSON.parse(savedPosts);
-          setIsSaved(savedPostIds.includes(foundPost.id));
+          setIsSaved(savedPostIds.includes(data.post.id));
         }
+        
+      } catch (error) {
+        console.error('Error fetching blog post:', error);
+        addToast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to load blog post",
+          type: "destructive",
+          duration: 5000
+        });
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
     
-    fetchPost();
-
+    if (slug) {
+      fetchPost();
+    }
+    
     // Set up scroll event listener for reading progress
     const handleScroll = () => {
       if (articleRef.current) {
@@ -249,7 +138,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [slug, trackPageView]);
+  }, [slug, trackPageView, trackEvent, addToast]);
 
   const handleShareClick = async () => {
     if (navigator.share && post) {
@@ -303,6 +192,8 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
   };
 
   const handleLikeClick = () => {
+    if (!post) return;
+    
     setIsLiked(!isLiked);
     
     // Save liked status to localStorage
@@ -310,9 +201,9 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     let likedPostIds = likedPosts ? JSON.parse(likedPosts) : [];
     
     if (isLiked) {
-      likedPostIds = likedPostIds.filter((id: number) => id !== post?.id);
+      likedPostIds = likedPostIds.filter((id: number) => id !== post.id);
     } else {
-      likedPostIds.push(post?.id);
+      likedPostIds.push(post.id);
     }
     
     localStorage.setItem('likedPosts', JSON.stringify(likedPostIds));
@@ -320,11 +211,13 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     trackEvent({
       category: 'Blog',
       action: isLiked ? 'Unlike Post' : 'Like Post',
-      label: post?.title || slug
+      label: post.title
     });
   };
 
   const handleSaveClick = () => {
+    if (!post) return;
+    
     setIsSaved(!isSaved);
     
     // Save bookmark status to localStorage
@@ -332,9 +225,9 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     let savedPostIds = savedPosts ? JSON.parse(savedPosts) : [];
     
     if (isSaved) {
-      savedPostIds = savedPostIds.filter((id: number) => id !== post?.id);
+      savedPostIds = savedPostIds.filter((id: number) => id !== post.id);
     } else {
-      savedPostIds.push(post?.id);
+      savedPostIds.push(post.id);
     }
     
     localStorage.setItem('savedPosts', JSON.stringify(savedPostIds));
@@ -351,7 +244,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     trackEvent({
       category: 'Blog',
       action: isSaved ? 'Remove Bookmark' : 'Add Bookmark',
-      label: post?.title || slug
+      label: post.title
     });
   };
 
@@ -376,7 +269,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
   const formatContentWithIds = (content: string) => {
     return content.replace(
       /<h([2-3])>([^<]+)<\/h\1>/g,
-      (match, level, text) => {
+      (level, text) => {
         const id = text.toLowerCase().replace(/[^\w]+/g, '-');
         return `<h${level} id="${id}">${text}</h${level}>`;
       }
@@ -410,7 +303,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
               Post Not Found
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Sorry, the blog post you&apos;re looking for doesn&apos;t exist or has been moved.
+              Sorry, the blog post you're looking for doesn't exist or has been moved.
             </p>
             <Link href="/blog" passHref>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -764,7 +657,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                           <span className="text-gray-500 dark:text-gray-400 text-xs">3 days ago</span>
                         </div>
                         <p className="text-gray-700 dark:text-gray-300 text-sm">
-                          Great article! I particularly found the section on networking strategically to be very helpful. I&apos;ve been trying to expand my professional network and these tips are exactly what I needed.
+                          Great article! I particularly found the section on networking strategically to be very helpful. I've been trying to expand my professional network and these tips are exactly what I needed.
                         </p>
                         <div className="flex items-center gap-4 mt-2">
                           <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">
@@ -791,7 +684,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                           <span className="text-gray-500 dark:text-gray-400 text-xs">1 week ago</span>
                         </div>
                         <p className="text-gray-700 dark:text-gray-300 text-sm">
-                          I&apos;ve been struggling with my job search for months. These strategies are exactly what I needed to revamp my approach. Thank you for the detailed explanations and practical tips!
+                          I've been struggling with my job search for months. These strategies are exactly what I needed to revamp my approach. Thank you for the detailed explanations and practical tips!
                         </p>
                         <div className="flex items-center gap-4 mt-2">
                           <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">

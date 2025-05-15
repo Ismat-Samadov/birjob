@@ -1,4 +1,3 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
@@ -9,14 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Existing models 
 model jobs_jobpost {
-  id         Int      @id @default(autoincrement())
-  title      String
-  company    String
-  apply_link String
-  source     String?
-  created_at DateTime @default(now())
+  id            Int             @id @default(autoincrement())
+  title         String
+  company       String
+  apply_link    String
+  source        String?
+  created_at    DateTime        @default(now())
   notifications notifications[]
 
   @@unique([title, company, apply_link], name: "unique_job_listing")
@@ -28,16 +26,15 @@ model search_logs {
   timestamp DateTime @default(now())
 }
 
-// User notification system models
 model users {
-  id                   Int             @id @default(autoincrement())
-  email                String          @unique
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
-  lastNotifiedAt       DateTime?
-  keywords             keywords[]
-  notifications        notifications[]
-  sourcePreferences    sourcePreferences[]
+  id                Int                 @id @default(autoincrement())
+  email             String              @unique
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  lastNotifiedAt    DateTime?
+  keywords          keywords[]
+  notifications     notifications[]
+  sourcePreferences sourcePreferences[]
 }
 
 model keywords {
@@ -50,7 +47,6 @@ model keywords {
   @@unique([userId, keyword])
 }
 
-// Keep the scraper_errors table to prevent it from being dropped
 model scraper_errors {
   id        Int      @id @default(autoincrement())
   source    String
@@ -58,7 +54,6 @@ model scraper_errors {
   timestamp DateTime @default(now())
 }
 
-// New model for source preferences
 model sourcePreferences {
   id        Int      @id @default(autoincrement())
   userId    Int
@@ -69,30 +64,70 @@ model sourcePreferences {
   @@unique([userId, source])
 }
 
-// Notifications history
 model notifications {
-  id            Int      @id @default(autoincrement())
-  userId        Int
-  jobId         Int
-  sentAt        DateTime @default(now())
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  jobId          Int
+  sentAt         DateTime     @default(now())
   matchedKeyword String
-  isRead        Boolean  @default(false)
-  user          users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  job           jobs_jobpost @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  isRead         Boolean      @default(false)
+  job            jobs_jobpost @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user           users        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([jobId])
 }
 
-// Contact form submissions
 model contactSubmissions {
-  id             Int      @id @default(autoincrement())
-  name           String
-  email          String
-  message        String   @db.Text
-  ip             String?
-  userAgent      String?
-  status         String   // "PENDING", "PROCESSED", "REPLIED", etc.
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String
+  ip        String?
+  userAgent String?
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model BlogPost {
+  id           Int           @id @default(autoincrement())
+  slug         String        @unique
+  title        String
+  excerpt      String
+  content      String        @db.Text
+  author       String
+  authorImage  String
+  authorBio    String        @db.Text
+  authorRole   String
+  date         DateTime
+  readTime     String
+  category     String
+  coverImage   String
+  featured     Boolean       @default(false)
+  trendingScore Int          @default(0)
+  viewCount    Int           @default(0)
+  likeCount    Int           @default(0)
+  commentCount Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  tags         BlogPostTag[]
+  relatedPosts BlogPostRelation[]
+}
+
+model BlogPostTag {
+  id          Int      @id @default(autoincrement())
+  name        String
+  blogPostId  Int
+  blogPost    BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+
+  @@unique([blogPostId, name])
+}
+
+model BlogPostRelation {
+  id              Int      @id @default(autoincrement())
+  blogPostId      Int
+  relatedPostId   Int
+  blogPost        BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+
+  @@unique([blogPostId, relatedPostId])
 }

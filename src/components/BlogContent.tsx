@@ -1,3 +1,4 @@
+// src/components/BlogContent.tsx
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -8,150 +9,93 @@ import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
 
-// Enhanced blog post data with Unsplash image URLs
-const blogPosts = [
-  {
-    id: 1,
-    title: "Top 10 Job Hunting Strategies for 2025",
-    excerpt: "Discover the most effective techniques to stand out in today's competitive job market and land your dream job.",
-    author: "Career Expert",
-    authorImage: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorRole: "Senior Career Advisor",
-    date: "May 10, 2025",
-    readTime: "8 min read",
-    category: "Job Search",
-    slug: "top-job-hunting-strategies-2025",
-    featured: true,
-    coverImage: "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0",
-    trendingScore: 92,
-    viewCount: 1245,
-    tags: ["Job Search", "Career Advice", "Networking", "Interviews"]
-  },
-  {
-    id: 2,
-    title: "How to Craft a Resume That Gets Noticed by ATS",
-    excerpt: "Learn how to optimize your resume for Applicant Tracking Systems while still making it appealing to human recruiters.",
-    author: "HR Specialist",
-    authorImage: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorRole: "Recruitment Lead at TechCorp",
-    date: "May 5, 2025",
-    readTime: "6 min read",
-    category: "Resumes",
-    slug: "ats-friendly-resume-tips",
-    featured: true,
-    coverImage: "https://images.unsplash.com/photo-1586281380117-5a60ae2050cc?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    trendingScore: 87,
-    viewCount: 982,
-    likeCount: 176,
-    commentCount: 24,
-    tags: ["Resumes", "Job Search", "ATS", "Career Advice"],
-    relatedPosts: [1, 3, 4]
-  },
-  {
-    id: 3,
-    title: "The Rise of Remote Work: New Opportunities in Tech",
-    excerpt: "Explore how the remote work revolution is reshaping the tech industry and creating new job possibilities.",
-    author: "Tech Analyst",
-    authorImage: "https://images.unsplash.com/photo-1580518324671-c2f0833a3af3?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorRole: "Technology Trends Researcher",
-    date: "April 28, 2025",
-    readTime: "7 min read",
-    category: "Remote Work",
-    slug: "remote-work-tech-opportunities",
-    featured: false,
-    coverImage: "https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    trendingScore: 75,
-    viewCount: 756,
-    tags: ["Remote Work", "Tech Jobs", "Future of Work"]
-  },
-  {
-    id: 4,
-    title: "Mastering the Job Interview: From Preparation to Follow-up",
-    excerpt: "A comprehensive guide to acing your job interviews, with expert tips for every stage of the process.",
-    author: "Interview Coach",
-    authorImage: "https://images.unsplash.com/photo-1565423529726-0c920b6b6f1c?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorRole: "Executive Interview Trainer",
-    date: "April 22, 2025",
-    readTime: "10 min read",
-    category: "Interviews",
-    slug: "mastering-job-interviews",
-    featured: false,
-    coverImage: "https://images.unsplash.com/photo-1529519654731-a0525bc4f835?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    trendingScore: 68,
-    viewCount: 689,
-    tags: ["Interviews", "Job Search", "Career Advice"]
-  },
-  {
-    id: 5,
-    title: "Networking in the Digital Age: Building Professional Relationships Online",
-    excerpt: "Effective strategies for expanding your professional network and creating meaningful connections in virtual environments.",
-    author: "Networking Strategist",
-    authorImage: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorRole: "Professional Networking Consultant",
-    date: "April 15, 2025",
-    readTime: "5 min read",
-    category: "Networking",
-    slug: "digital-networking-strategies",
-    featured: false,
-    coverImage: "https://images.unsplash.com/photo-1605999006862-83d68439d6f3?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    trendingScore: 63,
-    viewCount: 542,
-    tags: ["Networking", "Professional Development", "Career Growth"]
-  },
-  {
-    id: 6,
-    title: "Salary Negotiation: How to Get the Compensation You Deserve",
-    excerpt: "Practical advice for negotiating your salary and benefits package with confidence and professionalism.",
-    author: "Compensation Expert",
-    authorImage: "https://images.unsplash.com/photo-1589386417686-0d34b5903d23?w=400&auto=format&fit=crop&q=80&ixlib=rb-4.0.3",
-    authorRole: "Salary Negotiation Specialist",
-    date: "April 8, 2025",
-    readTime: "9 min read",
-    category: "Career Growth",
-    slug: "salary-negotiation-guide",
-    featured: false,
-    coverImage: "https://images.unsplash.com/photo-1534951009808-766178b47a4f?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    trendingScore: 58,
-    viewCount: 478,
-    tags: ["Salary Negotiation", "Career Advice", "Career Growth"]
-  }
-];
-
-// Category filter options
-const categories = [
-  "All",
-  "Job Search",
-  "Resumes",
-  "Interviews",
-  "Remote Work",
-  "Networking",
-  "Career Growth"
-];
+// Define types for blog posts
+interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  slug: string;
+  author: string;
+  authorImage: string;
+  authorRole: string;
+  date: string;
+  readTime: string;
+  category: string;
+  coverImage: string;
+  featured: boolean;
+  trendingScore: number;
+  viewCount: number;
+  likeCount?: number;
+  commentCount?: number;
+  tags: string[];
+}
 
 export default function BlogContent() {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [featuredPosts, setFeaturedPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [filteredPosts, setFilteredPosts] = useState(blogPosts);
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
   const [savedPosts, setSavedPosts] = useState<number[]>([]);
   const [emailSubscription, setEmailSubscription] = useState("");
   const { trackPageView, trackEvent } = useAnalytics();
   const { addToast } = useToast();
 
+  // Fetch blog posts from API
   useEffect(() => {
-    // Track page view
-    trackPageView({
-      url: '/blog',
-      title: 'Blog - BirJob'
-    });
+    const fetchBlogPosts = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch all posts
+        const response = await fetch('/api/blog');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch blog posts');
+        }
+        
+        const data = await response.json();
+        setBlogPosts(data.posts);
+        
+        // Set featured posts
+        const featured = data.posts.filter((post: BlogPost) => post.featured);
+        setFeaturedPosts(featured);
+        
+        // Extract unique categories
+        const uniqueCategories = ["All", ...Array.from(new Set(data.posts.map((post: BlogPost) => post.category))) as string[]];
+        setCategories(uniqueCategories);
+        
+        // Load saved posts from localStorage
+        const savedPostIds = localStorage.getItem('savedPosts');
+        if (savedPostIds) {
+          setSavedPosts(JSON.parse(savedPostIds));
+        }
+        
+        // Track page view
+        trackPageView({
+          url: '/blog',
+          title: 'Blog - BirJob'
+        });
+        
+      } catch (error) {
+        console.error('Error fetching blog posts:', error);
+        addToast({
+          title: "Error",
+          description: "Failed to load blog posts. Please try again later.",
+          type: "destructive",
+          duration: 5000
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    // Simulate loading saved posts from local storage
-    const savedPostIds = localStorage.getItem('savedPosts');
-    if (savedPostIds) {
-      setSavedPosts(JSON.parse(savedPostIds));
-    }
-  }, [trackPageView]);
+    fetchBlogPosts();
+  }, [trackPageView, addToast, trackEvent]);
 
+  // Update filtered posts when category changes
   useEffect(() => {
-    // Filter posts when category changes
     if (selectedCategory === "All") {
       setFilteredPosts(blogPosts);
     } else {
@@ -159,7 +103,7 @@ export default function BlogContent() {
         blogPosts.filter(post => post.category === selectedCategory)
       );
     }
-
+    
     // Track category filter usage
     if (selectedCategory !== "All") {
       trackEvent({
@@ -168,7 +112,7 @@ export default function BlogContent() {
         label: selectedCategory
       });
     }
-  }, [selectedCategory, trackEvent]);
+  }, [selectedCategory, blogPosts, trackEvent]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -228,6 +172,17 @@ export default function BlogContent() {
     setEmailSubscription("");
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading blog posts...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -274,85 +229,83 @@ export default function BlogContent() {
             Featured Articles
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {blogPosts
-              .filter(post => post.featured)
-              .map(post => (
-                <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group dark:bg-gray-800 border-0 shadow-md">
-                  <div className="relative aspect-[16/9] overflow-hidden">
-                    <img 
-                      src={post.coverImage} 
-                      alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
-                    />
-                    <div className="absolute top-4 right-4 z-10">
+            {featuredPosts.map(post => (
+              <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group dark:bg-gray-800 border-0 shadow-md">
+                <div className="relative aspect-[16/9] overflow-hidden">
+                  <img 
+                    src={post.coverImage} 
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                  />
+                  <div className="absolute top-4 right-4 z-10">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-full bg-black/30 text-white hover:bg-black/50 backdrop-blur-sm"
+                      onClick={() => handleSavePost(post.id)}
+                    >
+                      <Bookmark className={`h-4 w-4 ${savedPosts.includes(post.id) ? "fill-white" : ""}`} />
+                    </Button>
+                  </div>
+                  {post.trendingScore > 80 && (
+                    <div className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                      <TrendingUp className="h-3 w-3" />
+                      Trending
+                    </div>
+                  )}
+                </div>
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
+                    <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium">
+                      {post.category}
+                    </span>
+                    <span className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {post.readTime}
+                    </span>
+                  </div>
+                  
+                  <Link href={`/blog/${post.slug}`}>
+                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {post.title}
+                    </h3>
+                  </Link>
+                  
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+                    {post.excerpt}
+                  </p>
+                  
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center">
+                      <img 
+                        src={post.authorImage}
+                        alt={post.author}
+                        className="h-10 w-10 rounded-full object-cover mr-3"
+                      />
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white text-sm">{post.author}</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs">{post.date}</p>
+                      </div>
+                    </div>
+                    <Link href={`/blog/${post.slug}`} passHref>
                       <Button
                         variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-full bg-black/30 text-white hover:bg-black/50 backdrop-blur-sm"
-                        onClick={() => handleSavePost(post.id)}
+                        className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-0"
+                        onClick={() => {
+                          trackEvent({
+                            category: 'Blog',
+                            action: 'Article Click',
+                            label: post.title
+                          });
+                        }}
                       >
-                        <Bookmark className={`h-4 w-4 ${savedPosts.includes(post.id) ? "fill-white" : ""}`} />
+                        Read More <ChevronRight className="h-4 w-4 ml-1" />
                       </Button>
-                    </div>
-                    {post.trendingScore > 80 && (
-                      <div className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                        <TrendingUp className="h-3 w-3" />
-                        Trending
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
-                      <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium">
-                        {post.category}
-                      </span>
-                      <span className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {post.readTime}
-                      </span>
-                    </div>
-                    
-                    <Link href={`/blog/${post.slug}`}>
-                      <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {post.title}
-                      </h3>
                     </Link>
-                    
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                    
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                      <div className="flex items-center">
-                        <img 
-                          src={post.authorImage}
-                          alt={post.author}
-                          className="h-10 w-10 rounded-full object-cover mr-3"
-                        />
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white text-sm">{post.author}</p>
-                          <p className="text-gray-500 dark:text-gray-400 text-xs">{post.date}</p>
-                        </div>
-                      </div>
-                      <Link href={`/blog/${post.slug}`} passHref>
-                        <Button
-                          variant="ghost"
-                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-0"
-                          onClick={() => {
-                            trackEvent({
-                              category: 'Blog',
-                              action: 'Article Click',
-                              label: post.title
-                            });
-                          }}
-                        >
-                          Read More <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
 
