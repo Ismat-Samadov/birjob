@@ -84,7 +84,7 @@ const blogPosts = [
     category: "Job Search",
     slug: "top-job-hunting-strategies-2025",
     featured: true,
-    coverImage: "/assets/blog/job-hunting-strategies.jpg",
+    coverImage: "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3RyYXRlZ3l8ZW58MHx8MHx8fDA%3D",
     trendingScore: 92,
     viewCount: 1245,
     likeCount: 248,
