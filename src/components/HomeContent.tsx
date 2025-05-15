@@ -160,28 +160,25 @@ export default function HomeContent() {
               <div className="relative flex-grow">
                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                 <Input
-                  type="search"
+                  type="text"
                   placeholder="Search jobs or companies..."
                   value={search}
                   onChange={handleSearch}
-                  className="w-full pl-10 pr-4 transition-all focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
+                  className="w-full pl-10 pr-10 transition-all focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
                 />
-                {isSearching && (
+                {search && (
+                  <button
+                    onClick={clearFilters}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+                {isSearching && !search && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
                   </div>
-                )}
-              </div>
-              <div className="flex gap-2 mt-2 sm:mt-0">
-                {search && (
-                  <Button
-                    variant="ghost"
-                    onClick={clearFilters}
-                    className="flex items-center dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    <X className="h-4 w-4" />
-                    <span className="hidden sm:inline ml-1">Clear</span>
-                  </Button>
                 )}
               </div>
             </div>
