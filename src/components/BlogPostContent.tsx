@@ -50,9 +50,29 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
   const [readingProgress, setReadingProgress] = useState(0);
   const [copyLinkText, setCopyLinkText] = useState("Copy Link");
   const [showTableOfContents, setShowTableOfContents] = useState(true);
+  const [fixedContent, setFixedContent] = useState<string>("");
   const articleRef = useRef<HTMLDivElement>(null);
   const { trackPageView, trackEvent } = useAnalytics();
   const { addToast } = useToast();
+
+  // Function to fix malformed blog content
+  const fixBlogContent = (content: string): string => {
+    if (!content) return '';
+    
+    // Fix malformed headings like "Introduction id="2">2Introduction>"
+    let fixed = content.replace(
+      /([^\n<]+)\s+id="2">2([^>]+)>/g,
+      '<h2>$1</h2>'
+    );
+    
+    // Fix numbered headings like "1. Title id="2">21. Title>"
+    fixed = fixed.replace(
+      /(\d+\.\s+[^\n<]+)\s+id="2">2\d+\.\s+[^>]+>/g,
+      '<h2>$1</h2>'
+    );
+    
+    return fixed;
+  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -72,6 +92,11 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
         
         setPost(data.post);
         setRelatedPosts(data.relatedPosts || []);
+        
+        // Apply the fix to the content
+        if (data.post?.content) {
+          setFixedContent(fixBlogContent(data.post.content));
+        }
         
         // Track page view
         trackPageView({
@@ -270,7 +295,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
   const formatContentWithIds = (content: string) => {
     return content.replace(
       /<h([2-3])>([^<]+)<\/h\1>/g,
-      (level, text) => {
+      (_, level, text) => {
         const id = text.toLowerCase().replace(/[^\w]+/g, '-');
         return `<h${level} id="${id}">${text}</h${level}>`;
       }
@@ -318,9 +343,9 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     );
   }
 
-  // Extract headings for table of contents
-  const headings = extractHeadings(post.content);
-  const formattedContent = formatContentWithIds(post.content);
+  // Extract headings for table of contents using the fixed content
+  const headings = extractHeadings(fixedContent);
+  const formattedContent = formatContentWithIds(fixedContent);
 
   return (
     <>
@@ -446,7 +471,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
             <main className="lg:flex-1 max-w-3xl mx-auto lg:mx-0">
               <Card className="overflow-hidden mb-8 dark:bg-gray-800">
                 <CardContent className="p-6 md:p-8" ref={articleRef}>
-                  {/* Article content */}
+                  {/* Article content - Using the fixed and formatted content */}
                   <div 
                     className="prose max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-img:rounded-lg"
                     dangerouslySetInnerHTML={{ __html: formattedContent }}
