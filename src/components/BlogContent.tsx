@@ -541,7 +541,7 @@ export default function BlogContent() {
                   </h3>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Download professional resume templates designed to pass ATS systems and catch recruiters' attention.
+                  Download professional resume templates designed to pass ATS systems and catch recruiters&apos; attention.
                 </p>
                 <Link href="/blog?category=Resumes" passHref>
                   <Button 
@@ -603,7 +603,7 @@ export default function BlogContent() {
                   </h3>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Learn how to negotiate effectively and ensure you get paid what you're worth in your next role.
+                  Learn how to negotiate effectively and ensure you get paid what you&apos;re worth in your next role.
                 </p>
                 <Link href="/blog?tag=Negotiation" passHref>
                   <Button 
