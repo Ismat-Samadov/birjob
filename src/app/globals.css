@@ -288,3 +288,251 @@
     padding-right: env(safe-area-inset-right);
   }
 }
+
+/* Base text styles */
+.typography-enhanced {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+  color: #374151;
+  line-height: 1.7;
+  font-size: 1.125rem;
+}
+
+.dark .typography-enhanced {
+  color: #d1d5db;
+}
+
+/* Heading hierarchy */
+.typography-enhanced h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.dark .typography-enhanced h2 {
+  color: #f3f4f6;
+  border-color: #374151;
+}
+
+.typography-enhanced h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.3;
+}
+
+.dark .typography-enhanced h3 {
+  color: #f3f4f6;
+}
+
+/* Paragraph styles with proper spacing */
+.typography-enhanced p {
+  margin-bottom: 1.5rem;
+  line-height: 1.7;
+}
+
+/* First paragraph after a heading gets special treatment */
+.typography-enhanced h2 + p,
+.typography-enhanced h3 + p {
+  font-size: 1.125rem;
+  color: #4b5563;
+}
+
+.dark .typography-enhanced h2 + p,
+.dark .typography-enhanced h3 + p {
+  color: #9ca3af;
+}
+
+/* Text emphasis */
+.typography-enhanced em {
+  font-style: italic;
+  color: #111827;
+}
+
+.dark .typography-enhanced em {
+  color: #f9fafb;
+}
+
+.typography-enhanced strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+.dark .typography-enhanced strong {
+  color: #f9fafb;
+}
+
+/* List styles */
+.typography-enhanced ul,
+.typography-enhanced ol {
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.typography-enhanced ul {
+  list-style-type: disc;
+}
+
+.typography-enhanced ol {
+  list-style-type: decimal;
+}
+
+.typography-enhanced li {
+  margin: 0.5rem 0;
+  padding-left: 0.5rem;
+}
+
+/* Nested lists */
+.typography-enhanced li > ul,
+.typography-enhanced li > ol {
+  margin: 0.5rem 0 0.5rem 1rem;
+}
+
+/* Link styles */
+.typography-enhanced a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.typography-enhanced a:hover {
+  text-decoration: underline;
+}
+
+.dark .typography-enhanced a {
+  color: #60a5fa;
+}
+
+/* Blockquote styles */
+.typography-enhanced blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid #3b82f6;
+  background-color: #f9fafb;
+  font-style: italic;
+  color: #4b5563;
+}
+
+.dark .typography-enhanced blockquote {
+  background-color: #1f2937;
+  color: #9ca3af;
+  border-left-color: #60a5fa;
+}
+
+/* Code styles */
+.typography-enhanced code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9em;
+  padding: 0.2em 0.4em;
+  background-color: #f1f5f9;
+  border-radius: 0.25rem;
+  color: #ef4444;
+}
+
+.dark .typography-enhanced code {
+  background-color: #1e293b;
+  color: #f87171;
+}
+
+.typography-enhanced pre {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  background-color: #f1f5f9;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+}
+
+.dark .typography-enhanced pre {
+  background-color: #1e293b;
+}
+
+.typography-enhanced pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+.dark .typography-enhanced pre code {
+  color: #e2e8f0;
+}
+
+/* Special callout/info box */
+.typography-enhanced .info-box {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border-radius: 0.375rem;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.dark .typography-enhanced .info-box {
+  background-color: rgba(30, 58, 138, 0.3);
+  border-color: #1e40af;
+}
+
+/* Table styles */
+.typography-enhanced table {
+  margin: 1.5rem 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.typography-enhanced th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.dark .typography-enhanced th {
+  background-color: #1f2937;
+  border-bottom-color: #374151;
+}
+
+.typography-enhanced td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .typography-enhanced td {
+  border-bottom-color: #374151;
+}
+
+.typography-enhanced tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.dark .typography-enhanced tbody tr:hover {
+  background-color: #1f2937;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .typography-enhanced {
+    font-size: 1rem;
+  }
+  
+  .typography-enhanced h2 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .typography-enhanced h3 {
+    font-size: 1.25rem;
+  }
+  
+  .typography-enhanced ul,
+  .typography-enhanced ol {
+    padding-left: 1.25rem;
+  }
+}

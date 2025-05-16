@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { 
   ArrowLeft, Bookmark, Clock, Copy, Share2, ThumbsUp, 
   MessageCircle, MessageSquare, Heart, Tag, TrendingUp
-} from "lucide-react";
+} from 'lucide-react';
 import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
@@ -41,6 +41,74 @@ interface BlogPostProps {
   slug: string;
 }
 
+// Function to enhance typography in the blog content
+function enhanceTypography(content: string): string {
+  if (!content) return '';
+  
+  // Fix malformed headings like "Introduction id="2">2Introduction>"
+  let enhancedContent = content.replace(
+    /([^\n<]+)\s+id="2">2([^>]+)>/g,
+    '<h2>$1</h2>'
+  );
+  
+  // Fix numbered headings like "1. Title id="2">21. Title>"
+  enhancedContent = enhancedContent.replace(
+    /(\d+\.\s+[^\n<]+)\s+id="2">2\d+\.\s+[^>]+>/g,
+    '<h2>$1</h2>'
+  );
+  
+  // Enhance heading styles with proper spacing
+  enhancedContent = enhancedContent
+    // Add classes to h2 elements
+    .replace(
+      /<h2>([^<]+)<\/h2>/g,
+      '<h2 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mt-10 mb-6 leading-tight">$1</h2>'
+    )
+    // Add classes to h3 elements
+    .replace(
+      /<h3>([^<]+)<\/h3>/g,
+      '<h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mt-8 mb-4 leading-tight">$1</h3>'
+    );
+  
+  // Enhance paragraphs with better spacing and line height
+  enhancedContent = enhancedContent.replace(
+    /<p>([^<]+)<\/p>/g,
+    '<p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">$1</p>'
+  );
+  
+  // Add spacing and styling to lists
+  enhancedContent = enhancedContent
+    // Unordered lists
+    .replace(
+      /<ul>/g,
+      '<ul class="list-disc pl-6 space-y-2 my-6">'
+    )
+    // Ordered lists
+    .replace(
+      /<ol>/g,
+      '<ol class="list-decimal pl-6 space-y-2 my-6">'
+    )
+    // List items
+    .replace(
+      /<li>([^<]+)<\/li>/g,
+      '<li class="text-gray-700 dark:text-gray-300 leading-relaxed">$1</li>'
+    );
+  
+  // Add emphasis to key phrases (looking for sentences that might be important)
+  enhancedContent = enhancedContent.replace(
+    /(<p [^>]+>)([A-Z][^.!?:]+(?:[.!?:]))(\s[^<]+<\/p>)/g,
+    '$1<em>$2</em>$3'
+  );
+  
+  // Add styling to strong elements
+  enhancedContent = enhancedContent.replace(
+    /<strong>([^<]+)<\/strong>/g,
+    '<strong class="font-semibold text-gray-900 dark:text-white">$1</strong>'
+  );
+  
+  return enhancedContent;
+}
+
 export default function BlogPostContent({ slug }: BlogPostProps) {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
@@ -50,29 +118,10 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
   const [readingProgress, setReadingProgress] = useState(0);
   const [copyLinkText, setCopyLinkText] = useState("Copy Link");
   const [showTableOfContents, setShowTableOfContents] = useState(true);
-  const [fixedContent, setFixedContent] = useState<string>("");
+  const [enhancedContent, setEnhancedContent] = useState<string>("");
   const articleRef = useRef<HTMLDivElement>(null);
   const { trackPageView, trackEvent } = useAnalytics();
   const { addToast } = useToast();
-
-  // Function to fix malformed blog content
-  const fixBlogContent = (content: string): string => {
-    if (!content) return '';
-    
-    // Fix malformed headings like "Introduction id="2">2Introduction>"
-    let fixed = content.replace(
-      /([^\n<]+)\s+id="2">2([^>]+)>/g,
-      '<h2>$1</h2>'
-    );
-    
-    // Fix numbered headings like "1. Title id="2">21. Title>"
-    fixed = fixed.replace(
-      /(\d+\.\s+[^\n<]+)\s+id="2">2\d+\.\s+[^>]+>/g,
-      '<h2>$1</h2>'
-    );
-    
-    return fixed;
-  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -93,9 +142,9 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
         setPost(data.post);
         setRelatedPosts(data.relatedPosts || []);
         
-        // Apply the fix to the content
+        // Apply typography enhancements to the content
         if (data.post?.content) {
-          setFixedContent(fixBlogContent(data.post.content));
+          setEnhancedContent(enhanceTypography(data.post.content));
         }
         
         // Track page view
@@ -276,7 +325,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
 
   // Extract headings from content to build table of contents
   const extractHeadings = (content: string) => {
-    const headingRegex = /<h([2-3])>([^<]+)<\/h\1>/g;
+    const headingRegex = /<h([2-3])[^>]*>([^<]+)<\/h\1>/g;
     const headings = [];
     let match;
     
@@ -289,17 +338,6 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     }
     
     return headings;
-  };
-  
-  // Format content with IDs for headings
-  const formatContentWithIds = (content: string) => {
-    return content.replace(
-      /<h([2-3])>([^<]+)<\/h\1>/g,
-      (_, level, text) => {
-        const id = text.toLowerCase().replace(/[^\w]+/g, '-');
-        return `<h${level} id="${id}">${text}</h${level}>`;
-      }
-    );
   };
 
   if (isLoading) {
@@ -343,9 +381,8 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
     );
   }
 
-  // Extract headings for table of contents using the fixed content
-  const headings = extractHeadings(fixedContent);
-  const formattedContent = formatContentWithIds(fixedContent);
+  // Extract headings for table of contents using the enhanced content
+  const headings = extractHeadings(enhancedContent);
 
   return (
     <>
@@ -370,7 +407,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
           </div>
 
           {/* Hero Section with Cover Image */}
-          <div className="relative w-full max-w-6xl mx-auto rounded-xl overflow-hidden mb-8 aspect-[21/9]">
+          <div className="relative w-full max-w-6xl mx-auto rounded-xl overflow-hidden mb-12 aspect-[21/9]">
             <div className="absolute inset-0">
               <Image 
                 src={post.coverImage} 
@@ -389,7 +426,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
               </div>
             )}
             <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
-              <div className="flex items-center space-x-2 text-sm text-white mb-3">
+              <div className="flex items-center space-x-2 text-sm text-white mb-4">
                 <span className="bg-blue-600/80 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">
                   {post.category}
                 </span>
@@ -398,7 +435,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                   {post.readTime}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 max-w-4xl">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 max-w-4xl leading-tight">
                 {post.title}
               </h1>
               <div className="flex items-center">
@@ -442,13 +479,16 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                 </div>
                 
                 {showTableOfContents && (
-                  <nav className="toc text-gray-700 dark:text-gray-300">
-                    <ul className="space-y-2">
+                  <nav className="toc">
+                    <ul className="space-y-3 text-gray-700 dark:text-gray-300">
                       {headings.map((heading, index) => (
-                        <li key={index} className={`${heading.level === 3 ? 'ml-4' : ''}`}>
+                        <li 
+                          key={index} 
+                          className={`${heading.level === 3 ? 'ml-4 text-sm' : 'font-medium'}`}
+                        >
                           <a 
                             href={`#${heading.id}`}
-                            className="hover:text-blue-600 dark:hover:text-blue-400 text-sm transition-colors line-clamp-1"
+                            className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-2"
                             onClick={() => {
                               trackEvent({
                                 category: 'Blog',
@@ -469,18 +509,23 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
 
             {/* Main content */}
             <main className="lg:flex-1 max-w-3xl mx-auto lg:mx-0">
-              <Card className="overflow-hidden mb-8 dark:bg-gray-800">
+              <Card className="overflow-hidden mb-8 dark:bg-gray-800 shadow-lg">
                 <CardContent className="p-6 md:p-8" ref={articleRef}>
-                  {/* Article content - Using the fixed and formatted content */}
+                  {/* Article excerpt */}
+                  <p className="text-xl text-gray-700 dark:text-gray-300 leading-relaxed mb-8 font-medium italic border-l-4 border-blue-500 pl-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                    {post.excerpt}
+                  </p>
+                  
+                  {/* Article content - Using the enhanced content */}
                   <div 
-                    className="prose max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-img:rounded-lg"
-                    dangerouslySetInnerHTML={{ __html: formattedContent }}
+                    className="typography-enhanced"
+                    dangerouslySetInnerHTML={{ __html: enhancedContent }}
                   />
                   
                   {/* Tags */}
                   {post.tags && post.tags.length > 0 && (
-                    <div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Tags</h3>
+                    <div className="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Tags</h3>
                       <div className="flex flex-wrap gap-2">
                         {post.tags.map((tag: string, index: number) => (
                           <Link 
@@ -504,7 +549,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                   )}
                   
                   {/* Engagement buttons */}
-                  <div className="mt-8 flex flex-col sm:flex-row gap-4 sm:gap-8 items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
+                  <div className="mt-10 flex flex-col sm:flex-row gap-4 sm:gap-8 items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
                     <div className="flex items-center gap-4">
                       <Button
                         variant="outline"
@@ -613,7 +658,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
               </Card>
               
               {/* Author information */}
-              <Card className="mb-8 dark:bg-gray-800 border-blue-100 dark:border-blue-900/50">
+              <Card className="mb-8 dark:bg-gray-800 border-blue-100 dark:border-blue-900/50 shadow-md">
                 <CardContent className="p-6 md:p-8">
                   <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
                     <div className="relative w-24 h-24">
@@ -627,8 +672,8 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{post.author}</h3>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">{post.authorRole}</p>
-                      <p className="text-gray-600 dark:text-gray-300 mb-4">{post.authorBio}</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">{post.authorRole}</p>
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{post.authorBio}</p>
                       <Button
                         variant="outline"
                         size="sm"
@@ -655,7 +700,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
               </Card>
               
               {/* Comments section */}
-              <Card className="mb-8 dark:bg-gray-800">
+              <Card className="mb-8 dark:bg-gray-800 shadow-md">
                 <CardContent className="p-6 md:p-8">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">Comments ({post.commentCount})</h3>
@@ -699,7 +744,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                           <span className="font-semibold text-gray-900 dark:text-white">John Doe</span>
                           <span className="text-gray-500 dark:text-gray-400 text-xs">3 days ago</span>
                         </div>
-                        <p className="text-gray-700 dark:text-gray-300 text-sm">
+                        <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
                           Great article! I particularly found the section on networking strategically to be very helpful. I&apos;ve been trying to expand my professional network and these tips are exactly what I needed.
                         </p>
                         <div className="flex items-center gap-4 mt-2">
@@ -730,7 +775,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                           <span className="font-semibold text-gray-900 dark:text-white">Sarah Johnson</span>
                           <span className="text-gray-500 dark:text-gray-400 text-xs">1 week ago</span>
                         </div>
-                        <p className="text-gray-700 dark:text-gray-300 text-sm">
+                        <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
                           I&apos;ve been struggling with my job search for months. These strategies are exactly what I needed to revamp my approach. Thank you for the detailed explanations and practical tips!
                         </p>
                         <div className="flex items-center gap-4 mt-2">
@@ -770,7 +815,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
             </main>
             
             {/* Right sidebar - Related articles and sticky share buttons */}
-            <aside className="lg:w-64 sticky top-24 self-start hidden lg:block">
+            <aside className="hidden lg:block lg:w-64 sticky top-24 self-start">
               {/* Related articles */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Related Articles</h3>
@@ -816,7 +861,6 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                         label: post.title
                       });
                     }}
-                    aria-label="Share on Twitter"
                   >
                     <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -835,7 +879,6 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                         label: post.title
                       });
                     }}
-                    aria-label="Share on Facebook"
                   >
                     <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -854,7 +897,6 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                         label: post.title
                       });
                     }}
-                    aria-label="Share on LinkedIn"
                   >
                     <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2V9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -909,7 +951,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                         {relatedPost.title}
                       </h3>
                     </Link>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm line-clamp-2">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm line-clamp-2 leading-relaxed">
                       {relatedPost.excerpt}
                     </p>
                     <Link href={`/blog/${relatedPost.slug}`} passHref>
@@ -935,6 +977,103 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
           </div>
         </div>
       </div>
+      
+      {/* Add global styles for enhanced typography */}
+      <style jsx global>{`
+        /* Typography Enhancements */
+        .typography-enhanced h2 {
+          margin-top: 2.5rem;
+          margin-bottom: 1.5rem;
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: #1f2937;
+          line-height: 1.3;
+        }
+        
+        .dark .typography-enhanced h2 {
+          color: #f3f4f6;
+        }
+        
+        .typography-enhanced h3 {
+          margin-top: 2rem;
+          margin-bottom: 1rem;
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #1f2937;
+          line-height: 1.3;
+        }
+        
+        .dark .typography-enhanced h3 {
+          color: #f3f4f6;
+        }
+        
+        .typography-enhanced p {
+          margin-bottom: 1.5rem;
+          line-height: 1.7;
+          color: #374151;
+        }
+        
+        .dark .typography-enhanced p {
+          color: #d1d5db;
+        }
+        
+        .typography-enhanced em {
+          font-style: italic;
+          color: #111827;
+        }
+        
+        .dark .typography-enhanced em {
+          color: #f9fafb;
+        }
+        
+        .typography-enhanced strong {
+          font-weight: 600;
+          color: #111827;
+        }
+        
+        .dark .typography-enhanced strong {
+          color: #f9fafb;
+        }
+        
+        .typography-enhanced ul, .typography-enhanced ol {
+          margin: 1.5rem 0;
+          padding-left: 1.5rem;
+        }
+        
+        .typography-enhanced ul {
+          list-style-type: disc;
+        }
+        
+        .typography-enhanced ol {
+          list-style-type: decimal;
+        }
+        
+        .typography-enhanced li {
+          margin: 0.5rem 0;
+          padding-left: 0.5rem;
+          line-height: 1.7;
+        }
+        
+        .typography-enhanced a {
+          color: #2563eb;
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.2s;
+        }
+        
+        .typography-enhanced a:hover {
+          text-decoration: underline;
+        }
+        
+        .dark .typography-enhanced a {
+          color: #60a5fa;
+        }
+        
+        /* Add spacing between major sections */
+        .typography-enhanced h2 + p {
+          margin-top: -0.5rem;
+        }
+      `}</style>
     </>
   );
 }
