@@ -439,11 +439,11 @@ export default function BlogContent() {
               },
               {
                 title: "Interview Techniques",
-                image: "https://images.unsplash.com/photo-1529519654731-a0525bc4f835?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+                image: "https://plus.unsplash.com/premium_photo-1676666377229-12a9ad6b186a?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               },
               {
                 title: "Networking Strategies",
-                image: "https://images.unsplash.com/photo-1605999006862-83d68439d6f3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+                image: "https://images.unsplash.com/photo-1515169067868-5387ec356754?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               }
             ].map((topic, index) => (
               <Card 
