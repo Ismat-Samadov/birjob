@@ -7,6 +7,52 @@ export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
+// Define interfaces for our response data
+interface FormattedBlogPost {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  authorImage: string;
+  authorBio: string;
+  authorRole: string;
+  date: string;
+  readTime: string;
+  category: string;
+  coverImage: string;
+  featured: boolean;
+  trendingScore: number;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  tags: string[];
+  relatedPosts: number[];
+}
+
+interface RelatedPostData {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  authorImage: string;
+  authorBio: string;
+  authorRole: string;
+  date: string;
+  readTime: string;
+  category: string;
+  coverImage: string;
+  featured: boolean;
+  trendingScore: number;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  tags: string[];
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { slug: string } }
@@ -39,7 +85,7 @@ export async function GET(
     }
 
     // Format tags
-    const formattedPost = {
+    const formattedPost: FormattedBlogPost = {
       ...post,
       date: post.date.toISOString().split('T')[0],
       tags: post.tags.map(tag => tag.name),
@@ -47,7 +93,7 @@ export async function GET(
     };
 
     // Get related posts if any
-    let relatedPostsData = [];
+    let relatedPostsData: RelatedPostData[] = [];
     if (formattedPost.relatedPosts.length > 0) {
       const relatedPosts = await prisma.blogPost.findMany({
         where: {

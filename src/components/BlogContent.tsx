@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, ChevronRight, Bookmark, TrendingUp } from "lucide-react";
+import { Clock, ChevronRight, Bookmark, TrendingUp, Tag, BookOpen } from "lucide-react";
 import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
@@ -422,8 +422,242 @@ export default function BlogContent() {
           ))}
         </div>
 
-        {/* Rest of the component remains the same */}
+        {/* Trending topics section */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Trending Topics
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              {
+                title: "Resume Building",
+                image: "https://images.unsplash.com/photo-1586281380117-5a60ae2050cc?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+              },
+              {
+                title: "Remote Jobs",
+                image: "https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+              },
+              {
+                title: "Interview Techniques",
+                image: "https://images.unsplash.com/photo-1529519654731-a0525bc4f835?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+              },
+              {
+                title: "Networking Strategies",
+                image: "https://images.unsplash.com/photo-1605999006862-83d68439d6f3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+              }
+            ].map((topic, index) => (
+              <Card 
+                key={index} 
+                className="overflow-hidden hover:shadow-md transition-all duration-300 group dark:bg-gray-800 cursor-pointer"
+                onClick={() => handleCategoryChange(topic.title === "Remote Jobs" ? "Remote Work" : (topic.title === "Resume Building" ? "Resumes" : (topic.title === "Interview Techniques" ? "Interviews" : "Networking")))}
+              >
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <Image 
+                    src={topic.image} 
+                    alt={topic.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  />
+                  <div className="absolute inset-0 bg-black/40"></div>
+                  <div className="absolute inset-0 flex items-center justify-center text-center">
+                    <h3 className="text-xl font-bold text-white px-4 z-10">{topic.title}</h3>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Newsletter signup with improved design */}
+        <div className="mb-16">
+          <Card className="border-2 border-blue-100 dark:border-blue-900 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex flex-col md:flex-row">
+                <div className="md:w-3/5 p-8">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                    Get Career Insights Delivered
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">
+                    Stay updated with the latest career advice, job search tips, and industry trends delivered straight to your inbox.
+                  </p>
+                  <form
+                    className="flex flex-col sm:flex-row gap-3"
+                    onSubmit={handleSubscribe}
+                  >
+                    <input
+                      type="email"
+                      placeholder="Your email address"
+                      className="flex-grow p-3 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      value={emailSubscription}
+                      onChange={(e) => setEmailSubscription(e.target.value)}
+                      required
+                    />
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                      Subscribe
+                    </Button>
+                  </form>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
+                    By subscribing, you agree to our privacy policy and consent to receive updates from our company.
+                  </p>
+                </div>
+                <div className="md:w-2/5 hidden md:block relative">
+                  <div className="relative h-full w-full">
+                    <Image 
+                      src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
+                      alt="Newsletter signup"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-blue-600/50"></div>
+                    <div className="absolute inset-0 flex items-center justify-center p-6">
+                      <div className="text-white text-center">
+                        <h4 className="text-xl font-bold mb-2">Weekly Digest</h4>
+                        <p className="text-white/80">Curated career advice from industry experts</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Blog resources section */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Essential Resources
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="hover:shadow-md transition-all duration-300 dark:bg-gray-800">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-4">
+                    <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    Resume Templates
+                  </h3>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Download professional resume templates designed to pass ATS systems and catch recruiters' attention.
+                </p>
+                <Link href="/blog?category=Resumes" passHref>
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-center text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-900/30"
+                    onClick={() => {
+                      trackEvent({
+                        category: 'Resource',
+                        action: 'Click',
+                        label: 'Resume Templates'
+                      });
+                    }}
+                  >
+                    Browse Templates
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-md transition-all duration-300 dark:bg-gray-800">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mr-4">
+                    <BookOpen className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    Interview Guides
+                  </h3>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Prepare for tough interviews with our comprehensive guides covering common questions and best practices.
+                </p>
+                <Link href="/blog?category=Interviews" passHref>
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-center text-green-600 border-green-200 hover:bg-green-50 dark:text-green-400 dark:border-green-800 dark:hover:bg-green-900/30"
+                    onClick={() => {
+                      trackEvent({
+                        category: 'Resource',
+                        action: 'Click',
+                        label: 'Interview Guides'
+                      });
+                    }}
+                  >
+                    View Guides
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-md transition-all duration-300 dark:bg-gray-800">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mr-4">
+                    <BookOpen className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    Salary Negotiation
+                  </h3>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Learn how to negotiate effectively and ensure you get paid what you're worth in your next role.
+                </p>
+                <Link href="/blog?tag=Negotiation" passHref>
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-center text-purple-600 border-purple-200 hover:bg-purple-50 dark:text-purple-400 dark:border-purple-800 dark:hover:bg-purple-900/30"
+                    onClick={() => {
+                      trackEvent({
+                        category: 'Resource',
+                        action: 'Click',
+                        label: 'Salary Negotiation'
+                      });
+                    }}
+                  >
+                    Read Articles
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
         
+        {/* Tags/Categories Cloud */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Popular Topics
+          </h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+            <div className="flex flex-wrap gap-3">
+              {['Resume', 'Cover Letter', 'Interview', 'Remote Work', 'Networking', 'Career Change', 
+                'LinkedIn', 'Job Search', 'Negotiation', 'Freelance', 'Portfolio', 'Skills', 
+                'Tech Jobs', 'Entry Level', 'Senior Positions', 'Work-Life Balance'].map((tag, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full bg-gray-100 hover:bg-gray-200 border-gray-200 
+                             dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600"
+                  onClick={() => {
+                    trackEvent({
+                      category: 'Tag',
+                      action: 'Click',
+                      label: tag
+                    });
+                    // Handle tag filtering - you could implement this with a search parameter
+                    // or by selecting a category
+                  }}
+                >
+                  <Tag className="h-3 w-3 mr-1" />
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
