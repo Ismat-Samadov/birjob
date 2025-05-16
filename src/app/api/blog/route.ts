@@ -8,6 +8,17 @@ export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
+// Define a proper type for the where condition
+interface BlogWhereCondition {
+  category?: string;
+  tags?: {
+    some: {
+      name: string;
+    }
+  };
+  featured?: boolean;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -16,7 +27,7 @@ export async function GET(request: NextRequest) {
     const featured = searchParams.get('featured') === 'true' ? true : undefined;
     
     // Build where condition based on filters
-    const where: any = {};
+    const where: BlogWhereCondition = {};
     
     if (category && category !== 'All') {
       where.category = category;

@@ -11,6 +11,7 @@ import {
 import { useAnalytics } from "@/lib/hooks/useAnalytics";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
+import Image from 'next/image';
 
 // Define types for blog post
 interface BlogPost {
@@ -303,7 +304,7 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
               Post Not Found
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Sorry, the blog post you're looking for doesn't exist or has been moved.
+              Sorry, the blog post you&apos;re looking for doesn&apos;t exist or has been moved.
             </p>
             <Link href="/blog" passHref>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -345,11 +346,16 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
 
           {/* Hero Section with Cover Image */}
           <div className="relative w-full max-w-6xl mx-auto rounded-xl overflow-hidden mb-8 aspect-[21/9]">
-            <img 
-              src={post.coverImage} 
-              alt={post.title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
+            <div className="absolute inset-0">
+              <Image 
+                src={post.coverImage} 
+                alt={post.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1200px) 100vw, 1200px"
+                priority
+              />
+            </div>
             <div className="absolute inset-0 bg-black/40"></div>
             {post.trendingScore > 80 && (
               <div className="absolute top-6 left-6 z-10 flex items-center gap-1 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
@@ -371,11 +377,15 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                 {post.title}
               </h1>
               <div className="flex items-center">
-                <img 
-                  src={post.authorImage}
-                  alt={post.author}
-                  className="h-12 w-12 rounded-full object-cover mr-4 border-2 border-white"
-                />
+                <div className="relative h-12 w-12 mr-4">
+                  <Image 
+                    src={post.authorImage}
+                    alt={post.author}
+                    width={48}
+                    height={48}
+                    className="rounded-full object-cover border-2 border-white"
+                  />
+                </div>
                 <div>
                   <p className="font-medium text-white">{post.author}</p>
                   <div className="flex items-center text-sm text-white/70">
@@ -581,11 +591,15 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
               <Card className="mb-8 dark:bg-gray-800 border-blue-100 dark:border-blue-900/50">
                 <CardContent className="p-6 md:p-8">
                   <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
-                    <img 
-                      src={post.authorImage}
-                      alt={post.author}
-                      className="h-24 w-24 rounded-full object-cover border-4 border-white dark:border-gray-800"
-                    />
+                    <div className="relative w-24 h-24">
+                      <Image 
+                        src={post.authorImage}
+                        alt={post.author}
+                        width={96}
+                        height={96}
+                        className="rounded-full object-cover border-4 border-white dark:border-gray-800"
+                      />
+                    </div>
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{post.author}</h3>
                       <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">{post.authorRole}</p>
@@ -646,18 +660,22 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                   {/* Sample comments - In production, these would come from a database */}
                   <div className="space-y-6">
                     <div className="flex gap-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
-                        alt="John Doe"
-                        className="h-10 w-10 rounded-full object-cover flex-shrink-0"
-                      />
+                      <div className="relative h-10 w-10 flex-shrink-0">
+                        <Image 
+                          src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
+                          alt="John Doe"
+                          width={40}
+                          height={40}
+                          className="rounded-full object-cover"
+                        />
+                      </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold text-gray-900 dark:text-white">John Doe</span>
                           <span className="text-gray-500 dark:text-gray-400 text-xs">3 days ago</span>
                         </div>
                         <p className="text-gray-700 dark:text-gray-300 text-sm">
-                          Great article! I particularly found the section on networking strategically to be very helpful. I've been trying to expand my professional network and these tips are exactly what I needed.
+                          Great article! I particularly found the section on networking strategically to be very helpful. I&apos;ve been trying to expand my professional network and these tips are exactly what I needed.
                         </p>
                         <div className="flex items-center gap-4 mt-2">
                           <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">
@@ -673,18 +691,22 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                     </div>
                     
                     <div className="flex gap-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
-                        alt="Sarah Johnson"
-                        className="h-10 w-10 rounded-full object-cover flex-shrink-0"
-                      />
+                      <div className="relative h-10 w-10 flex-shrink-0">
+                        <Image 
+                          src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop&q=60&ixlib=rb-4.0.3" 
+                          alt="Sarah Johnson"
+                          width={40}
+                          height={40}
+                          className="rounded-full object-cover"
+                        />
+                      </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold text-gray-900 dark:text-white">Sarah Johnson</span>
                           <span className="text-gray-500 dark:text-gray-400 text-xs">1 week ago</span>
                         </div>
                         <p className="text-gray-700 dark:text-gray-300 text-sm">
-                          I've been struggling with my job search for months. These strategies are exactly what I needed to revamp my approach. Thank you for the detailed explanations and practical tips!
+                          I&apos;ve been struggling with my job search for months. These strategies are exactly what I needed to revamp my approach. Thank you for the detailed explanations and practical tips!
                         </p>
                         <div className="flex items-center gap-4 mt-2">
                           <button className="text-gray-500 dark:text-gray-400 text-xs flex items-center hover:text-blue-600 dark:hover:text-blue-400">
@@ -731,11 +753,13 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
                   {relatedPosts.slice(0, 3).map(relatedPost => (
                     <div key={relatedPost.id} className="group">
                       <Link href={`/blog/${relatedPost.slug}`}>
-                        <div className="mb-2 aspect-[16/9] overflow-hidden rounded">
-                          <img 
+                        <div className="mb-2 aspect-[16/9] overflow-hidden rounded relative">
+                          <Image 
                             src={relatedPost.coverImage}
                             alt={relatedPost.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                            fill
+                            className="object-cover group-hover:scale-105 transition-all duration-300"
+                            sizes="(max-width: 768px) 100vw, 300px"
                           />
                         </div>
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 mb-1">
@@ -835,11 +859,13 @@ export default function BlogPostContent({ slug }: BlogPostProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {relatedPosts.slice(0, 4).map(relatedPost => (
                 <Card key={relatedPost.id} className="overflow-hidden hover:shadow-md transition-all duration-300 group dark:bg-gray-800">
-                  <div className="aspect-[16/9] overflow-hidden">
-                    <img 
+                  <div className="relative aspect-[16/9] overflow-hidden">
+                    <Image 
                       src={relatedPost.coverImage}
                       alt={relatedPost.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-all duration-300"
+                      sizes="(max-width: 768px) 100vw, 50vw"
                     />
                   </div>
                   <CardContent className="p-6">
