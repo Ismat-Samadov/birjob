@@ -10,6 +10,7 @@ import JobCard from '@/components/JobCard';
 import LazyLoad from '@/components/LazyLoad';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import FeatureSpotlight from '@/components/FeatureSpotlight';
+import Link from 'next/link';
 
 interface Job {
   id: number;
@@ -40,8 +41,24 @@ export default function HomeContent() {
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [selectedSource, setSelectedSource] = useState<string>('');
+  const [selectedCompany, setSelectedCompany] = useState<string>('');
+  const [popularSearches, setPopularSearches] = useState<string[]>([
+    'remote', 'developer', 'marketing', 'data scientist', 'part-time'
+  ]);
+  const [popularLocations, setPopularLocations] = useState<string[]>([
+    'baku', 'azerbaijan', 'ganja', 'sumgait'
+  ]);
   const debouncedSearch = useDebounce<string>(search, 500);
-  const { trackEvent } = useAnalytics();
+  const { trackPageView, trackEvent } = useAnalytics();
+
+  // Track page view
+  useEffect(() => {
+    trackPageView({
+      url: '/',
+      title: 'Job Search | BirJob - Your Ultimate Job Aggregator'
+    });
+  }, [trackPageView]);
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
@@ -61,6 +78,14 @@ export default function HomeContent() {
         });
       }
       
+      if (selectedSource) {
+        queryParams.append('source', selectedSource);
+      }
+      
+      if (selectedCompany) {
+        queryParams.append('company', selectedCompany);
+      }
+      
       queryParams.append('page', page.toString());
       
       const response = await fetch(
@@ -73,7 +98,7 @@ export default function HomeContent() {
       trackEvent({
         category: 'Search',
         action: 'Search Results',
-        label: debouncedSearch || 'All Jobs',
+        label: debouncedSearch || selectedSource || selectedCompany || 'All Jobs',
         value: data.metadata.totalJobs
       });
     } catch (error) {
@@ -90,7 +115,7 @@ export default function HomeContent() {
       // Set a small delay before removing the searching state for better UX
       setTimeout(() => setIsSearching(false), 300);
     }
-  }, [debouncedSearch, page, trackEvent]);
+  }, [debouncedSearch, selectedSource, selectedCompany, page, trackEvent]);
 
   useEffect(() => {
     fetchJobs();
@@ -99,6 +124,9 @@ export default function HomeContent() {
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
     setPage(1);
+    // Reset other filters when searching
+    setSelectedSource('');
+    setSelectedCompany('');
   };
 
   const handlePreviousPage = () => {
@@ -140,6 +168,8 @@ export default function HomeContent() {
   const clearFilters = () => {
     setSearch('');
     setPage(1);
+    setSelectedSource('');
+    setSelectedCompany('');
     
     // Track clear filters event
     trackEvent({
@@ -148,13 +178,78 @@ export default function HomeContent() {
     });
   };
 
+  const handleSourceSelect = (source: string) => {
+    setSelectedSource(source === selectedSource ? '' : source);
+    setPage(1);
+    
+    trackEvent({
+      category: 'Filter',
+      action: 'Source Filter',
+      label: source
+    });
+  };
+
+  const handleCompanySelect = (company: string) => {
+    setSelectedCompany(company === selectedCompany ? '' : company);
+    setPage(1);
+    
+    trackEvent({
+      category: 'Filter',
+      action: 'Company Filter',
+      label: company
+    });
+  };
+
+  const handlePopularSearchClick = (term: string) => {
+    setSearch(term);
+    setPage(1);
+    
+    trackEvent({
+      category: 'Search',
+      action: 'Popular Search Click',
+      label: term
+    });
+  };
+
+  const handleLocationClick = (location: string) => {
+    trackEvent({
+      category: 'Navigation',
+      action: 'Location Click',
+      label: location
+    });
+  };
+
+  // Schema.org structured data for job search
+  const jobSearchSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://birjob.com/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://birjob.com/?search={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <div className="min-h-screen p-4 sm:p-8 bg-gray-50 dark:bg-gray-900">
+      {/* Add structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jobSearchSchema) }}
+      />
+      
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
           <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white">
             BirJob
           </h1>
+          <h2 className="text-xl text-center text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+            Your Ultimate Job Aggregator - Find Jobs from 50+ Sources
+          </h2>
           <div className="w-full max-w-xl mx-auto">
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-grow">
@@ -165,6 +260,7 @@ export default function HomeContent() {
                   value={search}
                   onChange={handleSearch}
                   className="w-full pl-10 pr-10 transition-all focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:border-gray-700"
+                  aria-label="Search for jobs"
                 />
                 {search && (
                   <button
@@ -183,17 +279,109 @@ export default function HomeContent() {
               </div>
             </div>
             
+            {/* Popular searches */}
+            <div className="flex flex-wrap gap-2 mt-3 justify-center">
+              {popularSearches.map((term, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePopularSearchClick(term)}
+                  className="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 rounded-full px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                >
+                  {term}
+                </button>
+              ))}
+            </div>
+            
             {jobsData?.metadata && (
               <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4 p-2 bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
                 <p>Last Updated: {new Date(jobsData.metadata.latestScrapeDate).toLocaleString()}</p>
                 <p className="font-medium">
                   Found {jobsData.metadata.totalJobs} jobs
                   {search ? ` matching "${search}"` : ''}
+                  {selectedSource ? ` from ${selectedSource}` : ''}
+                  {selectedCompany ? ` at ${selectedCompany}` : ''}
                 </p>
               </div>
             )}
           </div>
         </div>
+        
+        {/* Popular locations */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+            Popular Locations
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            {popularLocations.map((location, index) => (
+              <Link 
+                key={index}
+                href={`/jobs/location/${location}`}
+                onClick={() => handleLocationClick(location)}
+                className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full px-3 py-1 text-sm hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors"
+              >
+                <SearchIcon className="h-3 w-3" />
+                <span className="capitalize">{location}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Filters - Source and Company */}
+        {(jobsData && ((jobsData.sources?.length ?? 0) > 0 || (jobsData.companies?.length ?? 0) > 0)) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {jobsData && jobsData.sources && jobsData.sources.length > 0 && (
+              <Card className="dark:bg-gray-800">
+                <CardContent className="p-4">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                    Filter by Source
+                  </h3>
+                  <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto custom-scrollbar">
+                    {jobsData.sources.map((source, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSourceSelect(source)}
+                        className={`text-xs rounded-full px-3 py-1 transition-colors ${
+                          selectedSource === source 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        }`}
+                        aria-pressed={selectedSource === source}
+                      >
+                        {source}
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {jobsData && jobsData.companies && jobsData.companies.length > 0 && (
+              <Card className="dark:bg-gray-800">
+                <CardContent className="p-4">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                    Filter by Company
+                  </h3>
+                  <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto custom-scrollbar">
+                    {jobsData.companies.map((company, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleCompanySelect(company)}
+                        className={`text-xs rounded-full px-3 py-1 transition-colors ${
+                          selectedCompany === company 
+                            ? 'bg-purple-500 text-white' 
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        }`}
+                        aria-pressed={selectedCompany === company}
+                      >
+                        {company}
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
 
         <div className="space-y-4">
           {loading && !isSearching ? (
@@ -217,10 +405,19 @@ export default function HomeContent() {
                 <SearchIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
                 <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No jobs found</h3>
                 <p className="text-gray-500 dark:text-gray-400">
-                  {search ? 
-                    `Try adjusting your search to see more results.` : 
+                  {search || selectedSource || selectedCompany ? 
+                    `Try adjusting your search or filters to see more results.` : 
                     `There are currently no job listings available.`}
                 </p>
+                {(search || selectedSource || selectedCompany) && (
+                  <Button 
+                    onClick={clearFilters}
+                    className="mt-4"
+                    variant="outline"
+                  >
+                    Clear All Filters
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
@@ -246,6 +443,7 @@ export default function HomeContent() {
               disabled={page === 1 || loading}
               className="w-full sm:w-auto font-medium px-6 py-2 transition-all"
               variant={page === 1 ? "outline" : "default"}
+              aria-label="Go to previous page"
             >
               Previous
             </Button>
@@ -266,6 +464,7 @@ export default function HomeContent() {
               disabled={page >= jobsData.metadata.totalPages || loading}
               className="w-full sm:w-auto font-medium px-6 py-2 transition-all"
               variant={page >= jobsData.metadata.totalPages ? "outline" : "default"}
+              aria-label="Go to next page"
             >
               Next
             </Button>

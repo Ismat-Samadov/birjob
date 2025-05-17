@@ -1,10 +1,32 @@
-// src/app/trends/page.tsx
+// src/app/trends/page.tsx (Complete File)
 import ClientWrapper from "@/components/ClientWrapper";
 import JobTrendsVisualization from "@/components/JobTrendsVisualization";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InfoBox from "@/components/InfoBox";
 import { Info } from "lucide-react";
 import React from "react";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Job Market Trends & Insights | BirJob',
+  description: 'Analyze current job market trends, hiring companies, and most active job sources to optimize your job search strategy',
+  openGraph: {
+    title: 'Job Market Trends & Insights | BirJob',
+    description: 'Analyze current job market trends, hiring companies, and active job sources',
+    images: [
+      {
+        url: 'https://images.unsplash.com/photo-1635741042374-64875ac3ed60?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        width: 1200,
+        height: 630,
+        alt: 'BirJob Job Market Trends',
+      },
+    ],
+    url: 'https://birjob.com/trends',
+  },
+  alternates: {
+    canonical: 'https://birjob.com/trends',
+  },
+};
 
 export default function TrendsPage() {
   return (
