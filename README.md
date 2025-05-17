@@ -459,14 +459,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Contact
 
 For questions or feedback, reach out to us at [contact@birjob.com](mailto:contact@birjob.com) or visit our [contact page](https://birjob.com/contact).
-
-graph TD
-    A[Frontend Instrumentation] -->|Events| B[Event Collection API]
-    B -->|Raw Events| C[Event Queue/Stream]
-    C -->|Batch Processing| D[Data Processing Service]
-    D -->|Processed Data| E[Data Warehouse]
-    E -->|Queries| F[Analytics Dashboard]
-    E -->|Segmentation| G[Recommendation Engine]
-    B -->|Real-time Events| H[Real-time Analytics]
-    I[Session Storage] -->|Session Data| A
-    J[User Consent Manager] -->|Privacy Settings| A
