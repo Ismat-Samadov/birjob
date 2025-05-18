@@ -1,3 +1,5 @@
+// Updated prisma/schema.prisma to include visitor_logs model
+
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
@@ -89,6 +91,7 @@ model contactSubmissions {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 model BlogPost {
   id           Int           @id @default(autoincrement())
   slug         String        @unique
@@ -130,4 +133,41 @@ model BlogPostRelation {
   blogPost        BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
 
   @@unique([blogPostId, relatedPostId])
+}
+
+// New visitor tracking model
+model visitor_logs {
+  id              Int       @id @default(autoincrement())
+  ip              String?
+  userAgent       String?
+  browser         String?
+  browserVersion  String?
+  operatingSystem String?
+  osVersion       String?
+  deviceType      String?
+  deviceVendor    String?
+  deviceModel     String?
+  country         String?
+  city            String?
+  region          String?
+  timezone        String?
+  language        String?
+  referrer        String?
+  path            String?
+  query           String?
+  screenWidth     Int?
+  screenHeight    Int?
+  colorDepth      Int?
+  viewportWidth   Int?
+  viewportHeight  Int?
+  connectionType  String?
+  connectionSpeed String?
+  battery         Float?
+  sessionId       String?
+  previousVisitId Int?
+  timestamp       DateTime  @default(now())
+
+  @@index([timestamp])
+  @@index([sessionId])
+  @@index([ip])
 }

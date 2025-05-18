@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Suspense, ReactNode } from 'react';
+import VisitorTracker from './VisitorTracker';
 
 interface ClientWrapperProps {
   children: ReactNode;
@@ -20,7 +21,11 @@ export default function ClientWrapper({
 }: ClientWrapperProps) {
   return (
     <Suspense fallback={fallback}>
-      <ErrorBoundary>{children}</ErrorBoundary>
+      <ErrorBoundary>
+        {/* Add the VisitorTracker component to log user data */}
+        <VisitorTracker />
+        {children}
+      </ErrorBoundary>
     </Suspense>
   );
 }
