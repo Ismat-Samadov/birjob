@@ -8,10 +8,10 @@ import Footer from '@/components/Footer';
 import { Providers } from '@/components/Providers';
 import ScrollToTop from '@/components/ScrollToTop';
 
-// Extend the Window interface to include gtag
+// Extend the Window interface to include gtag with more specific typing
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void;
+    gtag?: (command: string, action: string, params?: Record<string, unknown>) => void;
   }
 }
 

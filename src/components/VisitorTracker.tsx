@@ -59,20 +59,20 @@ export default function VisitorTracker() {
         let connectionType = 'unknown';
         let connectionSpeed = 'unknown';
         
-        // @ts-ignore - TypeScript doesn't know about the Navigator.connection property
+        // @ts-expect-error - TypeScript doesn't know about the Navigator.connection property
         if (navigator.connection) {
-          // @ts-ignore
+          // @ts-expect-error - TypeScript doesn't know about connection.effectiveType
           connectionType = navigator.connection.effectiveType || 'unknown';
-          // @ts-ignore
+          // @ts-expect-error - TypeScript doesn't know about connection.downlink
           connectionSpeed = navigator.connection.downlink ? `${navigator.connection.downlink} Mbps` : 'unknown';
         }
         
         // Get battery level (if available and supported)
         let battery = null;
-        // @ts-ignore - TypeScript doesn't know about the Navigator.getBattery method
+        // @ts-expect-error - TypeScript doesn't know about the Navigator.getBattery method
         if (navigator.getBattery) {
           try {
-            // @ts-ignore
+            // @ts-expect-error - TypeScript doesn't know about getBattery()
             const batteryManager = await navigator.getBattery();
             battery = batteryManager.level;
           } catch (e) {
