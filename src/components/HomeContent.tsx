@@ -43,15 +43,16 @@ export default function HomeContent() {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [selectedSource, setSelectedSource] = useState<string>('');
   const [selectedCompany, setSelectedCompany] = useState<string>('');
-  const [popularSearches, setPopularSearches] = useState<string[]>([
+  // Remove state setters from destructuring
+  const [popularSearches] = useState<string[]>([
     'remote', 'developer', 'marketing', 'data scientist', 'part-time'
   ]);
-  const [popularLocations, setPopularLocations] = useState<string[]>([
+  const [popularLocations] = useState<string[]>([
     'baku', 'azerbaijan', 'ganja', 'sumgait'
   ]);
   const debouncedSearch = useDebounce<string>(search, 500);
   const { trackPageView, trackEvent } = useAnalytics();
-
+  
   // Track page view
   useEffect(() => {
     trackPageView({

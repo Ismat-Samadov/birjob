@@ -22,12 +22,24 @@ interface Job {
   created_at: string;
 }
 
+interface JobsResponse {
+  jobs: Job[];
+  metadata: {
+    latestScrapeDate: string;
+    totalJobs: number;
+    currentPage: number;
+    totalPages: number;
+  };
+  sources?: string[];
+  companies?: string[];
+}
+
 interface LocationJobsContentProps {
   location: string;
 }
 
 export default function LocationJobsContent({ location }: LocationJobsContentProps) {
-  const [jobsData, setJobsData] = useState<any>(null);
+  const [jobsData, setJobsData] = useState<JobsResponse | null>(null);
   const [search, setSearch] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);

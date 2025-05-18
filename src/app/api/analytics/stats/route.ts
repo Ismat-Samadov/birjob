@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const period = searchParams.get('period') || 'today';
     
     // Calculate date range based on period
-    let startDate = new Date();
+    const startDate = new Date(); // Change to const
     
     switch (period) {
       case 'today':

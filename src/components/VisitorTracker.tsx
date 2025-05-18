@@ -140,9 +140,9 @@ export default function VisitorTracker() {
     
     // Also track page changes
     // This event will fire on route changes
-    const handleRouteChange = () => {
-      trackVisit();
-    };
+    // const handleRouteChange = () => {
+    //   trackVisit();
+    // };
 
     return () => {
       // Clean up event listeners if needed

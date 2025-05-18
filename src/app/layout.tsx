@@ -14,6 +14,13 @@ declare global {
     gtag?: (...args: any[]) => void;
   }
 }
+interface WebVitalMetric {
+  id: string;
+  name: string;
+  value: number;
+  startTime: number;
+  label: string;
+}
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -88,7 +95,7 @@ export const metadata: Metadata = {
   },
 };
 
-export function reportWebVitals(metric: any) {
+export function reportWebVitals(metric: WebVitalMetric) {
   // Replace with your analytics service
   if (window.gtag) {
     window.gtag('event', 'web-vitals', {
