@@ -1,4 +1,4 @@
-// src/app/layout.tsx (Complete Updated File)
+// src/app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -13,13 +13,6 @@ declare global {
   interface Window {
     gtag?: (...args: any[]) => void;
   }
-}
-interface WebVitalMetric {
-  id: string;
-  name: string;
-  value: number;
-  startTime: number;
-  label: string;
 }
 
 const inter = Inter({ subsets: ['latin'] });
@@ -94,6 +87,16 @@ export const metadata: Metadata = {
     },
   },
 };
+
+// Define proper interface for Web Vitals metrics
+interface WebVitalMetric {
+  id: string;
+  name: string;
+  value: number;
+  startTime?: number;
+  label?: string;
+  attribution?: Record<string, unknown>;
+}
 
 export function reportWebVitals(metric: WebVitalMetric) {
   // Replace with your analytics service

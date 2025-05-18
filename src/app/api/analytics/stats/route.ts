@@ -8,6 +8,11 @@ export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
+// Define a type for the SQL count result
+interface CountResult {
+  count: bigint | number;
+}
+
 // Note: This endpoint should be secured with proper authentication in production
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +20,7 @@ export async function GET(request: NextRequest) {
     const period = searchParams.get('period') || 'today';
     
     // Calculate date range based on period
-    const startDate = new Date(); // Change to const
+    const startDate = new Date();
     
     switch (period) {
       case 'today':
@@ -48,11 +53,14 @@ export async function GET(request: NextRequest) {
     });
 
     // Get unique visitors (by sessionId) for the period
-    const uniqueVisitors = await prisma.$queryRaw`
-      SELECT COUNT(DISTINCT "sessionId") 
+    const uniqueVisitors = await prisma.$queryRaw<CountResult[]>`
+      SELECT COUNT(DISTINCT "sessionId") as count 
       FROM visitor_logs 
       WHERE "timestamp" >= ${startDate}
     `;
+
+    // Safely access the count with proper type checking
+    const uniqueVisitorCount = uniqueVisitors[0]?.count ? Number(uniqueVisitors[0].count) : 0;
 
     // Get top browsers
     const topBrowsers = await prisma.visitor_logs.groupBy({
@@ -185,7 +193,7 @@ export async function GET(request: NextRequest) {
       period,
       stats: {
         totalVisitors,
-        uniqueVisitors: Number(uniqueVisitors[0].count), // Convert BigInt to Number
+        uniqueVisitors: uniqueVisitorCount,
         topBrowsers: topBrowsers.map(b => ({
           browser: b.browser,
           count: b._count.browser

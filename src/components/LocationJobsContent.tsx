@@ -1,4 +1,4 @@
-// src/components/LocationJobsContent.tsx (New File)
+// src/components/LocationJobsContent.tsx
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -22,16 +22,18 @@ interface Job {
   created_at: string;
 }
 
+interface JobsMetadata {
+  latestScrapeDate: string;
+  totalJobs: number;
+  currentPage: number;
+  totalPages: number;
+}
+
 interface JobsResponse {
   jobs: Job[];
-  metadata: {
-    latestScrapeDate: string;
-    totalJobs: number;
-    currentPage: number;
-    totalPages: number;
-  };
   sources?: string[];
   companies?: string[];
+  metadata: JobsMetadata;
 }
 
 interface LocationJobsContentProps {

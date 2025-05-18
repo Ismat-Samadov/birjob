@@ -1,3 +1,4 @@
+// src/components/VisitorTracker.tsx
 "use client"
 
 import { useEffect, useState } from 'react';
@@ -57,15 +58,21 @@ export default function VisitorTracker() {
         // Get connection information (if available)
         let connectionType = 'unknown';
         let connectionSpeed = 'unknown';
+        
+        // @ts-ignore - TypeScript doesn't know about the Navigator.connection property
         if (navigator.connection) {
+          // @ts-ignore
           connectionType = navigator.connection.effectiveType || 'unknown';
+          // @ts-ignore
           connectionSpeed = navigator.connection.downlink ? `${navigator.connection.downlink} Mbps` : 'unknown';
         }
         
         // Get battery level (if available and supported)
         let battery = null;
+        // @ts-ignore - TypeScript doesn't know about the Navigator.getBattery method
         if (navigator.getBattery) {
           try {
+            // @ts-ignore
             const batteryManager = await navigator.getBattery();
             battery = batteryManager.level;
           } catch (e) {
@@ -137,16 +144,6 @@ export default function VisitorTracker() {
 
     // Execute tracking
     trackVisit();
-    
-    // Also track page changes
-    // This event will fire on route changes
-    // const handleRouteChange = () => {
-    //   trackVisit();
-    // };
-
-    return () => {
-      // Clean up event listeners if needed
-    };
   }, [pathname, searchParams, sessionId]);
 
   // This component doesn't render anything visible

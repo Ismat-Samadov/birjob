@@ -1,3 +1,4 @@
+// src/components/HomeContent.tsx
 "use client"
 
 import { useState, useEffect, useCallback } from 'react';
@@ -43,7 +44,7 @@ export default function HomeContent() {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [selectedSource, setSelectedSource] = useState<string>('');
   const [selectedCompany, setSelectedCompany] = useState<string>('');
-  // Remove state setters from destructuring
+  // Remove unused state setters from destructuring
   const [popularSearches] = useState<string[]>([
     'remote', 'developer', 'marketing', 'data scientist', 'part-time'
   ]);
@@ -52,7 +53,7 @@ export default function HomeContent() {
   ]);
   const debouncedSearch = useDebounce<string>(search, 500);
   const { trackPageView, trackEvent } = useAnalytics();
-  
+
   // Track page view
   useEffect(() => {
     trackPageView({
