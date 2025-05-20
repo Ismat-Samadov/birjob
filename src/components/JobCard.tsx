@@ -6,7 +6,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
-import RelatedJobs from '@/components/RelatedJobs';
 
 interface JobCardProps {
   id: number;
@@ -218,17 +217,6 @@ export default function JobCard({
               {isExpanded ? "Less Details" : "More Details"}
             </Button>
           </div>
-          
-          {/* Related Jobs section */}
-          {!isExpanded && (
-            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <RelatedJobs 
-                company={company}
-                currentJobId={id}
-                limit={3}
-              />
-            </div>
-          )}
         </CardContent>
       </Card>
     </>
