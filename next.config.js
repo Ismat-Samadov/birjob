@@ -11,13 +11,11 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   experimental: {
-    // Enable serverActions
-    serverActions: true,
-    // Enable optimizeCss
+    // optimizeCss needs critters package
     optimizeCss: true,
-    // Enable the standalone output mode
-    outputStandalone: true,
   },
+  // Use output: 'standalone' instead of experimental.outputStandalone
+  output: 'standalone',
   // Add gzip compression for better performance
   compress: true,
 }
