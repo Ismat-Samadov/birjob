@@ -10,11 +10,13 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
+  // Using the updated format as suggested in the warnings
   experimental: {
-    // optimizeCss needs critters package
-    optimizeCss: true,
+    // Remove serverActions (now available by default)
+    // Remove outputStandalone (moved to output)
+    // Remove optimizeCss to avoid 'critters' dependency
   },
-  // Use output: 'standalone' instead of experimental.outputStandalone
+  // New location for standalone output
   output: 'standalone',
   // Add gzip compression for better performance
   compress: true,
