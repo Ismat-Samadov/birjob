@@ -62,10 +62,6 @@ export default function HomeContent() {
   const [page, setPage] = useState<number>(1);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   
-  const popularSearches = useMemo(() => [
-    'remote', 'developer', 'marketing', 'data scientist', 'part-time'
-  ], []);
-  
   const debouncedSearch = useDebounce<string>(search, 500);
   const { trackPageView, trackEvent } = useAnalytics();
 
@@ -329,18 +325,6 @@ export default function HomeContent() {
               </div>
             </div>
             
-            {/* Popular searches */}
-            <div className="flex flex-wrap gap-2 mt-3 justify-center">
-              {popularSearches.map((term, index) => (
-                <button
-                  key={index}
-                  onClick={() => handlePopularSearchClick(term)}
-                  className="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 rounded-full px-3 py-1 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                >
-                  {term}
-                </button>
-              ))}
-            </div>
             
             {jobsData?.metadata && (
               <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4 p-2 bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
