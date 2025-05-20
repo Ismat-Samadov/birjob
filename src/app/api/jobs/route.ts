@@ -1,8 +1,13 @@
 // src/app/api/jobs/route.ts
 import { NextResponse } from 'next/server'
 import { PrismaClient, Prisma } from '@prisma/client'
+import { Redis } from '@upstash/redis'
 
 const prisma = new PrismaClient()
+
+// Initialize Redis client
+const redis = Redis.fromEnv()
+const CACHE_TTL = 60 * 15 // 15 minutes cache
 
 // Define types for database results
 interface DbResult {
@@ -26,7 +31,7 @@ function processDbResult(result: DbResult[]): DbResult[] {
   return result.map(item => {
     const processed: DbResult = { 
       ...item,
-      source: item.source || null // Ensure source exists even if null
+      source: item.source || null
     }
     for (const [key, value] of Object.entries(item)) {
       processed[key] = formatBigInt(value)
@@ -39,11 +44,24 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const search = searchParams.get('search') || ''
   const source = searchParams.get('source') || ''
-  const company = searchParams.get('company') || '' // Add company filter parameter
+  const company = searchParams.get('company') || ''
   const page = parseInt(searchParams.get('page') || '1')
   const pageSize = 10
 
+  // Create a cache key based on the request parameters
+  const cacheKey = `jobs:${search}:${source}:${company}:${page}:${pageSize}`
+
   try {
+    // Try to get data from cache first
+    const cachedData = await redis.get(cacheKey)
+    
+    if (cachedData) {
+      console.log('Cache hit for jobs query:', cacheKey)
+      return NextResponse.json(cachedData)
+    }
+    
+    console.log('Cache miss for jobs query:', cacheKey)
+
     // Get the latest created_at date
     const latestScrapeDate = await prisma.jobs_jobpost.aggregate({
       _max: {
@@ -140,32 +158,47 @@ export async function GET(request: Request) {
     // Get sources using raw SQL if column exists
     let sources: string[] = [];
     if (hasSourceColumn) {
-      try {
-        const sourcesResult = await prisma.$queryRaw<{source: string}[]>`
-          SELECT DISTINCT source FROM jobs_jobpost
-          WHERE source IS NOT NULL
-          ORDER BY source ASC
-        `;
-        sources = sourcesResult.map(row => row.source);
-      } catch (error) {
-        console.error('Error fetching sources:', error);
+      // Use cache for sources
+      const cachedSources = await redis.get('job_sources');
+      if (cachedSources) {
+        sources = cachedSources as string[];
+      } else {
+        try {
+          const sourcesResult = await prisma.$queryRaw<{source: string}[]>`
+            SELECT DISTINCT source FROM jobs_jobpost
+            WHERE source IS NOT NULL
+            ORDER BY source ASC
+          `;
+          sources = sourcesResult.map(row => row.source);
+          // Cache sources for 1 day
+          await redis.set('job_sources', sources, { ex: 86400 });
+        } catch (error) {
+          console.error('Error fetching sources:', error);
+        }
       }
     }
     
-    // Get top companies for filtering - FIXED QUERY
+    // Get top companies for filtering - with caching
     let companies: string[] = [];
-    try {
-      const companiesResult = await prisma.$queryRaw<{company: string, count: bigint}[]>`
-        SELECT company, COUNT(*) as count
-        FROM jobs_jobpost
-        WHERE company IS NOT NULL
-        GROUP BY company
-        ORDER BY count DESC
-        LIMIT 20
-      `;
-      companies = companiesResult.map(row => row.company);
-    } catch (error) {
-      console.error('Error fetching companies:', error);
+    const cachedCompanies = await redis.get('top_companies');
+    if (cachedCompanies) {
+      companies = cachedCompanies as string[];
+    } else {
+      try {
+        const companiesResult = await prisma.$queryRaw<{company: string, count: bigint}[]>`
+          SELECT company, COUNT(*) as count
+          FROM jobs_jobpost
+          WHERE company IS NOT NULL
+          GROUP BY company
+          ORDER BY count DESC
+          LIMIT 20
+        `;
+        companies = companiesResult.map(row => row.company);
+        // Cache companies for 1 day
+        await redis.set('top_companies', companies, { ex: 86400 });
+      } catch (error) {
+        console.error('Error fetching companies:', error);
+      }
     }
 
     // Process jobs to format bigints
@@ -176,17 +209,22 @@ export async function GET(request: Request) {
       ? parseInt(totalCount[0].count) 
       : Number(totalCount[0]?.count || 0);
 
-    return NextResponse.json({
+    const responseData = {
       jobs: processedJobs,
-      sources: sources, // Add sources for filtering
-      companies: companies, // Add companies for filtering
+      sources: sources,
+      companies: companies,
       metadata: {
         latestScrapeDate: latestDate,
         totalJobs: totalJobs,
         currentPage: page,
         totalPages: Math.ceil(totalJobs / pageSize)
       }
-    });
+    };
+
+    // Cache the response
+    await redis.set(cacheKey, responseData, { ex: CACHE_TTL });
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json(
