@@ -4,14 +4,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { X, Search as SearchIcon, Bell, Search } from 'lucide-react';
 import JobCard from '@/components/JobCard';
 import LazyLoad from '@/components/LazyLoad';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import FeatureSpotlight from '@/components/FeatureSpotlight';
-import Link from 'next/link';
 
 interface Job {
   id: number;
@@ -42,14 +40,10 @@ export default function HomeContent() {
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [selectedSource, setSelectedSource] = useState<string>('');
-  const [selectedCompany, setSelectedCompany] = useState<string>('');
+  // Remove the selectedSource and selectedCompany state variables
   // Remove unused state setters from destructuring
   const [popularSearches] = useState<string[]>([
     'remote', 'developer', 'marketing', 'data scientist', 'part-time'
-  ]);
-  const [popularLocations] = useState<string[]>([
-    'baku', 'azerbaijan', 'ganja', 'sumgait'
   ]);
   const debouncedSearch = useDebounce<string>(search, 500);
   const { trackPageView, trackEvent } = useAnalytics();
@@ -80,14 +74,6 @@ export default function HomeContent() {
         });
       }
       
-      if (selectedSource) {
-        queryParams.append('source', selectedSource);
-      }
-      
-      if (selectedCompany) {
-        queryParams.append('company', selectedCompany);
-      }
-      
       queryParams.append('page', page.toString());
       
       const response = await fetch(
@@ -100,7 +86,7 @@ export default function HomeContent() {
       trackEvent({
         category: 'Search',
         action: 'Search Results',
-        label: debouncedSearch || selectedSource || selectedCompany || 'All Jobs',
+        label: debouncedSearch || 'All Jobs',
         value: data.metadata.totalJobs
       });
     } catch (error) {
@@ -117,7 +103,7 @@ export default function HomeContent() {
       // Set a small delay before removing the searching state for better UX
       setTimeout(() => setIsSearching(false), 300);
     }
-  }, [debouncedSearch, selectedSource, selectedCompany, page, trackEvent]);
+  }, [debouncedSearch, page, trackEvent]);
 
   useEffect(() => {
     fetchJobs();
@@ -126,9 +112,6 @@ export default function HomeContent() {
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
     setPage(1);
-    // Reset other filters when searching
-    setSelectedSource('');
-    setSelectedCompany('');
   };
 
   const handlePreviousPage = () => {
@@ -170,35 +153,11 @@ export default function HomeContent() {
   const clearFilters = () => {
     setSearch('');
     setPage(1);
-    setSelectedSource('');
-    setSelectedCompany('');
     
     // Track clear filters event
     trackEvent({
       category: 'Filter',
       action: 'Clear Filters'
-    });
-  };
-
-  const handleSourceSelect = (source: string) => {
-    setSelectedSource(source === selectedSource ? '' : source);
-    setPage(1);
-    
-    trackEvent({
-      category: 'Filter',
-      action: 'Source Filter',
-      label: source
-    });
-  };
-
-  const handleCompanySelect = (company: string) => {
-    setSelectedCompany(company === selectedCompany ? '' : company);
-    setPage(1);
-    
-    trackEvent({
-      category: 'Filter',
-      action: 'Company Filter',
-      label: company
     });
   };
 
@@ -210,14 +169,6 @@ export default function HomeContent() {
       category: 'Search',
       action: 'Popular Search Click',
       label: term
-    });
-  };
-
-  const handleLocationClick = (location: string) => {
-    trackEvent({
-      category: 'Navigation',
-      action: 'Location Click',
-      label: location
     });
   };
 
@@ -300,118 +251,38 @@ export default function HomeContent() {
                 <p className="font-medium">
                   Found {jobsData.metadata.totalJobs} jobs
                   {search ? ` matching "${search}"` : ''}
-                  {selectedSource ? ` from ${selectedSource}` : ''}
-                  {selectedCompany ? ` at ${selectedCompany}` : ''}
                 </p>
               </div>
             )}
           </div>
         </div>
-        
-        {/* Popular locations */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-            Popular Locations
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            {popularLocations.map((location, index) => (
-              <Link 
-                key={index}
-                href={`/jobs/location/${location}`}
-                onClick={() => handleLocationClick(location)}
-                className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-full px-3 py-1 text-sm hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors"
-              >
-                <SearchIcon className="h-3 w-3" />
-                <span className="capitalize">{location}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
 
-        {/* Filters - Source and Company */}
-        {(jobsData && ((jobsData.sources?.length ?? 0) > 0 || (jobsData.companies?.length ?? 0) > 0)) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {jobsData && jobsData.sources && jobsData.sources.length > 0 && (
-              <Card className="dark:bg-gray-800">
-                <CardContent className="p-4">
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                    Filter by Source
-                  </h3>
-                  <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto custom-scrollbar">
-                    {jobsData.sources.map((source, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleSourceSelect(source)}
-                        className={`text-xs rounded-full px-3 py-1 transition-colors ${
-                          selectedSource === source 
-                            ? 'bg-blue-500 text-white' 
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }`}
-                        aria-pressed={selectedSource === source}
-                      >
-                        {source}
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {jobsData && jobsData.companies && jobsData.companies.length > 0 && (
-              <Card className="dark:bg-gray-800">
-                <CardContent className="p-4">
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                    Filter by Company
-                  </h3>
-                  <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto custom-scrollbar">
-                    {jobsData.companies.map((company, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleCompanySelect(company)}
-                        className={`text-xs rounded-full px-3 py-1 transition-colors ${
-                          selectedCompany === company 
-                            ? 'bg-purple-500 text-white' 
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }`}
-                        aria-pressed={selectedCompany === company}
-                      >
-                        {company}
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
-
+        {/* Job listings */}
         <div className="space-y-4">
           {loading && !isSearching ? (
             <div className="space-y-4">
               {[...Array(3)].map((_, index) => (
-                <Card key={index} className="animate-pulse dark:bg-gray-800">
-                  <CardContent className="p-6">
-                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-                    <div className="mt-4 flex space-x-2">
-                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div key={index} className="animate-pulse dark:bg-gray-800 p-6 rounded-lg">
+                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+                  <div className="mt-4 flex space-x-2">
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                  </div>
+                </div>
               ))}
             </div>
           ) : !jobsData?.jobs.length ? (
-            <Card className="dark:bg-gray-800 p-8">
-              <CardContent className="flex flex-col items-center justify-center text-center p-6">
+            <div className="dark:bg-gray-800 p-8 rounded-lg">
+              <div className="flex flex-col items-center justify-center text-center p-6">
                 <SearchIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
                 <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No jobs found</h3>
                 <p className="text-gray-500 dark:text-gray-400">
-                  {search || selectedSource || selectedCompany ? 
-                    `Try adjusting your search or filters to see more results.` : 
+                  {search ? 
+                    `Try adjusting your search to see more results.` : 
                     `There are currently no job listings available.`}
                 </p>
-                {(search || selectedSource || selectedCompany) && (
+                {search && (
                   <Button 
                     onClick={clearFilters}
                     className="mt-4"
@@ -420,8 +291,8 @@ export default function HomeContent() {
                     Clear All Filters
                   </Button>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : (
             jobsData.jobs.map((job: Job) => (
               <LazyLoad key={job.id} threshold={0.1}>
@@ -438,6 +309,7 @@ export default function HomeContent() {
           )}
         </div>
 
+        {/* Pagination */}
         {jobsData?.metadata && jobsData.jobs.length > 0 && (
           <div className="flex flex-col sm:flex-row justify-center gap-4 items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <Button
