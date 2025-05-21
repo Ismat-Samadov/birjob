@@ -1,7 +1,7 @@
 // src/components/HomeContent.tsx
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useDebounce } from '@/lib/hooks/useDebounce';
@@ -64,18 +64,41 @@ export default function HomeContent() {
   
   const debouncedSearch = useDebounce<string>(search, 500);
   const { trackPageView, trackEvent } = useAnalytics();
+  
+  // Add these refs to prevent infinite loops and duplicate tracking
+  const requestCountRef = useRef(0);
+  const initialFetchDone = useRef(false);
+  const trackedSearches = useRef<Set<string>>(new Set());
+  const componentMounted = useRef(false);
 
-  // Track page view
+  // Track page view only once
   useEffect(() => {
-    trackPageView({
-      url: '/',
-      title: 'Job Search | BirJob - Your Ultimate Job Aggregator'
-    });
+    if (!componentMounted.current) {
+      trackPageView({
+        url: '/',
+        title: 'Job Search | BirJob - Your Ultimate Job Aggregator'
+      });
+      componentMounted.current = true;
+    }
   }, [trackPageView]);
 
+  // Updated fetchJobs function with safety mechanisms
   const fetchJobs = useCallback(async () => {
     // Don't fetch if we're already loading
     if (loading) return;
+    
+    // Safety check - prevent excessive requests in short time period
+    requestCountRef.current += 1;
+    if (requestCountRef.current > 10) {
+      console.error("Too many requests detected - breaking potential infinite loop");
+      setTimeout(() => { requestCountRef.current = 0; }, 5000);
+      return;
+    }
+    
+    // Reset the counter after 5 seconds
+    setTimeout(() => {
+      requestCountRef.current = Math.max(0, requestCountRef.current - 1);
+    }, 5000);
     
     setLoading(true);
     setIsSearching(true);
@@ -85,63 +108,104 @@ export default function HomeContent() {
       
       if (debouncedSearch) {
         queryParams.append('search', debouncedSearch);
-        
-        // Track search event
-        trackEvent({
-          category: 'Search',
-          action: 'Job Search',
-          label: debouncedSearch
-        });
       }
       
       queryParams.append('page', page.toString());
       
+      // Create a unique key for this search to prevent duplicate API calls
+      const searchKey = `${debouncedSearch || 'all'}-${page}`;
+      
       // Implement SWR pattern with cache-then-network strategy
-      const cacheKey = `jobs-${debouncedSearch}-${page}`;
+      const cacheKey = `jobs-${searchKey}`;
       const cachedData = sessionStorage.getItem(cacheKey);
       
+      // Use cached data if available while fetching fresh data
       if (cachedData) {
-        setJobsData(JSON.parse(cachedData));
-        // Don't set loading to false yet - still fetch fresh data
+        try {
+          const parsedData = JSON.parse(cachedData);
+          setJobsData(parsedData);
+        } catch (e) {
+          console.error("Error parsing cached data:", e);
+          // Continue with the fetch even if cached data parsing fails
+        }
       }
       
+      // Add a cache buster to prevent browser caching
       const response = await fetch(
-        `/api/jobs?${queryParams.toString()}`,
+        `/api/jobs?${queryParams.toString()}&_t=${Date.now()}`,
         { cache: 'no-store' } // Force fresh data
       );
       
-      const data: JobsResponse = await response.json();
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
       setJobsData(data);
       
       // Cache the response in session storage
-      sessionStorage.setItem(cacheKey, JSON.stringify(data));
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify(data));
+      } catch (e) {
+        console.error("Error caching data:", e);
+        // Non-critical error, continue execution
+      }
       
-      // Track search results
-      trackEvent({
-        category: 'Search',
-        action: 'Search Results',
-        label: debouncedSearch || 'All Jobs',
-        value: data.metadata.totalJobs
-      });
+      // Track search results ONLY ONCE per unique search
+      if (!trackedSearches.current.has(searchKey)) {
+        trackEvent({
+          category: 'Search',
+          action: 'Search Results',
+          label: debouncedSearch || 'All Jobs',
+          value: data.metadata?.totalJobs || 0
+        });
+        
+        // Mark this search as tracked
+        trackedSearches.current.add(searchKey);
+        
+        // Limit the size of our tracking set to prevent memory leaks
+        if (trackedSearches.current.size > 100) {
+          // Remove the oldest entries (convert to array, slice, convert back)
+          const trackingArray = Array.from(trackedSearches.current);
+          trackedSearches.current = new Set(trackingArray.slice(-50));
+        }
+      }
     } catch (error) {
       console.error('Error fetching jobs:', error);
       
-      // Track error
-      trackEvent({
-        category: 'Error',
-        action: 'API Error',
-        label: 'Job fetch failed'
-      });
+      // Track error only once per error type
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorKey = `error_${errorMessage}`;
+      
+      if (!trackedSearches.current.has(errorKey)) {
+        trackEvent({
+          category: 'Error',
+          action: 'API Error',
+          label: errorMessage
+        });
+        trackedSearches.current.add(errorKey);
+      }
     } finally {
       setLoading(false);
-      // Set a small delay before removing the searching state for better UX
-      setTimeout(() => setIsSearching(false), 300);
+      // Set isSearching false immediately instead of using setTimeout
+      setIsSearching(false);
     }
-  }, [debouncedSearch, page, loading, trackEvent]);
+  }, [debouncedSearch, page, trackEvent]); // IMPORTANT: Remove loading from dependencies
 
-  // Only re-fetch when search or page changes
+  // Improved useEffect to prevent re-render loops
   useEffect(() => {
-    fetchJobs();
+    // Use a ref to prevent initial double-fetch that might occur in development
+    if (!initialFetchDone.current) {
+      fetchJobs();
+      initialFetchDone.current = true;
+    } else {
+      // For subsequent dependency changes, add a small debounce
+      const timer = setTimeout(() => {
+        fetchJobs();
+      }, 50);
+      
+      return () => clearTimeout(timer);
+    }
   }, [fetchJobs]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -346,7 +410,7 @@ export default function HomeContent() {
                 <JobCardSkeleton key={index} />
               ))}
             </div>
-          ) : !jobsData?.jobs.length ? (
+          ) : !jobsData?.jobs?.length ? (
             <div className="dark:bg-gray-800 p-8 rounded-lg">
               <div className="flex flex-col items-center justify-center text-center p-6">
                 <SearchIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
