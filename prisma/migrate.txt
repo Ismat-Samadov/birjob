@@ -1,0 +1,20 @@
+# 1. First, create the migrations directory if it doesn't exist
+mkdir -p prisma/migrations
+
+# 2. Create a timestamped directory for this specific migration
+TIMESTAMP=$(date +%Y%m%d%H%M%S)
+MIGRATION_DIR="prisma/migrations/${TIMESTAMP}_baseline"
+mkdir -p $MIGRATION_DIR
+
+# 3. Now generate the SQL and save it to the migration file
+npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > $MIGRATION_DIR/migration.sql
+
+# 4. Create the migration.toml file
+echo 'migration_name = "baseline"
+provider = "postgresql"' > $MIGRATION_DIR/migration.toml
+
+# 5. Mark the migration as applied
+npx prisma migrate resolve --applied ${TIMESTAMP}_baseline
+
+# 6. Verify everything is in sync
+npx prisma migrate status

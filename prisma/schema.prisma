@@ -133,53 +133,58 @@ model BlogPostRelation {
   @@unique([blogPostId, relatedPostId])
 }
 
+// Updated visitor_logs model with all analytics fields
 model visitor_logs {
-  id               Int      @id @default(autoincrement())
-  ip               String?
-  userAgent        String?
-  browser          String?
-  browserVersion   String?
-  operatingSystem  String?
-  osVersion        String?
-  deviceType       String?
-  deviceVendor     String?
-  deviceModel      String?
-  country          String?
-  city             String?
-  region           String?
-  timezone         String?
-  language         String?
-  referrer         String?
-  path             String?
-  query            String?
-  screenWidth      Int?
-  screenHeight     Int?
-  colorDepth       Int?
-  viewportWidth    Int?
-  viewportHeight   Int?
-  connectionType   String?
-  connectionSpeed  String?
-  battery          Float?
-  sessionId        String?
-  previousVisitId  Int?
-  timestamp        DateTime @default(now())
-  referrerDomain   String?
-  referrerPath     String?
-  referrerQuery    String?
+  id              Int       @id @default(autoincrement())
+  ip              String?
+  visitorId       String?
+  userAgent       String?
+  browser         String?
+  browserVersion  String?
+  operatingSystem String?
+  osVersion       String?
+  deviceType      String?
+  deviceVendor    String?
+  deviceModel     String?
+  country         String?
+  city            String?
+  region          String?
+  timezone        String?
+  language        String?
+  referrer        String?
+  path            String?
+  query           String?
+  screenWidth     Int?
+  screenHeight    Int?
+  colorDepth      Int?
+  viewportWidth   Int?
+  viewportHeight  Int?
+  connectionType  String?
+  connectionSpeed String?
+  battery         Float?
+  sessionId       String?
+  previousVisitId Int?
+  timestamp       DateTime  @default(now())
+  
+  // New analytics fields
+  referrerDomain  String?
+  referrerPath    String?
+  referrerQuery   String?
   referrerProtocol String?
-  referrerSource   String?
-  searchKeywords   String?
-  utmSource        String?
-  utmMedium        String?
-  utmCampaign      String?
-  utmContent       String?
-  utmTerm          String?
-  entryPage        String?
-  landingTime      BigInt?
+  referrerSource  String?
+  searchKeywords  String?
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  utmContent      String?
+  utmTerm         String?
+  entryPage       String?
+  landingTime     DateTime?
 
   @@index([timestamp])
   @@index([sessionId])
   @@index([ip])
-  @@index([referrerDomain])
+  @@index([visitorId])
   @@index([referrerSource])
+  @@index([utmSource, utmMedium, utmCampaign])
 }

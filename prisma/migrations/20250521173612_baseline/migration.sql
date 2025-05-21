@@ -135,6 +135,7 @@ CREATE TABLE "BlogPostRelation" (
 CREATE TABLE "visitor_logs" (
     "id" SERIAL NOT NULL,
     "ip" TEXT,
+    "visitorId" TEXT,
     "userAgent" TEXT,
     "browser" TEXT,
     "browserVersion" TEXT,
@@ -174,7 +175,7 @@ CREATE TABLE "visitor_logs" (
     "utmContent" TEXT,
     "utmTerm" TEXT,
     "entryPage" TEXT,
-    "landingTime" BIGINT,
+    "landingTime" TIMESTAMP(3),
 
     CONSTRAINT "visitor_logs_pkey" PRIMARY KEY ("id")
 );
@@ -216,10 +217,13 @@ CREATE INDEX "visitor_logs_sessionId_idx" ON "visitor_logs"("sessionId");
 CREATE INDEX "visitor_logs_ip_idx" ON "visitor_logs"("ip");
 
 -- CreateIndex
-CREATE INDEX "visitor_logs_referrerDomain_idx" ON "visitor_logs"("referrerDomain");
+CREATE INDEX "visitor_logs_visitorId_idx" ON "visitor_logs"("visitorId");
 
 -- CreateIndex
 CREATE INDEX "visitor_logs_referrerSource_idx" ON "visitor_logs"("referrerSource");
+
+-- CreateIndex
+CREATE INDEX "visitor_logs_utmSource_utmMedium_utmCampaign_idx" ON "visitor_logs"("utmSource", "utmMedium", "utmCampaign");
 
 -- AddForeignKey
 ALTER TABLE "keywords" ADD CONSTRAINT "keywords_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

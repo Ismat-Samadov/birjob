@@ -19,10 +19,14 @@ export async function POST(request: NextRequest) {
     // Parse the request body
     const data = await request.json();
     
-    // Record the visitor log
+    // Record the visitor log with all the extended fields
     const visitorLog = await prisma.visitor_logs.create({
       data: {
+        // Basic identification
         ip: ip,
+        visitorId: data.visitorId || null,
+        
+        // Device and browser information
         userAgent: data.userAgent || request.headers.get('user-agent') || 'unknown',
         browser: data.browser || 'unknown',
         browserVersion: data.browserVersion || 'unknown',
@@ -31,24 +35,55 @@ export async function POST(request: NextRequest) {
         deviceType: data.deviceType || 'unknown',
         deviceVendor: data.deviceVendor || 'unknown',
         deviceModel: data.deviceModel || 'unknown',
+        
+        // Geolocation information
         country: data.country || 'unknown',
         city: data.city || 'unknown',
         region: data.region || 'unknown',
         timezone: data.timezone || 'unknown',
+        
+        // User preferences
         language: data.language || 'unknown',
-        referrer: data.referrer || 'unknown',
+        
+        // Current page information
         path: data.path || 'unknown',
         query: data.query || null,
+        
+        // Screen and viewport information
         screenWidth: data.screenWidth || null,
         screenHeight: data.screenHeight || null,
         colorDepth: data.colorDepth || null,
         viewportWidth: data.viewportWidth || null,
         viewportHeight: data.viewportHeight || null,
+        
+        // Connection information
         connectionType: data.connectionType || 'unknown',
         connectionSpeed: data.connectionSpeed || 'unknown',
         battery: data.battery || null,
+        
+        // Session tracking
         sessionId: data.sessionId || null,
-        previousVisitId: data.previousVisitId || null
+        previousVisitId: data.previousVisitId ? parseInt(data.previousVisitId) : null,
+        
+        // Referrer information (new fields)
+        referrer: data.referrer || 'unknown',
+        referrerDomain: data.referrerDomain || null,
+        referrerPath: data.referrerPath || null,
+        referrerQuery: data.referrerQuery || null,
+        referrerProtocol: data.referrerProtocol || null,
+        referrerSource: data.referrerSource || null,
+        searchKeywords: data.searchKeywords || null,
+        
+        // UTM parameters (new fields)
+        utmSource: data.utmSource || null,
+        utmMedium: data.utmMedium || null,
+        utmCampaign: data.utmCampaign || null,
+        utmContent: data.utmContent || null,
+        utmTerm: data.utmTerm || null,
+        
+        // Landing information (new fields)
+        entryPage: data.entryPage || null,
+        landingTime: data.landingTime ? new Date(data.landingTime) : null
       }
     });
     
