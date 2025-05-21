@@ -1,5 +1,3 @@
-// Updated prisma/schema.prisma to include visitor_logs model
-
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
@@ -93,81 +91,95 @@ model contactSubmissions {
 }
 
 model BlogPost {
-  id           Int           @id @default(autoincrement())
-  slug         String        @unique
-  title        String
-  excerpt      String
-  content      String        @db.Text
-  author       String
-  authorImage  String
-  authorBio    String        @db.Text
-  authorRole   String
-  date         DateTime
-  readTime     String
-  category     String
-  coverImage   String
-  featured     Boolean       @default(false)
-  trendingScore Int          @default(0)
-  viewCount    Int           @default(0)
-  likeCount    Int           @default(0)
-  commentCount Int           @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  tags         BlogPostTag[]
-  relatedPosts BlogPostRelation[]
+  id            Int                @id @default(autoincrement())
+  slug          String             @unique
+  title         String
+  excerpt       String
+  content       String
+  author        String
+  authorImage   String
+  authorBio     String
+  authorRole    String
+  date          DateTime
+  readTime      String
+  category      String
+  coverImage    String
+  featured      Boolean            @default(false)
+  trendingScore Int                @default(0)
+  viewCount     Int                @default(0)
+  likeCount     Int                @default(0)
+  commentCount  Int                @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  relatedPosts  BlogPostRelation[]
+  tags          BlogPostTag[]
 }
 
 model BlogPostTag {
-  id          Int      @id @default(autoincrement())
-  name        String
-  blogPostId  Int
-  blogPost    BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  id         Int      @id @default(autoincrement())
+  name       String
+  blogPostId Int
+  blogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
 
   @@unique([blogPostId, name])
 }
 
 model BlogPostRelation {
-  id              Int      @id @default(autoincrement())
-  blogPostId      Int
-  relatedPostId   Int
-  blogPost        BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  id            Int      @id @default(autoincrement())
+  blogPostId    Int
+  relatedPostId Int
+  blogPost      BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
 
   @@unique([blogPostId, relatedPostId])
 }
 
-// New visitor tracking model
 model visitor_logs {
-  id              Int       @id @default(autoincrement())
-  ip              String?
-  userAgent       String?
-  browser         String?
-  browserVersion  String?
-  operatingSystem String?
-  osVersion       String?
-  deviceType      String?
-  deviceVendor    String?
-  deviceModel     String?
-  country         String?
-  city            String?
-  region          String?
-  timezone        String?
-  language        String?
-  referrer        String?
-  path            String?
-  query           String?
-  screenWidth     Int?
-  screenHeight    Int?
-  colorDepth      Int?
-  viewportWidth   Int?
-  viewportHeight  Int?
-  connectionType  String?
-  connectionSpeed String?
-  battery         Float?
-  sessionId       String?
-  previousVisitId Int?
-  timestamp       DateTime  @default(now())
+  id               Int      @id @default(autoincrement())
+  ip               String?
+  userAgent        String?
+  browser          String?
+  browserVersion   String?
+  operatingSystem  String?
+  osVersion        String?
+  deviceType       String?
+  deviceVendor     String?
+  deviceModel      String?
+  country          String?
+  city             String?
+  region           String?
+  timezone         String?
+  language         String?
+  referrer         String?
+  path             String?
+  query            String?
+  screenWidth      Int?
+  screenHeight     Int?
+  colorDepth       Int?
+  viewportWidth    Int?
+  viewportHeight   Int?
+  connectionType   String?
+  connectionSpeed  String?
+  battery          Float?
+  sessionId        String?
+  previousVisitId  Int?
+  timestamp        DateTime @default(now())
+  referrerDomain   String?
+  referrerPath     String?
+  referrerQuery    String?
+  referrerProtocol String?
+  referrerSource   String?
+  searchKeywords   String?
+  utmSource        String?
+  utmMedium        String?
+  utmCampaign      String?
+  utmContent       String?
+  utmTerm          String?
+  entryPage        String?
+  landingTime      BigInt?
 
   @@index([timestamp])
   @@index([sessionId])
   @@index([ip])
+  @@index([referrerDomain])
+  @@index([referrerSource])
 }
