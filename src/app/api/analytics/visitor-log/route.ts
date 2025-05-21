@@ -79,14 +79,15 @@ export async function POST(request: NextRequest) {
     // Validate numeric fields
     const numericFields = ['screenWidth', 'screenHeight', 'colorDepth', 'viewportWidth', 'viewportHeight'];
     for (const field of numericFields) {
-      if (data[field as keyof VisitorLogData] !== undefined) {
-        const value = data[field as keyof VisitorLogData];
+      const fieldKey = field as keyof VisitorLogData;
+      if (data[fieldKey] !== undefined) {
+        const value = data[fieldKey];
         if (typeof value === 'string') {
           try {
-            data[field as keyof VisitorLogData] = parseInt(value as string) as any;
+            data[fieldKey] = parseInt(value as string) as any;
           } catch (error) {
             fieldValidation[field] = `Failed to parse ${field} as number: ${value}`;
-            data[field as keyof VisitorLogData] = null as any;
+            data[fieldKey] = null as any;
           }
         }
       }
@@ -104,9 +105,12 @@ export async function POST(request: NextRequest) {
       }
       
       // If battery is outside valid range, log and reset to null
-      if (data.battery !== null && (data.battery < 0 || data.battery > 1)) {
-        fieldValidation['battery'] = `Battery value outside valid range (0-1): ${data.battery}`;
-        data.battery = null as any;
+      // First check if battery is not undefined and not null
+      if (data.battery !== undefined && data.battery !== null) {
+        if (data.battery < 0 || data.battery > 1) {
+          fieldValidation['battery'] = `Battery value outside valid range (0-1): ${data.battery}`;
+          data.battery = null as any;
+        }
       }
     }
     
