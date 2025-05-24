@@ -200,6 +200,19 @@ interface DbResult {
   [key: string]: unknown
 }
 
+// Define the response interface
+interface JobsResponse {
+  jobs: DbResult[]
+  sources: string[]
+  companies: string[]
+  metadata: {
+    latestScrapeDate: Date
+    totalJobs: number
+    currentPage: number
+    totalPages: number
+  }
+}
+
 function formatBigInt(value: unknown): unknown {
   if (typeof value === 'bigint') {
     return Number(value)
@@ -234,7 +247,7 @@ export async function GET(request: Request) {
 
     // Step 1: Check for complete cached response first
     const jobsCacheKey = cacheKeys.buildJobsKey(search, source, company, page)
-    const cachedResponse = await cache.get(jobsCacheKey)
+    const cachedResponse = await cache.get<JobsResponse>(jobsCacheKey)
     
     if (cachedResponse) {
       console.log(`Complete cache hit for: ${jobsCacheKey} (${Date.now() - startTime}ms)`)
