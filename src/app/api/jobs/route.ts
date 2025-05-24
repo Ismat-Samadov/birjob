@@ -238,6 +238,20 @@ export async function GET(request: Request) {
     
     if (cachedResponse) {
       console.log(`Complete cache hit for: ${jobsCacheKey} (${Date.now() - startTime}ms)`)
+      console.log(`Cached response summary:`, {
+        jobsCount: cachedResponse.jobs?.length || 0,
+        totalJobs: cachedResponse.metadata?.totalJobs || 0,
+        sourcesCount: cachedResponse.sources?.length || 0,
+        companiesCount: cachedResponse.companies?.length || 0,
+        latestScrapeDate: cachedResponse.metadata?.latestScrapeDate
+      })
+      
+      // If no jobs in cached response, log more details
+      if (!cachedResponse.jobs || cachedResponse.jobs.length === 0) {
+        console.log('WARNING: Cached response contains no jobs!')
+        console.log('Full cached response:', JSON.stringify(cachedResponse, null, 2))
+      }
+      
       return NextResponse.json(cachedResponse)
     }
 
