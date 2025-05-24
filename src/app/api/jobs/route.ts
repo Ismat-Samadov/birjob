@@ -1,32 +1,32 @@
-// src/app/api/jobs/route.ts - Fixed Caching Implementation
+// src/app/api/jobs/route.ts - Fixed Complete Implementation
 import { NextResponse } from 'next/server'
 import { PrismaClient, Prisma } from '@prisma/client'
 import { Redis } from '@upstash/redis'
 
 const prisma = new PrismaClient()
-const redis = Redis.fromEnv()
+
+// Initialize Redis with error handling
+let redis: Redis | null = null;
+try {
+  redis = Redis.fromEnv();
+} catch (error) {
+  console.error('Failed to initialize Redis:', error);
+}
 
 // Hierarchical cache configuration
 const CACHE_CONFIG = {
-  // Core data that changes infrequently
   SOURCES: 60 * 60 * 24, // 24 hours
   COMPANIES: 60 * 60 * 12, // 12 hours
   LATEST_SCRAPE_DATE: 60 * 30, // 30 minutes
-  
-  // Job listings - shorter TTL for fresh data
   JOBS_BASE: 60 * 10, // 10 minutes for base job queries
   JOBS_SEARCH: 60 * 5, // 5 minutes for search results
-  
-  // Metadata
   METADATA: 60 * 15, // 15 minutes
-  
-  // Popular/frequent data - longer TTL
   POPULAR_QUERIES: 60 * 60, // 1 hour
 }
 
 // Cache key builder with normalization
 class CacheKeyBuilder {
-  private version = 'v3' // Increment to invalidate all cache
+  private version = 'v3'
   
   buildJobsKey(search: string, source: string, company: string, page: number): string {
     const normalizedSearch = this.normalizeSearch(search)
@@ -55,6 +55,8 @@ const cacheKeys = new CacheKeyBuilder()
 // Cache wrapper with error handling
 class CacheManager {
   async get<T>(key: string): Promise<T | null> {
+    if (!redis) return null;
+    
     try {
       console.log(`Cache GET: ${key}`)
       const result = await redis.get(key)
@@ -71,28 +73,14 @@ class CacheManager {
   }
   
   async set<T>(key: string, value: T, ttl: number): Promise<void> {
+    if (!redis) return;
+    
     try {
       console.log(`Cache SET: ${key} (TTL: ${ttl}s)`)
       await redis.set(key, value, { ex: ttl })
     } catch (error) {
       console.error(`Cache SET error for key ${key}:`, error)
     }
-  }
-  
-  async mget(keys: string[]): Promise<(any | null)[]> {
-    try {
-      console.log(`Cache MGET: ${keys.join(', ')}`)
-      const results = await redis.mget(...keys)
-      console.log(`Cache MGET results: ${results.map((r, i) => `${keys[i]}:${r ? 'HIT' : 'MISS'}`).join(', ')}`)
-      return results
-    } catch (error) {
-      console.error(`Cache MGET error for keys ${keys.join(', ')}:`, error)
-      return keys.map(() => null)
-    }
-  }
-  
-  async pipeline() {
-    return redis.pipeline()
   }
 }
 
@@ -161,6 +149,42 @@ class JobsDataManager {
     
     return companies
   }
+  
+  // Fixed: Added the missing getTotalCount method
+  async getTotalCount(
+    latestDate: Date, 
+    search: string, 
+    source: string, 
+    company: string, 
+    hasSourceColumn: boolean
+  ): Promise<number> {
+    let countQuery = Prisma.sql`
+      SELECT COUNT(*) as count FROM jobs_jobpost 
+      WHERE created_at = ${latestDate}
+    `
+    
+    if (search) {
+      countQuery = Prisma.sql`
+        ${countQuery} AND (
+          LOWER(title) LIKE ${`%${search.toLowerCase()}%`} OR 
+          LOWER(company) LIKE ${`%${search.toLowerCase()}%`}
+        )
+      `
+    }
+    
+    if (source && hasSourceColumn) {
+      countQuery = Prisma.sql`${countQuery} AND source = ${source}`
+    }
+    
+    if (company) {
+      countQuery = Prisma.sql`${countQuery} AND LOWER(company) = ${company.toLowerCase()}`
+    }
+    
+    const totalCountResult = await prisma.$queryRaw<[{count: string | number}]>(countQuery)
+    return typeof totalCountResult[0]?.count === 'string' 
+      ? parseInt(totalCountResult[0].count) 
+      : Number(totalCountResult[0]?.count || 0)
+  }
 }
 
 const dataManager = new JobsDataManager()
@@ -196,7 +220,8 @@ function processDbResult(result: DbResult[]): DbResult[] {
   })
 }
 
-export async function GET(this: any, request: Request) {
+export async function GET(request: Request) {
+  const startTime = Date.now()
   const { searchParams } = new URL(request.url)
   const search = searchParams.get('search') || ''
   const source = searchParams.get('source') || ''
@@ -205,16 +230,18 @@ export async function GET(this: any, request: Request) {
   const pageSize = 10
 
   try {
+    console.log(`Jobs API request: search="${search}", source="${source}", company="${company}", page=${page}`)
+
     // Step 1: Check for complete cached response first
     const jobsCacheKey = cacheKeys.buildJobsKey(search, source, company, page)
     const cachedResponse = await cache.get(jobsCacheKey)
     
     if (cachedResponse) {
-      console.log('Complete cache hit for:', jobsCacheKey)
+      console.log(`Complete cache hit for: ${jobsCacheKey} (${Date.now() - startTime}ms)`)
       return NextResponse.json(cachedResponse)
     }
 
-    console.log('Cache miss - building response for:', jobsCacheKey)
+    console.log(`Cache miss - building response for: ${jobsCacheKey}`)
 
     // Step 2: Get base data (these have longer TTLs and are shared across requests)
     const [latestDate, sources, companies] = await Promise.all([
@@ -223,10 +250,12 @@ export async function GET(this: any, request: Request) {
       dataManager.getTopCompanies()
     ])
 
+    console.log(`Latest scrape date: ${latestDate.toISOString()}`)
+    console.log(`Sources count: ${sources.length}, Companies count: ${companies.length}`)
+
     // Step 3: Check if source column exists
     let hasSourceColumn = sources.length > 0
-    if (hasSourceColumn && sources.includes('Unknown')) {
-      // We have sources but need to verify the column exists
+    if (hasSourceColumn) {
       try {
         await prisma.$queryRaw`SELECT source FROM jobs_jobpost LIMIT 1`
       } catch (error) {
@@ -235,7 +264,7 @@ export async function GET(this: any, request: Request) {
       }
     }
 
-    // Step 4: Build and execute job query
+    // Step 4: Build job query
     let sqlQuery = Prisma.sql`
       SELECT * FROM jobs_jobpost 
       WHERE created_at = ${latestDate}
@@ -270,14 +299,15 @@ export async function GET(this: any, request: Request) {
     `
     
     // Step 5: Execute queries in parallel
-    const [jobsQuery, totalCountQuery] = await Promise.all([
+    const [jobsQuery, totalJobs] = await Promise.all([
       prisma.$queryRaw<DbResult[]>(sqlQuery),
-      this.getTotalCount(latestDate, search, source, company, hasSourceColumn)
+      dataManager.getTotalCount(latestDate, search, source, company, hasSourceColumn)
     ])
+
+    console.log(`Database queries completed: ${jobsQuery.length} jobs, ${totalJobs} total`)
 
     // Step 6: Process results
     const processedJobs = processDbResult(jobsQuery)
-    const totalJobs = Number(totalCountQuery[0]?.count || 0)
 
     // Step 7: Build response
     const responseData = {
@@ -292,15 +322,16 @@ export async function GET(this: any, request: Request) {
       }
     }
 
+    console.log(`Response built: ${processedJobs.length} jobs, ${totalJobs} total jobs`)
+
     // Step 8: Cache the response with appropriate TTL
     const isSearchQuery = search || source || company
     const cacheTTL = isSearchQuery ? CACHE_CONFIG.JOBS_SEARCH : CACHE_CONFIG.JOBS_BASE
     
     await cache.set(jobsCacheKey, responseData, cacheTTL)
 
-    // Step 9: Log search query if provided
+    // Step 9: Log search query if provided (non-blocking)
     if (search) {
-      // Don't await this - let it run in background
       prisma.search_logs.create({
         data: {
           query: search,
@@ -317,15 +348,17 @@ export async function GET(this: any, request: Request) {
       await cache.set(popularKey, responseData, CACHE_CONFIG.POPULAR_QUERIES)
     }
 
+    const totalTime = Date.now() - startTime
+    console.log(`Jobs API completed in ${totalTime}ms`)
+
     return NextResponse.json(responseData)
 
   } catch (error) {
-    console.error('Error in jobs API:', error)
+    const totalTime = Date.now() - startTime
+    console.error(`Error in jobs API after ${totalTime}ms:`, error)
     return NextResponse.json(
       { error: 'Failed to fetch jobs' },
       { status: 500 }
     )
   }
 }
-
-// Helper method for total count query
